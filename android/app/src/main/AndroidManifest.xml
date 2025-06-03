@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.hyun0627.game.my_game">
+    package="com.trekkit.trekkit_flutter">
     <application
         android:label="trekkit_flutter"
         android:icon="@mipmap/ic_launcher">
