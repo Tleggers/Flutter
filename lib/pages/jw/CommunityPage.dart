@@ -12,18 +12,50 @@ class CommunityPage extends StatefulWidget {
 class CommunityPageState extends State<CommunityPage> {
   @override
   Widget build(BuildContext context) {
-    //화면 가로,세로 크기
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      appBar: AppBar(title: Text('커뮤니티')),
-      body: Padding(
-        padding: EdgeInsets.all(screenWidth * 0.1),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [PostFilter(), PostList()],
-        ),
+      appBar: AppBar(title: const Text('커뮤니티')),
+      body: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(screenWidth * 0.1),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [PostFilter(), PostList()],
+            ),
+          ),
+
+          // ✅ 우측 하단 고정 버튼
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: GestureDetector(
+              onTap: () {
+                // 여기에 버튼 클릭시 동작을 추가하세요.
+                print('추가 버튼 클릭됨!');
+              },
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.lightGreenAccent, // ✅ 밝은 연두색 계열
+                  shape: BoxShape.circle,
+                ),
+                child: const Center(
+                  child: Text(
+                    '+',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -40,7 +72,7 @@ class PostFilter extends StatefulWidget {
 class _PostFilterState extends State<PostFilter> {
   String _sortOption = '최신순';
   String? _selectedMountain;
-  List<String> _selectedAges = [];
+  final List<String> _selectedAges = [];
 
   final List<String> sortOptions = ['최신순', '인기순'];
   final List<String> ageOptions = ['30대', '40대', '50대', '60대 이상'];
@@ -53,6 +85,10 @@ class _PostFilterState extends State<PostFilter> {
     '구봉산 (대전)',
   ];
 
+  // 필터 연령대 토글
+  // 동작 흐름:
+  // 이미 선택된 연령이면 → 제거
+  // 아직 선택되지 않은 연령이면 → 추가
   void _toggleAge(String age) {
     setState(() {
       if (_selectedAges.contains(age)) {
@@ -63,12 +99,14 @@ class _PostFilterState extends State<PostFilter> {
     });
   }
 
+  // 필터 산 토글
   void _selectMountain(String? mountain) {
     setState(() {
       _selectedMountain = mountain;
     });
   }
 
+  // 필터
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -78,6 +116,7 @@ class _PostFilterState extends State<PostFilter> {
         Wrap(
           spacing: 10,
           children: [
+            //최신,인기순 구간
             DropdownButton<String>(
               value: _sortOption,
               items:
@@ -95,6 +134,7 @@ class _PostFilterState extends State<PostFilter> {
                 }
               },
             ),
+            // 산 구간
             DropdownButton<String>(
               hint: const Text('산'),
               value: _selectedMountain,
@@ -107,6 +147,7 @@ class _PostFilterState extends State<PostFilter> {
                   }).toList(),
               onChanged: _selectMountain,
             ),
+            //연령 구간
             PopupMenuButton<String>(
               onSelected: _toggleAge,
               itemBuilder: (context) {
@@ -120,8 +161,8 @@ class _PostFilterState extends State<PostFilter> {
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+                  horizontal: 12, //가로여백
+                  vertical: 8, //세로여백
                 ),
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
@@ -204,7 +245,7 @@ class PostItem extends StatelessWidget {
         SizedBox(
           height: 200,
           child: PageView.builder(
-            itemCount: 2, //사진 몇개 노출 할 지 정하는 코드
+            itemCount: 5, //사진 몇개 노출 할 지 정하는 코드
             itemBuilder: (context, index) {
               //테스트를 위해 Containor에 회색,글씨 돌출, 추후 DB에 있는 사진으로 대처
               return Container(
@@ -225,8 +266,7 @@ class PostItem extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
 
-        const SizedBox(height: 10),
-
+        const SizedBox(height: 10), //ui 디자인을 위해 10픽셀 빈공간 생성
         // 🟡 하트 / 댓글 / 북마크 아이콘
         Row(
           children: const [
