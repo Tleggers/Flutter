@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trekkit_flutter/pages/gb/home_page.dart';
 import 'package:trekkit_flutter/pages/jw/CommunityPage.dart';
 
 import 'jh/MyPage.dart';
@@ -20,6 +21,7 @@ class _MainPageState extends State<MainPage> {
   final List<Widget> _pages = [
     // 이 밑에 화면으로 이동하는 함수 추가할 것
     // 홈 화면
+    HomePage(),
     // 지도 화면
     // 커뮤니티 화면
     CommunityPage(),
