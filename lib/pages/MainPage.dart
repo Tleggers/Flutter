@@ -51,18 +51,24 @@ class _MainPageState extends State<MainPage> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-
       appBar: AppBar(
         title: Row(
           children: [
 
             // 여기에 로고 추가
+            Image.asset(
+              'assets/images/logo_final1.png', // 로고 이미지
+              width: screenWidth * 0.12, // 너비 비율
+              height: screenHeight * 0.06, // 높이 비율
+              fit: BoxFit.contain,
+            ),
+
             SizedBox(width: screenWidth * 0.02),
 
             // 선택된 화면의 제목을 출력
             Text(
               _titles[_selectedIndex],
-              style: TextStyle(fontSize: screenWidth * 0.05), // 글자 크기
+              style: TextStyle(fontSize: screenWidth * 0.06), // 글자 크기
             ),
 
           ],
