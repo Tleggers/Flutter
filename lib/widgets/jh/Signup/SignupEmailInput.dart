@@ -4,8 +4,8 @@ import '../../../services/jh/Signup/SendMail.dart';
 
 class SignupEmailInput extends StatefulWidget {
   final TextEditingController emailController;
-  final Future<void> Function(String email) onRequestVerification;
-  final void Function(String email) validateEmail;
+  final Future<bool> Function(String email) onRequestVerification;
+  final bool Function(String email) validateEmail;
   final String? emailCheckMessage;
   final Color? emailCheckColor;
 
@@ -27,6 +27,9 @@ class _SignupEmailInputState extends State<SignupEmailInput> {
   Timer? _debounce;
   Timer? _countdownTimer;
   int _remainingSeconds = 0;
+
+  String? _emailMessage;
+  Color? _emailMessageColor;
 
   String _formatTime(int seconds) {
     final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
@@ -63,11 +66,9 @@ class _SignupEmailInputState extends State<SignupEmailInput> {
   // 이메일 입력 값이 onChange 되면 실행되는 메소드
   // 0.5초 동안 아무것도 안하면 함수 실행
   void _onEmailChanged(String value) {
-    widget.validateEmail(value);
-
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 500), () async {
-      if (widget.emailCheckMessage == null && value.isNotEmpty) {
+      if (value.isNotEmpty) {
         await widget.onRequestVerification(value);
       }
     });
@@ -118,27 +119,48 @@ class _SignupEmailInputState extends State<SignupEmailInput> {
               suffix: TextButton(
                 onPressed: () async {
                   final email = widget.emailController.text.trim();
-                  widget.validateEmail(email);
 
-                  // 이메일 공백 제거 후 정규식 체크
-                  final isValid = widget.emailCheckMessage == null && email.isNotEmpty;
+                  final isValidFormat = widget.validateEmail(email);
 
-                  // 정규식을 통과하면 메일 보내기 + 타이머 시작
-                  if (isValid) {
-                    try {
-                      await sendMail(email);
-                      _startTimer();
-                    } catch (e) {
-                      if (!context.mounted) return;
+                  // 이메일 형식 오류
+                  if (!isValidFormat) {
+                    setState(() {
+                      _emailMessage = '이메일 형식이 올바르지 않습니다.';
+                      _emailMessageColor = Colors.red;
+                    });
+                    return;
+                  }
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('이메일 전송에 실패했습니다. (${e.toString()})'),
-                          backgroundColor: Colors.red,
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
+                  try {
+                    // 중복 체크
+                    final isAvailable = await widget.onRequestVerification(email);
+
+                    if (!mounted) return;
+
+                    if (!isAvailable) {
+                      setState(() {
+                        _emailMessage = '이미 사용 중인 이메일입니다.';
+                        _emailMessageColor = Colors.red;
+                      });
+                      return;
                     }
+
+                    // 이메일 전송
+                    await sendMail(email);
+
+                    setState(() {
+                      _emailMessage = '사용 가능한 이메일입니다';
+                      _emailMessageColor = Colors.green;
+                    });
+
+                    _startTimer();
+
+                  } catch (e) {
+                    if (!context.mounted) return;
+                    setState(() {
+                      _emailMessage = '메일 전송에 실패했습니다. 다시 시도해주세요.';
+                      _emailMessageColor = Colors.red;
+                    });
                   }
                 },
                 child: Text(
@@ -158,12 +180,13 @@ class _SignupEmailInputState extends State<SignupEmailInput> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // 이메일 체크 메시지 (항상 표시)
+
+              // 이메일 체크 메시지 (인증요청 눌렀을 때만 표시)
               Expanded(
                 child: Text(
-                  widget.emailCheckMessage ?? '',
+                  _emailMessage ?? '',
                   style: TextStyle(
-                    color: widget.emailCheckColor ?? Colors.transparent,
+                    color: _emailMessageColor ?? Colors.transparent,
                     fontSize: screenWidth * 0.032,
                   ),
                 ),

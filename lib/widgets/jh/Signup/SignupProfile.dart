@@ -4,7 +4,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 
 class ProfileImagePicker extends StatefulWidget {
-  const ProfileImagePicker({super.key});
+
+  final void Function(File?) onImageSelected;
+  const ProfileImagePicker({super.key, required this.onImageSelected});
 
   @override
   State<ProfileImagePicker> createState() => _ProfileImagePickerState();
@@ -20,6 +22,8 @@ class _ProfileImagePickerState extends State<ProfileImagePicker> {
 
   Future<void> _pickImage() async {
 
+    print("실행");
+
     final picker = ImagePicker(); // ImagePicker를 생성
     final pickedFile = await picker.pickImage(source: ImageSource.gallery); // 선택된 사진 넣는 변수
 
@@ -27,9 +31,11 @@ class _ProfileImagePickerState extends State<ProfileImagePicker> {
       final extension = path.extension(pickedFile.path).toLowerCase().replaceAll('.', '');
 
       if (_allowedExtensions.contains(extension)) {
+        final image = File(pickedFile.path);
         setState(() {
-          _selectedImage = File(pickedFile.path);
+          _selectedImage = image;
         });
+        widget.onImageSelected(image); // 👈 상위로 전달
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -80,7 +86,7 @@ class _ProfileImagePickerState extends State<ProfileImagePicker> {
 
             SizedBox(height: screenHeight * 0.01),
 
-            GestureDetector(
+            InkWell(
               onTap: _pickImage,
               child: Text(
                 '편집',

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../../../services/jh/Signup/CheckDupEmail.dart';
 import '../../../services/jh/Signup/CheckDupId.dart';
@@ -9,6 +11,7 @@ import '../../../widgets/jh/Signup/SignupConfirmPwInput.dart';
 import '../../../widgets/jh/Signup/SignupEmailInput.dart';
 import '../../../widgets/jh/Signup/SignupIdInput.dart';
 import '../../../widgets/jh/Signup/SignupNickNameInput.dart';
+import '../../../widgets/jh/Signup/SignupProfile.dart';
 import '../../../widgets/jh/Signup/SignupPwInput.dart';
 
 // 회원가입 페이지
@@ -52,6 +55,9 @@ class _SignupPageState extends State<SignupPage> {
   String? emailCheckMessage; // 출력 메시지
   Color? emailCheckColor; // 메시지 색깔
 
+  // 선택한 이미지를 백엔드로 전달하기 위해 선언한 변수
+  File? _profileImage;
+
   // id 정규식
   void validateId(String input) {
     final regex = RegExp(r'^[a-zA-Z0-9]{1,16}$');
@@ -81,19 +87,19 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   // 이메일 정규식 확인
-  void validateEmail(String input) {
+  bool validateEmail(String input) {
     final regex = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
     final isValid = regex.hasMatch(input);
 
     setState(() {
       isValidEmail = isValid;
-
-      // ✅ 메시지 처리 추가
       emailCheckMessage = input.isEmpty
           ? null
           : (isValid ? null : '이메일 형식이 올바르지 않습니다.');
       emailCheckColor = isValid ? null : Colors.red;
     });
+
+    return isValid;
   }
 
   @override
@@ -232,14 +238,8 @@ class _SignupPageState extends State<SignupPage> {
             SignupEmailInput(
               emailController: _emailController,
               onRequestVerification: (email) async {
-                final result = await checkDupEmail(email);
-                setState(() {
-                  isCheckDupEmail = result;
-                  emailCheckMessage = result
-                      ? '사용 가능한 이메일입니다'
-                      : '이미 사용 중입니다';
-                  emailCheckColor = result ? Colors.green : Colors.red;
-                });
+                final result = await checkDupEmail(email); // <- bool 반환
+                return result;
               },
               validateEmail: validateEmail,
               emailCheckMessage: emailCheckMessage,
@@ -262,43 +262,13 @@ class _SignupPageState extends State<SignupPage> {
             // 프로필 사진 위치
             Column(
               children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    '프로필 사진',
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.04,
-                      color: Colors.grey,
-                    ),
-                  ),
+                ProfileImagePicker(
+                  onImageSelected: (image) {
+                    setState(() {
+                      _profileImage = image;
+                    });
+                  },
                 ),
-                SizedBox(height: screenHeight * 0.01),
-
-                // 프로필 이미지와 편집 텍스트
-                Column(
-                  children: [
-                    // 기본은 아이콘 사진을 넣으면 사진을 추가
-                    CircleAvatar(
-                      radius: screenWidth * 0.12,
-                      backgroundColor: Colors.grey.shade300,
-                      child: Icon(
-                        Icons.person,
-                        size: screenWidth*0.2,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.01),
-                    Text(
-                      '편집',
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.04,
-                        color: Colors.teal,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: screenHeight * 0.02),
               ],
             ),
 
@@ -313,6 +283,7 @@ class _SignupPageState extends State<SignupPage> {
                     pw: _pwController.text,
                     nickname: _nicknameController.text.trim(),
                     email: _emailController.text.trim(),
+                    profileImage: _profileImage, // 여기 전달
                   );
 
                   if (success) {
