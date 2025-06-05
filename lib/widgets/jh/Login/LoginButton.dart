@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../functions/jh/Login/KaKaoLogin.dart';
 import '../../../services/jh/Login/HandleLogin.dart';
 
 // 여러개의 로그인 버튼들을 모아놓은 위젯
@@ -75,6 +76,32 @@ class LoginButtonSection extends StatelessWidget {
             ),
           ),
         ),
+
+        SizedBox(height: screenHeight * 0.015),
+
+        // ✅ 카카오 로그인 버튼
+        SizedBox(
+          width: double.infinity,
+          height: screenHeight * 0.07,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFEE500), // 카카오 노란색
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+            onPressed: () async {
+              await loginWithKakao(); // 🔥 여기서 호출하면 됨
+            },
+            label: Text(
+              'KAKAO로 로그인',
+              style: TextStyle(
+                fontSize: screenWidth * 0.065,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+
       ],
     );
   }
