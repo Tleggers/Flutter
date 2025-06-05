@@ -40,9 +40,8 @@ class _LoginPageState extends State<LoginPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           
           children: [
-            
-            // 공백
-            SizedBox(height: screenHeight * 0.1),
+
+            SizedBox(height: screenHeight * 0.05),
             
             // 타이틀 + 아이디 및 비밀번호 입력창
             LoginFormSection(

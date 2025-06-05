@@ -51,7 +51,7 @@ class _MainPageState extends State<MainPage> {
           children: [
             // 여기에 로고 추가
             Image.asset(
-              'assets/images/logo_final1.png', // 로고 이미지
+              'assets/images/logo_final2.png', // 로고 이미지
               width: screenWidth * 0.12, // 너비 비율
               height: screenHeight * 0.06, // 높이 비율
               fit: BoxFit.contain,
