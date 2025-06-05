@@ -1,5 +1,8 @@
 // 폴더 보이게 하기 위한 용도
 import 'package:flutter/material.dart';
+import 'package:trekkit_flutter/pages/jw/PostWriting.dart';
+import 'ViewDetail.dart';
+import 'package:trekkit_flutter/models/jw/Post.dart';
 
 //페이지 뷰
 class CommunityPage extends StatefulWidget {
@@ -22,6 +25,7 @@ class CommunityPageState extends State<CommunityPage> {
             padding: EdgeInsets.all(screenWidth * 0.1),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              //children 내에 대괄호에 다른 클래스 작성
               children: const [PostFilter(), PostList()],
             ),
           ),
@@ -32,8 +36,15 @@ class CommunityPageState extends State<CommunityPage> {
             right: 20,
             child: GestureDetector(
               onTap: () {
-                // 여기에 버튼 클릭시 동작을 추가하세요.
-                print('추가 버튼 클릭됨!');
+                // 👉 PostWriting 페이지로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) =>
+                            const PostWriting(), // PostWriting이 Stateless 또는 StatefulWidget일 경우
+                  ),
+                );
               },
               child: Container(
                 width: 40,
@@ -190,9 +201,15 @@ class PostList extends StatefulWidget {
 class _PostListState extends State<PostList> {
   @override
   Widget build(BuildContext context) {
-    // 나중에 백엔드 데이터로 대체할 리스트
-    //dummyPosts, 즉 로컬데이터 테스트 상태
-    final dummyPosts = List.generate(5, (index) => {}); // 빈 리스트로 틀만 잡음
+    final dummyPosts = List.generate(
+      5,
+      (index) => Post(
+        mountain: '관악산',
+        content: '게시글 내용 $index입니다. 긴 텍스트가 들어갈 수 있어요.',
+        imagePaths: ['path1', 'path2'],
+        createdAt: DateTime(2025, 6, 1 + index),
+      ),
+    );
 
     return Expanded(
       child: ListView.builder(
@@ -200,7 +217,7 @@ class _PostListState extends State<PostList> {
         itemBuilder: (context, index) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
-            child: PostItem(), //하단의 class 추적
+            child: PostItem(post: dummyPosts[index]), // ✅ Post 전달
           );
         },
       ),
@@ -208,80 +225,132 @@ class _PostListState extends State<PostList> {
   }
 }
 
-//_PostListeState의 자식
-class PostItem extends StatelessWidget {
-  const PostItem({super.key});
+// _PostListeState의 자식
+class PostItem extends StatefulWidget {
+  final Post post; // ✅ Post 추가
+
+  const PostItem({super.key, required this.post});
+
+  @override
+  State<PostItem> createState() => _PostItemState();
+}
+
+class _PostItemState extends State<PostItem> {
+  bool isFavorite = false; // 좋아요 상태
+  bool isBookmarked = false; // 북마크 상태
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 🟡 프로필 정보 (유저 프로필 + 닉네임 + 등록일)
-        Row(
-          children: [
-            const CircleAvatar(
-              radius: 20,
-              backgroundColor: Colors.grey, // 실제 이미지 올 때 교체
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              //로컬테스트 상태라서 '닉네임','작성일자'가 그대로 노출, 추후 백앤드 연결 후 데이터 노출
-              children: const [
-                Text('닉네임', style: TextStyle(fontWeight: FontWeight.bold)),
-                Text(
-                  '2025-06-01',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 10),
-
-        // 🟡 사진 영역 (슬라이더 가능하게 틀만)
-        SizedBox(
-          height: 200,
-          child: PageView.builder(
-            itemCount: 5, //사진 몇개 노출 할 지 정하는 코드
-            itemBuilder: (context, index) {
-              //테스트를 위해 Containor에 회색,글씨 돌출, 추후 DB에 있는 사진으로 대처
-              return Container(
-                color: Colors.grey[300],
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                child: Center(child: Text('사진 $index')),
-              );
-            },
+    return GestureDetector(
+      onTap: () {
+        // ✅ ViewDetail로 이동하며 post 전달
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ViewDetail(post: widget.post),
           ),
-        ),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 🟡 프로필 정보
+          Row(
+            children: [
+              const CircleAvatar(radius: 20, backgroundColor: Colors.grey),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '닉네임',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    '${widget.post.createdAt.year}-${widget.post.createdAt.month.toString().padLeft(2, '0')}-${widget.post.createdAt.day.toString().padLeft(2, '0')}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
 
-        const SizedBox(height: 10),
+          // 🟡 이미지 슬라이더
+          SizedBox(
+            height: 200,
+            child: PageView.builder(
+              itemCount: widget.post.imagePaths.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  color: Colors.grey[300],
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Center(child: Text('사진 $index')), // 실제 이미지 대체 가능
+                );
+              },
+            ),
+          ),
 
-        // 🟡 본문 텍스트
-        const Text(
-          '게시글 내용이 여기에 들어갑니다. 3줄 이상이면 자동으로 ... 표시됩니다.',
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-        ),
+          const SizedBox(height: 10),
 
-        const SizedBox(height: 10), //ui 디자인을 위해 10픽셀 빈공간 생성
-        // 🟡 하트 / 댓글 / 북마크 아이콘
-        Row(
-          children: const [
-            Icon(Icons.favorite, color: Colors.red),
-            SizedBox(width: 4),
-            Text('12'),
-            SizedBox(width: 20),
-            Icon(Icons.comment, color: Colors.grey),
-            SizedBox(width: 4),
-            Text('5'),
-            Spacer(),
-            Icon(Icons.bookmark_border, color: Colors.grey),
-          ],
-        ),
-      ],
+          // 🟡 본문 내용
+          Text(
+            widget.post.content,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+
+          const SizedBox(height: 10),
+
+          // 🟡 아이콘 - 좋아요, 댓글, 북마크
+          Row(
+            children: [
+              // 좋아요 아이콘 버튼
+              IconButton(
+                iconSize: 28,
+                onPressed: () {
+                  setState(() {
+                    isFavorite = !isFavorite;
+                  });
+                },
+                icon: Icon(
+                  Icons.favorite,
+                  color: isFavorite ? Colors.red : Colors.grey,
+                ),
+                splashRadius: 24,
+                tooltip: '좋아요',
+              ),
+              const SizedBox(width: 4),
+              const Text('12'),
+
+              const SizedBox(width: 20),
+
+              // 댓글 아이콘 (변경 없음)
+              const Icon(Icons.comment, color: Colors.grey),
+              const SizedBox(width: 4),
+              const Text('5'),
+
+              const Spacer(),
+
+              // 북마크 아이콘 버튼
+              IconButton(
+                iconSize: 28,
+                onPressed: () {
+                  setState(() {
+                    isBookmarked = !isBookmarked;
+                  });
+                },
+                icon: Icon(
+                  isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                  color: isBookmarked ? Colors.yellow : Colors.black,
+                ),
+                splashRadius: 24,
+                tooltip: '북마크',
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

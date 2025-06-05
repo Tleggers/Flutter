@@ -10,10 +10,10 @@ class PopularCourseSection extends StatefulWidget {
   final double screenHeight; // 외부에서 전달받은 화면 높이
 
   const PopularCourseSection({
-    Key? key,
+    super.key,
     required this.screenWidth,
     required this.screenHeight,
-  }) : super(key: key);
+  });
 
   @override
   State<PopularCourseSection> createState() => _PopularCourseSectionState();
