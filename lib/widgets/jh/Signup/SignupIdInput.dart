@@ -64,7 +64,7 @@ class _SignupIdInputState extends State<SignupIdInput> {
         children: [
           // 라벨
           Text(
-            '아이디',
+            '아이디(*필수)',
             style: TextStyle(
               fontSize: screenWidth * 0.035,
               fontWeight: FontWeight.w500,

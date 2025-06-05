@@ -6,12 +6,14 @@ class SignupAuthCodeInput extends StatefulWidget {
   final TextEditingController emailCodeController;
   final TextEditingController emailController;
   final Future<bool> Function(String email, String code) onConfirm;
+  final void Function(bool isVerified) onVerificationResult;
 
   const SignupAuthCodeInput({
     super.key,
     required this.emailCodeController,
     required this.emailController,
     required this.onConfirm,
+    required this.onVerificationResult,
   });
 
   @override
@@ -80,6 +82,8 @@ class _SignupAuthCodeInputState extends State<SignupAuthCodeInput> {
                           : '인증에 실패하였습니다.';
                       resultColor = isVerified ? Colors.green : Colors.red;
                     });
+                    // 부모에게 결과 전달
+                    widget.onVerificationResult(isVerified);
                   }
                 },
                 child: Text(

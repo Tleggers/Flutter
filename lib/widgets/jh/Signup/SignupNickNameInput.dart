@@ -54,7 +54,7 @@ class _SignupNicknameInputState extends State<SignupNicknameInput> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '닉네임',
+            '닉네임(*선택)',
             style: TextStyle(
               fontSize: screenWidth * 0.035,
               fontWeight: FontWeight.w500,

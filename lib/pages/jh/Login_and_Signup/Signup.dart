@@ -54,6 +54,7 @@ class _SignupPageState extends State<SignupPage> {
   // email 확인용 변수
   String? emailCheckMessage; // 출력 메시지
   Color? emailCheckColor; // 메시지 색깔
+  bool isCheckEmail = false; // 이메일 인증 확인
 
   // 선택한 이미지를 백엔드로 전달하기 위해 선언한 변수
   File? _profileImage;
@@ -255,6 +256,11 @@ class _SignupPageState extends State<SignupPage> {
               onConfirm: (email, code) async {
                 return await verifyAuthCode(email, code); // bool 반환
               },
+              onVerificationResult: (isVerified) {
+                setState(() {
+                  isCheckEmail = isVerified;
+                });
+              },
             ),
 
             SizedBox(height: screenHeight * 0.02),
@@ -278,30 +284,45 @@ class _SignupPageState extends State<SignupPage> {
               height: screenHeight * 0.07,
               child: OutlinedButton(
                 onPressed: () async {
-                  final success = await signUp(
-                    id: _idController.text.trim(),
-                    pw: _pwController.text,
-                    nickname: _nicknameController.text.trim(),
-                    email: _emailController.text.trim(),
-                    profileImage: _profileImage, // 여기 전달
-                  );
 
-                  if (success) {
-                    // 회원가입 성공 처리
-                    if (!mounted) return;
-                    
-                    // 성공 시 snakebar 띄우기 + 로그인 페이지로 이동
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('회원가입이 완료되었습니다!')),
+                  print(isCheckDupId);
+                  print(isCheckEmail);
+                  print(isSamePw);
+                  if(isCheckDupId && isCheckEmail && isSamePw) {
+                    final success = await signUp(
+                      id: _idController.text.trim(),
+                      pw: _pwController.text,
+                      nickname: _nicknameController.text.trim(),
+                      email: _emailController.text.trim(),
+                      profileImage: _profileImage, // 여기 전달
                     );
-                    Navigator.pop(context);
+
+                    if (success) {
+                      // 회원가입 성공 처리
+                      if (!mounted) return;
+
+                      // 성공 시 snakebar 띄우기 + 로그인 페이지로 이동
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('회원가입이 완료되었습니다!')),
+                      );
+                      Navigator.pop(context);
+                    } else {
+                      // 실패 처리
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('회원가입에 실패했습니다. 다시 시도해주세요.')),
+                      );
+                    }
                   } else {
-                    // 실패 처리
-                    if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('회원가입에 실패했습니다. 다시 시도해주세요.')),
+                      const SnackBar(
+                        content: Text('모든 필수 정보를 입력해야 합니다.'),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ),
                     );
                   }
+
                 },
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(

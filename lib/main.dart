@@ -1,8 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trekkit_flutter/pages/MainPage.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'functions/jh/Login/UserProvider.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+
+  final token = prefs.getString('token');
+  final nickname = prefs.getString('nickname');
+  final profile = prefs.getString('profile');
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => UserProvider()
+        ..login(token ?? '', nickname ?? '', profile ?? ''),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

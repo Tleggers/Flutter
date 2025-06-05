@@ -42,7 +42,7 @@ class _SignupPwInputState extends State<SignupPwInput> {
           
           // 라벨
           Text(
-            '비밀번호',
+            '비밀번호(*필수)',
             style: TextStyle(
               fontSize: screenWidth * 0.035,
               fontWeight: FontWeight.w500,

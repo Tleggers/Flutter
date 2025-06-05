@@ -89,7 +89,7 @@ class _SignupEmailInputState extends State<SignupEmailInput> {
           
           // 라벨
           Text(
-            '이메일',
+            '이메일(*필수)',
             style: TextStyle(
               fontSize: screenWidth * 0.035,
               fontWeight: FontWeight.w500,

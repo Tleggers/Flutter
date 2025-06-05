@@ -59,7 +59,7 @@ class _ProfileImagePickerState extends State<ProfileImagePicker> {
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
-            '프로필 사진',
+            '프로필 사진(*선택)',
             style: TextStyle(
               fontSize: screenWidth * 0.04,
               color: Colors.grey,
