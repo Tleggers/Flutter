@@ -70,6 +70,13 @@ class HomePage extends StatelessWidget {
             // 위 Row 아래 간격
             SizedBox(height: screenHeight * 0.04), // 전체 높이의 4%
             // 인기 등산 코스 섹션 (외부 위젯)
+            Text(
+              '지금 인기있는 산',
+              style: TextStyle(
+                fontSize: screenWidth * 0.05, // 반응형 폰트 크기
+                fontWeight: FontWeight.bold, // 굵은 글씨
+              ),
+            ),
             PopularCourseSection(
               screenWidth: screenWidth, // 화면 너비 전달
               screenHeight: screenHeight, // 화면 높이 전달
