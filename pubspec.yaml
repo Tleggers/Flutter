@@ -45,6 +45,7 @@ dependencies:
   path: ^1.8.3
   provider: ^6.1.1
   shared_preferences: ^2.2.2
+  kakao_flutter_sdk: ^1.4.1
   kakao_flutter_sdk_user: ^1.4.1
   csv: ^5.0.0
 

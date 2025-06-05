@@ -89,7 +89,7 @@ class LoginButtonSection extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             ),
             onPressed: () async {
-              await loginWithKakao(); // 🔥 여기서 호출하면 됨
+              await loginWithKakao(context);
             },
             label: Text(
               'KAKAO로 로그인',

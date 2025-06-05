@@ -14,6 +14,18 @@
     <application
         android:label="trekkit_flutter"
         android:icon="@mipmap/ic_launcher">
+
+        <activity
+            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+            android:exported="true">
+            <intent-filter android:label="kakao">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="kakao07f1249d85be7b1d16504c545410ecb6" android:host="oauth"/>
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
