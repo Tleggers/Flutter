@@ -62,10 +62,15 @@ class _SignupPageState extends State<SignupPage> {
   // id 정규식
   void validateId(String input) {
     final regex = RegExp(r'^[a-zA-Z0-9]{1,16}$');
+    final isValid = regex.hasMatch(input);
+
     setState(() {
-      isValidId = regex.hasMatch(input);
-      idCheckMessage = null;
-      isCheckDupId = false; // 아이디 변경 시 중복 확인 초기화
+      isValidId = isValid;
+      isCheckDupId = false;
+      idCheckMessage = input.isEmpty
+          ? null
+          : (isValid ? null : '아이디 형식이 올바르지 않습니다.');
+      idCheckColor = isValid ? null : Colors.red;
     });
   }
 
@@ -284,45 +289,102 @@ class _SignupPageState extends State<SignupPage> {
               height: screenHeight * 0.07,
               child: OutlinedButton(
                 onPressed: () async {
+                  final id = _idController.text.trim();
+                  final pw = _pwController.text;
+                  final nickname = _nicknameController.text.trim();
+                  final email = _emailController.text.trim();
 
-                  print(isCheckDupId);
-                  print(isCheckEmail);
-                  print(isSamePw);
-                  if(isCheckDupId && isCheckEmail && isSamePw) {
-                    final success = await signUp(
-                      id: _idController.text.trim(),
-                      pw: _pwController.text,
-                      nickname: _nicknameController.text.trim(),
-                      email: _emailController.text.trim(),
-                      profileImage: _profileImage, // 여기 전달
-                    );
-
-                    if (success) {
-                      // 회원가입 성공 처리
-                      if (!mounted) return;
-
-                      // 성공 시 snakebar 띄우기 + 로그인 페이지로 이동
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('회원가입이 완료되었습니다!')),
-                      );
-                      Navigator.pop(context);
-                    } else {
-                      // 실패 처리
-                      if (!mounted) return;
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('회원가입에 실패했습니다. 다시 시도해주세요.')),
-                      );
-                    }
-                  } else {
+                  // 1. 입력값 비어 있는지 확인
+                  if (id.isEmpty || pw.isEmpty || email.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('모든 필수 정보를 입력해야 합니다.'),
+                        content: Text('모든 정보를 입력하십시오.'),
                         backgroundColor: Colors.red,
                         duration: Duration(seconds: 2),
                       ),
                     );
+                    return;
                   }
 
+                  if(!isValidId) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('해당 아이디는 사용 불가능합니다.'),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
+
+                  // 2. 아이디 중복 확인 실패
+                  if (!isCheckDupId) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('해당 아이디는 사용 불가능합니다.'),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
+
+                  if(!isValidPw) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('해당 비밀번호는 사용 불가능합니다.'),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
+
+                  // 3. 비밀번호 불일치
+                  if (!isSamePw) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('해당 비밀번호는 사용 불가능합니다.'),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
+
+                  // 4. 이메일 인증 실패
+                  if (!isCheckEmail) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('이메일 인증을 받으십시오.'),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
+
+                  // 5. 모든 조건 통과 시 회원가입 진행
+                  final success = await signUp(
+                    id: id,
+                    pw: pw,
+                    nickname: nickname,
+                    email: email,
+                    profileImage: _profileImage,
+                  );
+
+                  if (!mounted) return;
+
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('회원가입이 완료되었습니다!')),
+                    );
+                    Navigator.pop(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('회원가입에 실패했습니다. 다시 시도해주세요.')),
+                    );
+                  }
                 },
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(

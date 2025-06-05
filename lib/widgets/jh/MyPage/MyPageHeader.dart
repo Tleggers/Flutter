@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../functions/jh/Login/UserProvider.dart';
 import '../../../pages/jh/Login_and_Signup/Login.dart';
+import 'MyPageHeader/Profile.dart';
 
 // 프사, 닉네임 (로그인, 회원가입) 부분
 class MyPageHeader extends StatefulWidget {
@@ -58,16 +59,12 @@ class _MyPageHeaderState extends State<MyPageHeader> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            
             // 프로필 아이콘
-            CircleAvatar(
-              radius: widget.screenWidth * 0.08,
-              backgroundColor: Colors.grey.shade300,
-              child: Icon(
-                Icons.person,
-                size: widget.screenWidth * 0.08,
-                color: Colors.white,
-              ),
-            ),
+            // 로그인 O + 프로필 O -> 이미지
+            // 로그인 O + 프로필 X -> 아이콘
+            // 로그인 X -> 아이콘
+            ProfileAvatar(screenWidth: widget.screenWidth),
 
             SizedBox(width: widget.screenWidth * 0.04),
 

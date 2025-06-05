@@ -3,7 +3,7 @@ String getImageFolder(String koreanName) {
     '가지산': 'gajisan',
     '가리왕산': 'gariwangsan',
     '감악산': 'gamaksan',
-    '가리산': 'garisan',
+    '가리산': 'gachisan',
     '가야산': 'gayasan',
 
     // 필요한 산 이름과 폴더명 추가
