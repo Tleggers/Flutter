@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../functions/jh/Login/KaKaoLogin.dart';
+import '../../../services/jh/Login/KaKaoLogin.dart';
 import '../../../services/jh/Login/HandleLogin.dart';
 
 // 여러개의 로그인 버튼들을 모아놓은 위젯

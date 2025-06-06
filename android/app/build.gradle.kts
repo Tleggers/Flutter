@@ -29,6 +29,8 @@ android {
         targetSdk = 33
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
+        manifestPlaceholders["kakaoScheme"] = "kakao07f1249d85be7b1d16504c545410ecb6"
     }
 
     buildTypes {
@@ -51,5 +53,7 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:22.3.1")
     implementation("com.google.android.gms:play-services-auth:20.7.0")
     implementation("com.google.android.gms:play-services-base:18.4.0")
+    implementation("com.kakao.sdk:v2-user:2.21.3")
+    implementation("androidx.multidex:multidex:2.0.1")
 
 }

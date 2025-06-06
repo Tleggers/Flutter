@@ -30,7 +30,8 @@ Future<void> loginHandler({
     return;
   }
 
-  final url = Uri.parse('http://10.0.2.2:30000/login/dologin');
+  // final url = Uri.parse('http://10.0.2.2:30000/login/dologin'); // 에뮬레이터
+  final url = Uri.parse('http://192.168.0.7:30000/login/dologin'); // 실제 기기
   try {
     final response = await http.post(
       url,
@@ -43,17 +44,20 @@ Future<void> loginHandler({
       final token = body['token'];
       final nickname = body['nickname'];
       final profile = body['profile'];
+      final logintype = body['logintype'];
 
       if (token != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
         await prefs.setString('nickname', nickname);
         await prefs.setString('profile', profile);
+        await prefs.setString('logintype', logintype);
 
         Provider.of<UserProvider>(context, listen: false).login(
           token,
           nickname,
           profile,
+          logintype,
         );
 
         if (!context.mounted) return;

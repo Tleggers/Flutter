@@ -8,17 +8,24 @@ import 'functions/jh/Login/UserProvider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
 
+  KakaoSdk.init(nativeAppKey: '07f1249d85be7b1d16504c545410ecb6');
+
+  final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('token');
   final nickname = prefs.getString('nickname');
   final profile = prefs.getString('profile');
+  final logintype = prefs.getString('logintype');
 
-  KakaoSdk.init(nativeAppKey: '07f1249d85be7b1d16504c545410ecb6');
+  final userProvider = UserProvider();
+
+  if (token != null && token.isNotEmpty) {
+    userProvider.login(token, nickname ?? '', profile ?? '', logintype ?? '');
+  }
+
   runApp(
     ChangeNotifierProvider(
-      create: (_) => UserProvider()
-        ..login(token ?? '', nickname ?? '', profile ?? ''),
+      create: (_) => userProvider,
       child: MyApp(),
     ),
   );
@@ -32,6 +39,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       home: MainPage(title: 'TrekKit'),
 
     );
