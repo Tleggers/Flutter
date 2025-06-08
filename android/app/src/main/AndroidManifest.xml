@@ -4,6 +4,7 @@
 
     <!-- 이미지 추가용 설정 -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
@@ -13,7 +14,7 @@
     </queries>
 
     <application
-        android:label="trekkit_flutter"
+        android:label="TrekKit"
         android:icon="@mipmap/ic_launcher"
         android:theme="@style/LaunchTheme">
 

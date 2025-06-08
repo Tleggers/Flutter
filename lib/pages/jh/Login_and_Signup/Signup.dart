@@ -139,10 +139,20 @@ class _SignupPageState extends State<SignupPage> {
               idCheckColor: idCheckColor, // 메세지 색깔
               onChanged: validateId, // onChange 될 때마다 정규식 비교 진행
 
-              // 중복확인 버튼을 눌렀을 때
               // 서버쪽으로 입력값 전달 -> DB 비교 -> 사용 가능하면 true리턴, 아니면 false리턴
               // 그 리턴 값을 isAvailable에 넣기 -> isAvailable이 true나 false일 때 각각의 메시지 출력
               onCheckDupId: (id) async {
+
+                // 만약 값이 비어있으면 snakeBar 띄우고 return(서버 과부화 방지)
+                if (id.trim().isEmpty) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('값이 입력되지 않았습니다.')),
+                    );
+                  }
+                  return false; // 바로 종료
+                }
+
                 try {
                   final isAvailable = await checkDupId(id);
                   setState(() {
@@ -217,25 +227,6 @@ class _SignupPageState extends State<SignupPage> {
 
                 return isValid;
               },
-              onCheckDupNickName: (nickname) async {
-                try {
-                  final isAvailable = await checkDupNickName(nickname);
-                  setState(() {
-                    isCheckDupNickName = isAvailable;
-                    nicknameCheckMessage = isAvailable
-                        ? '사용 가능한 닉네임입니다.'
-                        : '이미 사용 중인 닉네임입니다.';
-                    nicknameCheckColor = isAvailable ? Colors.green : Colors.red;
-                  });
-                  return isAvailable;
-                } catch (e) {
-                  setState(() {
-                    nicknameCheckMessage = '서버 오류가 발생했습니다.';
-                    nicknameCheckColor = Colors.orange;
-                  });
-                  return false;
-                }
-              },
             ),
 
             SizedBox(height: screenHeight * 0.02),
@@ -289,10 +280,11 @@ class _SignupPageState extends State<SignupPage> {
               height: screenHeight * 0.07,
               child: OutlinedButton(
                 onPressed: () async {
-                  final id = _idController.text.trim();
-                  final pw = _pwController.text;
-                  final nickname = _nicknameController.text.trim();
-                  final email = _emailController.text.trim();
+
+                  final id = _idController.text.trim(); // 아이디
+                  final pw = _pwController.text; // 비밀번호
+                  final nickname = _nicknameController.text.trim(); // 닉네임
+                  final email = _emailController.text.trim(); // 이메일
 
                   // 1. 입력값 비어 있는지 확인
                   if (id.isEmpty || pw.isEmpty || email.isEmpty) {
@@ -362,6 +354,24 @@ class _SignupPageState extends State<SignupPage> {
                       ),
                     );
                     return;
+                  }
+
+                  // 만약 사진이 있을 때
+                  // 사진 크기를 체크 -> 10MB 이상이면 사용 불가능
+                  if (_profileImage != null) {
+                    final fileSizeInBytes = await _profileImage!.length();
+                    final fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+
+                    if (fileSizeInMB > 10) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('이미지 크기가 10MB를 초과합니다.'),
+                          backgroundColor: Colors.red,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      return;
+                    }
                   }
 
                   // 5. 모든 조건 통과 시 회원가입 진행

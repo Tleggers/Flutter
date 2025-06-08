@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../functions/jh/Login/UserProvider.dart';
@@ -24,10 +25,23 @@ class ProfileAvatar extends StatelessWidget {
       return CircleAvatar(
         radius: screenWidth * 0.08,
         backgroundColor: Colors.grey.shade300,
-        backgroundImage: NetworkImage(profileUrl),
+        child: ClipOval(
+          child: CachedNetworkImage(
+            imageUrl: profileUrl,
+            width: screenWidth * 0.16,
+            height: screenWidth * 0.16,
+            fit: BoxFit.cover,
+            placeholder: (context, url) => const CircularProgressIndicator(),
+            errorWidget: (context, url, error) => Icon(
+              Icons.person,
+              size: screenWidth * 0.08,
+              color: Colors.white,
+            ),
+          ),
+        ),
       );
     } else {
-      // 👉 로그인 X 또는 프로필 X → 아이콘
+      // 로그인 X 또는 프로필 X
       return CircleAvatar(
         radius: screenWidth * 0.08,
         backgroundColor: Colors.grey.shade300,

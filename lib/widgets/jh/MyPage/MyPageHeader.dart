@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../functions/jh/Login/UserProvider.dart';
 import '../../../pages/jh/Login_and_Signup/Login.dart';
@@ -29,6 +27,7 @@ class _MyPageHeaderState extends State<MyPageHeader> {
     final userProvider = Provider.of<UserProvider>(context); // ✅ Provider에서 로그인 정보 가져옴
     final isLoggedIn = userProvider.isLoggedIn;
     final nickname = userProvider.nickname;
+    final index = userProvider.index;
 
     return GestureDetector(
 
@@ -40,39 +39,7 @@ class _MyPageHeaderState extends State<MyPageHeader> {
             MaterialPageRoute(builder: (context) => LoginPage()),
           );
         } else {
-          // 임시 로그아웃 처리
-          final prefs = await SharedPreferences.getInstance();
-          final loginType = prefs.getString('logintype'); // 'NORMAL', 'KAKAO', 'GOOGLE'
-
-          try {
-            // ✅ 각 로그인 타입에 따라 로그아웃 처리
-            if (loginType == 'KAKAO') {
-              await UserApi.instance.logout(); // 카카오 로그아웃
-              print('카카오 로그아웃 완료');
-            } else if (loginType == 'GOOGLE') {
-              // final GoogleSignIn _googleSignIn = GoogleSignIn();
-              // await _googleSignIn.signOut();
-              print('구글 로그아웃 완료');
-            } else {
-              print('일반 로그인 로그아웃');
-            }
-          } catch (e) {
-            print('소셜 로그아웃 실패: $e');
-          }
-
-          // ✅ 공통 로그아웃 처리
-          await prefs.remove('token');
-          await prefs.remove('logintype');
-          await prefs.remove('nickname');
-          await prefs.remove('profile');
-
-          userProvider.logout(); // Provider에 로그인 상태 초기화
-
-          // ✅ UI 갱신
-          // ignore: use_build_context_synchronously
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('로그아웃 되었습니다')),
-          );
+          // 로그인 시 마이페이지로 이동하는 코드 추가
         }
       },
 

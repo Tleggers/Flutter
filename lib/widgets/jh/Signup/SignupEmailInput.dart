@@ -131,6 +131,16 @@ class _SignupEmailInputState extends State<SignupEmailInput> {
                     return;
                   }
 
+                  // 비어 있는 경우 처리
+                  if (email.isEmpty) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('이메일을 입력해주세요.')),
+                      );
+                    }
+                    return;
+                  }
+
                   try {
                     // 중복 체크
                     final isAvailable = await widget.onRequestVerification(email);
@@ -145,15 +155,15 @@ class _SignupEmailInputState extends State<SignupEmailInput> {
                       return;
                     }
 
-                    // 이메일 전송
-                    await sendMail(email);
-
+                    // 먼저 UI를 반응시킴
                     setState(() {
                       _emailMessage = '사용 가능한 이메일입니다';
                       _emailMessageColor = Colors.green;
                     });
+                    _startTimer(); // 타이머도 먼저 시작
 
-                    _startTimer();
+                    // 이메일 전송
+                    await sendMail(email);
 
                   } catch (e) {
                     if (!context.mounted) return;

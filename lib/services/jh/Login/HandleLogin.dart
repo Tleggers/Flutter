@@ -32,6 +32,7 @@ Future<void> loginHandler({
 
   // final url = Uri.parse('http://10.0.2.2:30000/login/dologin'); // 에뮬레이터
   final url = Uri.parse('http://192.168.0.7:30000/login/dologin'); // 실제 기기
+
   try {
     final response = await http.post(
       url,
@@ -41,10 +42,11 @@ Future<void> loginHandler({
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
-      final token = body['token'];
-      final nickname = body['nickname'];
-      final profile = body['profile'];
-      final logintype = body['logintype'];
+      final token = body['token']; // 토큰
+      final nickname = body['nickname']; // 닉네임
+      final profile = body['profile']; // 프로필
+      final logintype = body['logintype']; // 로그인 타입(ex.KAKAO,LOCAL)
+      final index = body['index']; // 인덱스 (DB에서 ID를 의미)
 
       if (token != null) {
         final prefs = await SharedPreferences.getInstance();
@@ -52,12 +54,14 @@ Future<void> loginHandler({
         await prefs.setString('nickname', nickname);
         await prefs.setString('profile', profile);
         await prefs.setString('logintype', logintype);
+        await prefs.setInt('index', index);
 
         Provider.of<UserProvider>(context, listen: false).login(
           token,
           nickname,
           profile,
           logintype,
+          index,
         );
 
         if (!context.mounted) return;

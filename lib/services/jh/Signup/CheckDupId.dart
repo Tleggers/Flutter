@@ -5,7 +5,8 @@ import 'dart:convert';
 Future<bool> checkDupId(String id) async {
 
   // 10.0.2.2 << localhost같은 역할
-  final url = Uri.parse('http://10.0.2.2:30000/signup/checkDupid');
+  // final url = Uri.parse('http://10.0.2.2:30000/signup/checkDupid');
+  final url = Uri.parse('http://192.168.0.7:30000/signup/checkDupid'); // 실제 기기
 
   final response = await http.post(
     url,

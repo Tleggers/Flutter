@@ -5,7 +5,6 @@ class SignupNicknameInput extends StatefulWidget {
   final TextEditingController nicknameController;
   final String? nicknameCheckMessage;
   final Color? nicknameCheckColor;
-  final Future<bool> Function(String) onCheckDupNickName;
   final bool Function(String) validateNickname;
 
   const SignupNicknameInput({
@@ -13,7 +12,6 @@ class SignupNicknameInput extends StatefulWidget {
     required this.nicknameController,
     required this.nicknameCheckMessage,
     required this.nicknameCheckColor,
-    required this.onCheckDupNickName,
     required this.validateNickname,
   });
 
@@ -33,13 +31,8 @@ class _SignupNicknameInputState extends State<SignupNicknameInput> {
   void _onChangedWithDebounce(String value) {
     _debounce?.cancel();
 
-    // 🔥 validateNickname 호출 먼저
-    final isValid = widget.validateNickname(value); // 여기서 setState + print 실행됨
-
     _debounce = Timer(const Duration(milliseconds: 500), () async {
-      if (isValid) {
-        await widget.onCheckDupNickName(value);
-      }
+      widget.validateNickname(value); // 여기서 setState + print 실행됨
     });
   }
 

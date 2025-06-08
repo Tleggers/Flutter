@@ -16,11 +16,12 @@ void main() async {
   final nickname = prefs.getString('nickname');
   final profile = prefs.getString('profile');
   final logintype = prefs.getString('logintype');
+  final index = prefs.getInt('index');
 
   final userProvider = UserProvider();
 
-  if (token != null && token.isNotEmpty) {
-    userProvider.login(token, nickname ?? '', profile ?? '', logintype ?? '');
+  if (token != null && token.isNotEmpty && index != null) {
+    userProvider.login(token, nickname ?? '', profile ?? '', logintype ?? '', index);
   }
 
   runApp(

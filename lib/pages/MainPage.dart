@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trekkit_flutter/pages/gb/home_page.dart';
 import 'package:trekkit_flutter/pages/jw/CommunityPage.dart';
-
+import 'package:provider/provider.dart';
+import '../functions/jh/Login/UserProvider.dart';
 import 'jh/MyPage.dart';
 
 // 메인 화면
@@ -49,23 +52,80 @@ class _MainPageState extends State<MainPage> {
       appBar: AppBar(
         title: Row(
           children: [
-            // 여기에 로고 추가
             Image.asset(
-              'assets/images/logo_final2.png', // 로고 이미지
-              width: screenWidth * 0.12, // 너비 비율
-              height: screenHeight * 0.06, // 높이 비율
+              'assets/images/logo_final2.png',
+              width: screenWidth * 0.12,
+              height: screenHeight * 0.06,
               fit: BoxFit.contain,
             ),
-
             SizedBox(width: screenWidth * 0.02),
-
-            // 선택된 화면의 제목을 출력
             Text(
               _titles[_selectedIndex],
-              style: TextStyle(fontSize: screenWidth * 0.06), // 글자 크기
+              style: TextStyle(fontSize: screenWidth * 0.06),
             ),
           ],
         ),
+        
+        // 설정한 인덱스에서는 로그아웃 버튼 생기게 하기
+        actions: _selectedIndex == 2
+            ? [
+          Padding(
+            padding: EdgeInsets.only(right: screenWidth * 0.06),
+            child: TextButton(
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                final loginType = prefs.getString('logintype'); // 'NORMAL', 'KAKAO', 'GOOGLE'
+
+                try {
+                  if (loginType == 'KAKAO') {
+                    await UserApi.instance.logout();
+                    print('카카오 로그아웃 완료');
+                  } else if (loginType == 'GOOGLE') {
+                    // final GoogleSignIn _googleSignIn = GoogleSignIn();
+                    // await _googleSignIn.signOut();
+                    print('구글 로그아웃 완료');
+                  } else {
+                    print('일반 로그인 로그아웃');
+                  }
+                } catch (e) {
+                  print('소셜 로그아웃 실패: $e');
+                }
+
+                await prefs.remove('token');
+                await prefs.remove('logintype');
+                await prefs.remove('nickname');
+                await prefs.remove('profile');
+                await prefs.remove('index');
+
+                // ✅ Provider에서 로그인 상태 초기화
+                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                userProvider.logout();
+
+                // ✅ UI 메시지 출력
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('로그아웃 되었습니다')),
+                  );
+                }
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black, // 글자 색만 검정
+                backgroundColor: Colors.transparent, // 배경 투명
+                padding: EdgeInsets.zero, // 패딩 최소화
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap, // 클릭 영역 최소화
+                minimumSize: Size.zero, // 크기 최소화
+              ),
+              child: Text(
+                '로그아웃',
+                style: TextStyle(
+                  color: Colors.blue.shade900,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ]
+            : null,
       ),
 
       // IndexedStack -> 선택된 index 하나만 화면에 출력시킴

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 // 회원가입 함수
@@ -11,7 +12,8 @@ Future<bool> signUp({
   required File? profileImage,
 }) async {
 
-  final url = Uri.parse('http://10.0.2.2:30000/signup/dosignup'); // 실제 서버 주소로 변경
+  // final url = Uri.parse('http://10.0.2.2:30000/signup/dosignup'); // 에뮬레이터
+  final url = Uri.parse('http://192.168.0.7:30000/signup/dosignup'); // 실제 기기
 
   try {
     var request = http.MultipartRequest('POST', url);

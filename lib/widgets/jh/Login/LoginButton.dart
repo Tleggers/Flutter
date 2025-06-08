@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../services/jh/Login/GoogleLogin.dart';
 import '../../../services/jh/Login/KaKaoLogin.dart';
 import '../../../services/jh/Login/HandleLogin.dart';
 
@@ -54,32 +55,33 @@ class LoginButtonSection extends StatelessWidget {
         // 공백
         SizedBox(height: screenHeight * 0.02),
         
-        // 네이버 로그인 버튼
-        SizedBox(
-          width: double.infinity,
-          height: screenHeight * 0.07,
-          child: ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF03C75A),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            ),
-            onPressed: () {
-              // 네이버 로그인 로직 추가 예정
-            },
-            label: Text(
-              'NAVER로 로그인',
-              style: TextStyle(
-                fontSize: screenWidth * 0.065,
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
+        // // 혹시 모를 네이버 로그인
+        // // 네이버 로그인 버튼
+        // SizedBox(
+        //   width: double.infinity,
+        //   height: screenHeight * 0.07,
+        //   child: ElevatedButton.icon(
+        //     style: ElevatedButton.styleFrom(
+        //       backgroundColor: const Color(0xFF03C75A),
+        //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        //     ),
+        //     onPressed: () {
+        //       // 네이버 로그인 로직 추가 예정
+        //     },
+        //     label: Text(
+        //       'NAVER로 로그인',
+        //       style: TextStyle(
+        //         fontSize: screenWidth * 0.065,
+        //         color: Colors.white,
+        //         fontWeight: FontWeight.bold,
+        //       ),
+        //     ),
+        //   ),
+        // ),
+        //
+        // SizedBox(height: screenHeight * 0.015),
 
-        SizedBox(height: screenHeight * 0.015),
-
-        // ✅ 카카오 로그인 버튼
+        // 카카오 로그인 버튼
         SizedBox(
           width: double.infinity,
           height: screenHeight * 0.07,
@@ -96,6 +98,36 @@ class LoginButtonSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: screenWidth * 0.065,
                 color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+
+        // 간격
+        SizedBox(height: screenHeight * 0.015),
+
+        // 구글 로그인 버튼
+        SizedBox(
+          width: double.infinity,
+          height: screenHeight * 0.07,
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: Colors.grey.shade400),
+              ),
+            ),
+            onPressed: () async {
+              // 여기에 구글 로그인 실행 함수 넣기
+              await loginWithGoogle(context);
+            },
+            label: Text(
+              'GOOGLE로 로그인',
+              style: TextStyle(
+                fontSize: screenWidth * 0.065,
+                color: Colors.black87,
                 fontWeight: FontWeight.bold,
               ),
             ),
