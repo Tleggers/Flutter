@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../functions/jh/Login/UserProvider.dart';
+import '../../../functions/jh/UserProvider.dart';
 import '../../../pages/jh/Login_and_Signup/Login.dart';
 import 'MyPageHeader/Profile.dart';
 

@@ -42,7 +42,13 @@ class _SignupEmailInputState extends State<SignupEmailInput> {
     _countdownTimer?.cancel();
     setState(() {
       _remainingSeconds = 180;
-    });
+  });
+    
+  // 타이머 멈추는 함수
+  void stopTimer() {
+    _countdownTimer?.cancel();
+    _remainingSeconds = 0;
+  }
 
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {

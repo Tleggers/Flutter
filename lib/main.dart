@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trekkit_flutter/pages/MainPage.dart';
 
-import 'functions/jh/Login/UserProvider.dart';
+import 'functions/jh/UserProvider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

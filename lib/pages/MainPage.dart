@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trekkit_flutter/pages/gb/home_page.dart';
 import 'package:trekkit_flutter/pages/jw/CommunityPage.dart';
 import 'package:provider/provider.dart';
-import '../functions/jh/Login/UserProvider.dart';
+import '../functions/jh/UserProvider.dart';
 import 'jh/MyPage.dart';
 
 // 메인 화면
@@ -84,9 +85,11 @@ class _MainPageState extends State<MainPage> {
                 try {
                   if (loginType == 'KAKAO') {
                     await UserApi.instance.logout();
+                    await UserApi.instance.unlink(); // 이건 배포 전 무조건 지워야함(매번 로그인을 띄우게 하기 위함)
                   } else if (loginType == 'GOOGLE') {
                     // final GoogleSignIn _googleSignIn = GoogleSignIn();
                     // await _googleSignIn.signOut();
+                    await GoogleSignIn().signOut();
                     print('구글 로그아웃 완료');
                   } else {
                     print('일반 로그인 로그아웃');
