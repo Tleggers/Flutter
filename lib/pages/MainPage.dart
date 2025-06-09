@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trekkit_flutter/pages/gb/home_page.dart';
+import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 import 'package:trekkit_flutter/pages/jw/CommunityPage.dart';
 import 'package:provider/provider.dart';
 import '../functions/jh/UserProvider.dart';
@@ -66,72 +67,79 @@ class _MainPageState extends State<MainPage> {
             ),
           ],
         ),
-        
+
         // 설정한 인덱스에서는 로그아웃 버튼 생기게 하기
-        actions: _selectedIndex == 2
-            ? [
-          Padding(
-            padding: EdgeInsets.only(right: screenWidth * 0.06),
-            child: TextButton(
-              onPressed: () async {
+        actions:
+            _selectedIndex == 2
+                ? [
+                  Padding(
+                    padding: EdgeInsets.only(right: screenWidth * 0.06),
+                    child: TextButton(
+                      onPressed: () async {
+                        // 로그인 상태가 아닌 경우 -> 아무것도 안 함
+                        final userProvider = Provider.of<UserProvider>(
+                          context,
+                          listen: false,
+                        );
+                        if (!userProvider.isLoggedIn) return;
 
-                // 로그인 상태가 아닌 경우 -> 아무것도 안 함
-                final userProvider = Provider.of<UserProvider>(context, listen: false);
-                if (!userProvider.isLoggedIn) return;
+                        final prefs = await SharedPreferences.getInstance();
+                        final loginType = prefs.getString(
+                          'logintype',
+                        ); // 'NORMAL', 'KAKAO', 'GOOGLE'
 
-                final prefs = await SharedPreferences.getInstance();
-                final loginType = prefs.getString('logintype'); // 'NORMAL', 'KAKAO', 'GOOGLE'
+                        try {
+                          if (loginType == 'KAKAO') {
+                            await UserApi.instance.logout();
+                            await UserApi.instance
+                                .unlink(); // 이건 배포 전 무조건 지워야함(매번 로그인을 띄우게 하기 위함)
+                          } else if (loginType == 'GOOGLE') {
+                            // final GoogleSignIn _googleSignIn = GoogleSignIn();
+                            // await _googleSignIn.signOut();
+                            await GoogleSignIn().signOut();
+                            print('구글 로그아웃 완료');
+                          } else {
+                            print('일반 로그인 로그아웃');
+                          }
+                        } catch (e) {
+                          print('소셜 로그아웃 실패: $e');
+                        }
 
-                try {
-                  if (loginType == 'KAKAO') {
-                    await UserApi.instance.logout();
-                    await UserApi.instance.unlink(); // 이건 배포 전 무조건 지워야함(매번 로그인을 띄우게 하기 위함)
-                  } else if (loginType == 'GOOGLE') {
-                    // final GoogleSignIn _googleSignIn = GoogleSignIn();
-                    // await _googleSignIn.signOut();
-                    await GoogleSignIn().signOut();
-                    print('구글 로그아웃 완료');
-                  } else {
-                    print('일반 로그인 로그아웃');
-                  }
-                } catch (e) {
-                  print('소셜 로그아웃 실패: $e');
-                }
+                        await prefs.remove('token');
+                        await prefs.remove('logintype');
+                        await prefs.remove('nickname');
+                        await prefs.remove('profile');
+                        await prefs.remove('index');
 
-                await prefs.remove('token');
-                await prefs.remove('logintype');
-                await prefs.remove('nickname');
-                await prefs.remove('profile');
-                await prefs.remove('index');
+                        // Provider에서 로그인 상태 초기화
+                        userProvider.logout();
 
-                // Provider에서 로그인 상태 초기화
-                userProvider.logout();
-
-                // UI 메시지 출력
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('로그아웃 되었습니다')),
-                  );
-                }
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.black, // 글자 색만 검정
-                backgroundColor: Colors.transparent, // 배경 투명
-                padding: EdgeInsets.zero, // 패딩 최소화
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap, // 클릭 영역 최소화
-                minimumSize: Size.zero, // 크기 최소화
-              ),
-              child: Text(
-                '로그아웃',
-                style: TextStyle(
-                  color: Colors.blue.shade900,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ]
-            : null,
+                        // UI 메시지 출력
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('로그아웃 되었습니다')),
+                          );
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.black, // 글자 색만 검정
+                        backgroundColor: Colors.transparent, // 배경 투명
+                        padding: EdgeInsets.zero, // 패딩 최소화
+                        tapTargetSize:
+                            MaterialTapTargetSize.shrinkWrap, // 클릭 영역 최소화
+                        minimumSize: Size.zero, // 크기 최소화
+                      ),
+                      child: Text(
+                        '로그아웃',
+                        style: TextStyle(
+                          color: Colors.blue.shade900,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ]
+                : null,
       ),
 
       // IndexedStack -> 선택된 index 하나만 화면에 출력시킴
@@ -183,5 +191,19 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
     );
+  }
+
+  //0609 gb
+  @override
+  void initState() {
+    super.initState();
+    //initState()는 build()보다 먼저 호출되고,
+    //이때 context.read()는 위젯 트리가 완전히 구축되지 않아서 실패할 수 있습니다.
+    // context 안전하게 접근하기 위한 post-frame callback 사용
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final stepProvider = context.read<StepProvider>();
+      stepProvider.fetchTodayStepFromServer();
+      // stepProvider.fetchMonthlyStepFromServer();
+    });
   }
 }

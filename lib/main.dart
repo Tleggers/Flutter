@@ -3,6 +3,8 @@ import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trekkit_flutter/pages/MainPage.dart';
+import 'package:trekkit_flutter/pages/gb/step/step_detail_page.dart';
+import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 
 import 'functions/jh/UserProvider.dart';
 
@@ -21,13 +23,22 @@ void main() async {
   final userProvider = UserProvider();
 
   if (token != null && token.isNotEmpty && index != null) {
-    userProvider.login(token, nickname ?? '', profile ?? '', logintype ?? '', index);
+    userProvider.login(
+      token,
+      nickname ?? '',
+      profile ?? '',
+      logintype ?? '',
+      index,
+    );
   }
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => userProvider,
-      child: MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => userProvider), // 로그인 상태
+        ChangeNotifierProvider(create: (_) => StepProvider()), // 0609 만보기 상태
+      ],
+      child: const MyApp(),
     ),
   );
 }
@@ -42,7 +53,9 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       home: MainPage(title: 'TrekKit'),
-
+      routes: {
+        '/stepDetail': (context) => const StepDetailPage(), // ← 0609 만보기 상세페이지
+      },
     );
   }
 }
