@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -27,9 +28,8 @@ Future<void> loginWithGoogle(BuildContext context) async {
     final String profile = account.photoUrl ?? '';
     final type = "GOOGLE";
 
-    // final url = Uri.parse('http://10.0.2.2:30000/login/sociallogin'); // 에뮬레이터
-    // final url = Uri.parse('http://192.168.0.7:30000/login/sociallogin'); // 실제 기기(주소는 각자 주소 넣기)
-    final url = Uri.parse('http://192.168.0.51:30000/login/sociallogin'); // 실제 기기2(주소는 각자 주소 넣기)
+    final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
+    final url = Uri.parse('$baseUrl/login/sociallogin');
 
     // 백엔드로 전송할 데이터
     final response = await http.post(

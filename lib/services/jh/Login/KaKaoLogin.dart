@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,8 +10,6 @@ import '../../../functions/jh/UserProvider.dart';
 import '../../../pages/MainPage.dart';
 
 Future<void> loginWithKakao(BuildContext context) async {
-
-  print('카카오 접속 성공'); // 얘는 들어옴
 
   try {
 
@@ -39,9 +38,8 @@ Future<void> loginWithKakao(BuildContext context) async {
     final type = "KAKAO";
 
     // 3. 백엔드로 POST 요청 보내기
-    // final url = Uri.parse('http://10.0.2.2:30000/login/sociallogin'); // 에뮬레이터
-    // final url = Uri.parse('http://192.168.0.7:30000/login/sociallogin'); // 실제 기기(주소는 각자 주소 넣기)
-    final url = Uri.parse('http://192.168.0.51:30000/login/sociallogin'); // 실제 기기2(주소는 각자 주소 넣기)
+    final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
+    final url = Uri.parse('$baseUrl/login/sociallogin');
 
     final response = await http.post(
       url,

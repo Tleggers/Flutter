@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,7 +12,15 @@ import 'functions/jh/UserProvider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  KakaoSdk.init(nativeAppKey: '07f1249d85be7b1d16504c545410ecb6');
+  await dotenv.load(fileName: ".env");
+
+  final kakaoKey = dotenv.env['KAKAO_NATIVE_KEY'];
+
+  if (kakaoKey == null || kakaoKey.isEmpty) {
+    throw Exception("KAKAO_NATIVE_KEY is missing from .env file.");
+  }
+
+  KakaoSdk.init(nativeAppKey: kakaoKey);
 
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('token');

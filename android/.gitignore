@@ -1,14 +1,37 @@
+# ✅ Gradle 관련
+.gradle/
 gradle-wrapper.jar
-/.gradle
-/captures/
-/gradlew
-/gradlew.bat
-/local.properties
-GeneratedPluginRegistrant.java
-.cxx/
+gradlew
+gradlew.bat
+android/build.gradle
+android/settings.gradle
+android/.cxx/
+android/captures/
+android/local.properties
 
-# Remember to never publicly share your keystore.
-# See https://flutter.dev/to/reference-keystore
-key.properties
-**/*.keystore
-**/*.jks
+# ✅ AndroidManifest
+android/app/src/main/AndroidManifest.xml
+
+# ✅ Flutter 자동 생성 파일
+lib/generated_plugin_registrant.dart
+android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+
+# ✅ Firebase / 보안 파일
+android/app/google-services.json
+android/app/key.properties
+android/app/**/*.keystore
+android/app/**/*.jks
+*.pem
+*.key
+*.crt
+
+# ✅ 환경변수 파일
+.env
+
+# ✅ Flutter 관련
+.dart_tool/
+.packages
+.buildlog/
+.pub-cache/
+.flutter-plugins
+.flutter-plugins-dependencies

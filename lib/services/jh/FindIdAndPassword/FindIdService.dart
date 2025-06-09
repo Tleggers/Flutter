@@ -1,9 +1,13 @@
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 // 메일 보내는 함수
 Future<void> sendMail(String email) async {
-  final url = Uri.parse('http://192.168.0.51:30000/signup/sendFindMail');
+
+  final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
+  final url = Uri.parse('$baseUrl/signup/sendFindMail');
+
   final response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},
@@ -17,7 +21,10 @@ Future<void> sendMail(String email) async {
 
 // 메일로 아이디 찾는 함수
 Future<Map<String, dynamic>?> fetchUserIdByEmail(String email) async {
-  final url = Uri.parse('http://192.168.0.51:30000/find/findid');
+
+  final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
+  final url = Uri.parse('$baseUrl/find/findid');
+
   final response = await http.post(
     url,
     headers: {'Content-Type': 'application/json'},

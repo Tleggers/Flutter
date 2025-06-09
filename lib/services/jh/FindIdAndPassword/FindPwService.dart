@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 // 메일 보내는 함수
@@ -7,8 +8,11 @@ Future<void> sendMail(BuildContext context, String email, String userid) async {
 
   try {
 
+    final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
+    final url = Uri.parse('$baseUrl/signup/sendFindPwMail');
+
     final response = await http.post(
-      Uri.parse('http://192.168.0.51:30000/signup/sendFindPwMail'),
+      url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({"email": email, "userid": userid}),
     );
@@ -37,7 +41,9 @@ Future<bool> resetPassword(String userid, String newPw, BuildContext context) as
 
   try {
 
-    final url = Uri.parse('http://192.168.0.51:30000/find/resetPassword');
+    final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
+    final url = Uri.parse('$baseUrl/find/resetPassword');
+
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

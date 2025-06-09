@@ -1,45 +1,48 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
+# ✅ 환경변수
+.env
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# ✅ Flutter 관련
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
-/build/
+build/
+.packages
+GeneratedPluginRegistrant.java
+lib/generated_plugin_registrant.dart
 
-# Symbolication related
+# ✅ 안드로이드 빌드 및 키 파일
+android/.gradle/
+android/app/build/
+android/local.properties
+android/key.properties
+android/app/google-services.json
+android/app/**/*.keystore
+android/app/**/*.jks
+android/app/**/*.p12
+
+# ✅ iOS 관련
+**/ios/Flutter/.last_build_id
+
+# ✅ 사용자 로그/캐시 등
+*.log
+*.swp
+*.pyc
+*.class
+.history
+.DS_Store
+
+# ✅ IDE 설정 (IntelliJ, VS Code)
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# ✅ 심볼/난독화 관련
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# ✅ Android NDK / CMake 빌드 캐시 제거
+android/app/.cxx/

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
 // 회원가입 함수
@@ -12,9 +13,8 @@ Future<bool> signUp({
   required File? profileImage,
 }) async {
 
-  // final url = Uri.parse('http://10.0.2.2:30000/signup/dosignup'); // 에뮬레이터
-  // final url = Uri.parse('http://192.168.0.7:30000/signup/dosignup'); // 실제 기기
-  final url = Uri.parse('http://192.168.0.51:30000/signup/dosignup'); // 실제 기기
+  final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
+  final url = Uri.parse('$baseUrl/signup/dosignup');
 
   try {
     var request = http.MultipartRequest('POST', url);
