@@ -13,7 +13,8 @@ Future<bool> signUp({
 }) async {
 
   // final url = Uri.parse('http://10.0.2.2:30000/signup/dosignup'); // 에뮬레이터
-  final url = Uri.parse('http://192.168.0.7:30000/signup/dosignup'); // 실제 기기
+  // final url = Uri.parse('http://192.168.0.7:30000/signup/dosignup'); // 실제 기기
+  final url = Uri.parse('http://192.168.0.51:30000/signup/dosignup'); // 실제 기기
 
   try {
     var request = http.MultipartRequest('POST', url);

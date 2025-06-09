@@ -77,12 +77,13 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#ffffff"
-  image: assets/splash/splash.png
+  image: assets/splash/splash2.png
   android: true
   ios: true
   fullscreen: true
   android_gravity: center
-  ios_content_mode: center
+  ios_content_mode: scaleAspectFill
+
 # The following section is specific to Flutter packages.
 flutter:
 

@@ -31,14 +31,16 @@ Future<void> loginHandler({
   }
 
   // final url = Uri.parse('http://10.0.2.2:30000/login/dologin'); // 에뮬레이터
-  final url = Uri.parse('http://192.168.0.7:30000/login/dologin'); // 실제 기기
-
+  // final url = Uri.parse('http://192.168.0.7:30000/login/dologin'); // 실제 기기
+  final url = Uri.parse('http://192.168.0.51:30000/login/dologin'); // 실제 기기2
   try {
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({"userid": id, "password": pw}),
     );
+
+    print("응답 본문: ${response.body}");
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);

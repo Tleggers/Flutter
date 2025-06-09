@@ -6,7 +6,8 @@ Future<bool> checkDupNickName(String nickname) async {
 
   // 10.0.2.2 << localhost같은 역할
   // final url = Uri.parse('http://10.0.2.2:30000/signup/checkDupNickname');
-  final url = Uri.parse('http://192.168.0.7:30000/signup/checkDupNickname'); // 실제 기기
+  // final url = Uri.parse('http://192.168.0.7:30000/signup/checkDupNickname'); // 실제 기기
+  final url = Uri.parse('http://192.168.0.51:30000/signup/checkDupNickname'); // 실제 기기
 
   final response = await http.post(
     url,

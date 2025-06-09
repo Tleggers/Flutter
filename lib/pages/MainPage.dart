@@ -73,13 +73,17 @@ class _MainPageState extends State<MainPage> {
             padding: EdgeInsets.only(right: screenWidth * 0.06),
             child: TextButton(
               onPressed: () async {
+
+                // 로그인 상태가 아닌 경우 -> 아무것도 안 함
+                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                if (!userProvider.isLoggedIn) return;
+
                 final prefs = await SharedPreferences.getInstance();
                 final loginType = prefs.getString('logintype'); // 'NORMAL', 'KAKAO', 'GOOGLE'
 
                 try {
                   if (loginType == 'KAKAO') {
                     await UserApi.instance.logout();
-                    print('카카오 로그아웃 완료');
                   } else if (loginType == 'GOOGLE') {
                     // final GoogleSignIn _googleSignIn = GoogleSignIn();
                     // await _googleSignIn.signOut();
@@ -97,11 +101,10 @@ class _MainPageState extends State<MainPage> {
                 await prefs.remove('profile');
                 await prefs.remove('index');
 
-                // ✅ Provider에서 로그인 상태 초기화
-                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                // Provider에서 로그인 상태 초기화
                 userProvider.logout();
 
-                // ✅ UI 메시지 출력
+                // UI 메시지 출력
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('로그아웃 되었습니다')),

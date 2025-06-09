@@ -18,7 +18,6 @@ class UserProvider with ChangeNotifier {
     token = t;
     nickname = n;
     profileUrl = p;
-    print("✅ UserProvider에 저장된 프로필: $p");
     logintype = l;
     index = i;
     notifyListeners();

@@ -62,26 +62,29 @@ class _SignupPageState extends State<SignupPage> {
   // id 정규식
   void validateId(String input) {
     final regex = RegExp(r'^[a-zA-Z0-9]{1,16}$');
-    final isValid = regex.hasMatch(input);
+    final isValidFormat = regex.hasMatch(input);
+    final isAdminBlocked = input.toLowerCase() == 'admin'; // admin은 사용 불가
 
     setState(() {
-      isValidId = isValid;
+      isValidId = isValidFormat && !isAdminBlocked;
       isCheckDupId = false;
       idCheckMessage = input.isEmpty
           ? null
-          : (isValid ? null : '아이디 형식이 올바르지 않습니다.');
-      idCheckColor = isValid ? null : Colors.red;
+          : (!isValidFormat
+          ? '아이디 형식이 올바르지 않습니다.'
+          : (isAdminBlocked ? '사용할 수 없는 아이디입니다.' : null));
+      idCheckColor = isValidFormat ? null : Colors.red;
     });
   }
 
   // 비밀번호 정규식
   void validatePw(String input) {
     final regex = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#%^&*])[A-Za-z\d!@#%^&*]{1,16}$');
-
     final isValid = regex.hasMatch(input);
+    final isAdminBlocked = input.toLowerCase() == 'admin'; // admin은 사용 불가
 
     setState(() {
-      isValidPw = isValid;
+      isValidPw = isValid && !isAdminBlocked;
       isSamePw = _pwCheckController.text == input;
     });
   }

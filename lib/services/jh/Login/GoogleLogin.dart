@@ -15,7 +15,6 @@ Future<void> loginWithGoogle(BuildContext context) async {
       serverClientId: '719721622586-7hgas4saqrk7k61ii86fb1s3hv16ukc7.apps.googleusercontent.com',
     );
     final GoogleSignInAccount? account = await googleSignIn.signIn();
-    print("👤 로그인된 계정: $account");
 
     if (account == null) {
       showSnackBar(context, '로그인이 취소되었습니다.');
@@ -29,9 +28,10 @@ Future<void> loginWithGoogle(BuildContext context) async {
     final type = "GOOGLE";
 
     // final url = Uri.parse('http://10.0.2.2:30000/login/sociallogin'); // 에뮬레이터
-    final url = Uri.parse('http://192.168.0.7:30000/login/sociallogin'); // 실제 기기(주소는 각자 주소 넣기)
+    // final url = Uri.parse('http://192.168.0.7:30000/login/sociallogin'); // 실제 기기(주소는 각자 주소 넣기)
+    final url = Uri.parse('http://192.168.0.51:30000/login/sociallogin'); // 실제 기기2(주소는 각자 주소 넣기)
 
-    // ✅ 백엔드로 전송할 데이터
+    // 백엔드로 전송할 데이터
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -50,8 +50,6 @@ Future<void> loginWithGoogle(BuildContext context) async {
       final profile = body['profile']; // 프로필 사진
       final logintype = body['logintype']; // 로그인 타입
       final index = body['index']; // 인덱스 (DB에서 ID를 의미)
-
-      print("📸 프로필 주소: $profile");
 
       if (token != null) {
         final prefs = await SharedPreferences.getInstance();

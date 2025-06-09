@@ -3,7 +3,8 @@ import 'dart:convert';
 
 Future<void> sendMail(String email) async {
   // final url = Uri.parse('http://10.0.2.2:30000/signup/sendMail');
-  final url = Uri.parse('http://192.168.0.7:30000/signup/sendMail'); // 실제 기기
+  // final url = Uri.parse('http://192.168.0.7:30000/signup/sendMail'); // 실제 기기
+  final url = Uri.parse('http://192.168.0.51:30000/signup/sendMail'); // 실제 기기
 
   final response = await http.post(
     url,

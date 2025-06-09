@@ -40,7 +40,8 @@ Future<void> loginWithKakao(BuildContext context) async {
 
     // 3. 백엔드로 POST 요청 보내기
     // final url = Uri.parse('http://10.0.2.2:30000/login/sociallogin'); // 에뮬레이터
-    final url = Uri.parse('http://192.168.0.7:30000/login/sociallogin'); // 실제 기기(주소는 각자 주소 넣기)
+    // final url = Uri.parse('http://192.168.0.7:30000/login/sociallogin'); // 실제 기기(주소는 각자 주소 넣기)
+    final url = Uri.parse('http://192.168.0.51:30000/login/sociallogin'); // 실제 기기2(주소는 각자 주소 넣기)
 
     final response = await http.post(
       url,
