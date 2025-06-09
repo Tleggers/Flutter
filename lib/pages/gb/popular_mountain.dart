@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:trekkit_flutter/api/mountain_api.dart'; // 산 정보를 가져오는 API 클래스
 import 'package:trekkit_flutter/models/gb/popular_course_section.dart'; // 산 정보 모델 클래스
 import 'package:trekkit_flutter/utils/gb/string_utils.dart';
