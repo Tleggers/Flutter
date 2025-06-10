@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:trekkit_flutter/models/jw/Post.dart';
-import 'package:trekkit_flutter/models/jw/PostService.dart';
+import 'package:trekkit_flutter/services/jw/AuthService.dart';
+import 'package:trekkit_flutter/services/jw/PostService.dart';
 
 class PostWriting extends StatefulWidget {
   const PostWriting({super.key});
@@ -13,21 +14,16 @@ class PostWriting extends StatefulWidget {
 
 class _PostWritingState extends State<PostWriting> {
   String? _selectedMountain;
-  List<String> _mountainOptions = [];
   List<XFile> _images = [];
   List<String> _uploadedImagePaths = [];
 
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
 
-  bool _isLoading = false;
   bool _isSubmitting = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadMountains();
-  }
+  // 데이터베이스의 5가지 산
+  final List<String> _mountainOptions = ['한라산', '지리산', '설악산', '북한산', '내장산'];
 
   @override
   void dispose() {
@@ -36,57 +32,27 @@ class _PostWritingState extends State<PostWriting> {
     super.dispose();
   }
 
-  // 산 목록 로드
-  Future<void> _loadMountains() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final mountains = await PostService.getMountains();
-      setState(() {
-        _mountainOptions = mountains;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('산 목록 로드 실패: $e')));
-      }
-    }
-  }
-
   void _selectMountain(String? mountain) {
     setState(() {
       _selectedMountain = mountain;
     });
   }
 
-  // 이미지 추가
   Future<void> _pickImages() async {
     final ImagePicker picker = ImagePicker();
-    final List<XFile>? picked = await picker.pickMultiImage();
+    final List<XFile> picked = await picker.pickMultiImage();
 
-    if (picked != null) {
-      setState(() {
-        _images = (picked.length > 5) ? picked.sublist(0, 5) : picked;
-      });
-    }
+    setState(() {
+      _images = (picked.length > 5) ? picked.sublist(0, 5) : picked;
+    });
   }
 
-  // 이미지 삭제
   void _removeImage(int index) {
     setState(() {
       _images.removeAt(index);
     });
   }
 
-  // 이미지 업로드
   Future<void> _uploadImages() async {
     if (_images.isEmpty) {
       _uploadedImagePaths = [];
@@ -103,7 +69,6 @@ class _PostWritingState extends State<PostWriting> {
     }
   }
 
-  // 게시글 작성 완료
   Future<void> _submitPost() async {
     // 유효성 검사
     if (_selectedMountain == null || _selectedMountain!.isEmpty) {
@@ -113,6 +78,11 @@ class _PostWritingState extends State<PostWriting> {
 
     if (_contentController.text.trim().isEmpty) {
       _showErrorSnackBar('내용을 입력해주세요.');
+      return;
+    }
+
+    if (!AuthService().isLoggedIn) {
+      _showErrorSnackBar('로그인이 필요합니다.');
       return;
     }
 
@@ -126,7 +96,7 @@ class _PostWritingState extends State<PostWriting> {
 
       // 2. 게시글 작성
       final post = Post(
-        nickname: 'currentUser', // 실제 사용자 닉네임으로 변경
+        nickname: AuthService().nickname ?? 'Unknown',
         title:
             _titleController.text.trim().isEmpty
                 ? null
@@ -140,11 +110,13 @@ class _PostWritingState extends State<PostWriting> {
       await PostService.createPost(post);
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('게시글이 성공적으로 작성되었습니다.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('게시글이 성공적으로 작성되었습니다.'),
+            backgroundColor: Colors.green,
+          ),
+        );
 
-        // 성공 시 이전 페이지로 돌아가면서 새로고침 신호 전달
         Navigator.pop(context, true);
       }
     } catch (e) {
@@ -173,6 +145,8 @@ class _PostWritingState extends State<PostWriting> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('글쓰기'),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
         actions: [
           if (_isSubmitting)
             const Center(
@@ -181,7 +155,10 @@ class _PostWritingState extends State<PostWriting> {
                 child: SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             )
@@ -190,72 +167,85 @@ class _PostWritingState extends State<PostWriting> {
               onPressed: _submitPost,
               child: const Text(
                 '완료',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
         ],
       ),
-      body:
-          _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
-                padding: EdgeInsets.all(screenWidth * 0.05),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(screenWidth * 0.05),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 제목 입력 (선택사항)
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(
+                hintText: '제목 (선택사항)',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.title),
+              ),
+              maxLines: 1,
+            ),
+
+            const SizedBox(height: 16),
+
+            // 산 선택
+            DropdownButtonFormField<String>(
+              decoration: const InputDecoration(
+                labelText: '산 선택 *',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.landscape),
+              ),
+              value: _selectedMountain,
+              items:
+                  _mountainOptions.map((mountain) {
+                    return DropdownMenuItem<String>(
+                      value: mountain,
+                      child: Text(mountain),
+                    );
+                  }).toList(),
+              onChanged: _selectMountain,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return '산을 선택해주세요';
+                }
+                return null;
+              },
+            ),
+
+            const SizedBox(height: 16),
+
+            // 내용 입력
+            TextField(
+              controller: _contentController,
+              decoration: const InputDecoration(
+                hintText: '등산 후기나 경험을 공유해주세요 *',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.edit),
+                alignLabelWithHint: true,
+              ),
+              maxLines: 8,
+              keyboardType: TextInputType.multiline,
+            ),
+
+            const SizedBox(height: 20),
+
+            // 이미지 선택 섹션
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 제목 입력 (선택사항)
-                    TextField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(
-                        hintText: '제목 (선택사항)',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 1,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // 산 선택
-                    DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(
-                        labelText: '산 선택 *',
-                        border: OutlineInputBorder(),
-                      ),
-                      value: _selectedMountain,
-                      items:
-                          _mountainOptions.map((mountain) {
-                            return DropdownMenuItem<String>(
-                              value: mountain,
-                              child: Text(mountain),
-                            );
-                          }).toList(),
-                      onChanged: _selectMountain,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return '산을 선택해주세요';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // 내용 입력
-                    TextField(
-                      controller: _contentController,
-                      decoration: const InputDecoration(
-                        hintText: '등산 후기나 경험을 공유해주세요 *',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 8,
-                      keyboardType: TextInputType.multiline,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // 이미지 선택 섹션
                     Row(
                       children: [
+                        const Icon(Icons.photo_camera, color: Colors.green),
+                        const SizedBox(width: 8),
                         const Text(
                           '사진 추가',
                           style: TextStyle(
@@ -264,7 +254,7 @@ class _PostWritingState extends State<PostWriting> {
                           ),
                         ),
                         const Spacer(),
-                        TextButton.icon(
+                        OutlinedButton.icon(
                           onPressed: _pickImages,
                           icon: const Icon(Icons.add_photo_alternate),
                           label: Text('사진 선택 (${_images.length}/5)'),
@@ -272,10 +262,8 @@ class _PostWritingState extends State<PostWriting> {
                       ],
                     ),
 
-                    const SizedBox(height: 8),
-
-                    // 선택된 이미지 미리보기
-                    if (_images.isNotEmpty)
+                    if (_images.isNotEmpty) ...[
+                      const SizedBox(height: 16),
                       SizedBox(
                         height: 100,
                         child: ListView.builder(
@@ -320,39 +308,57 @@ class _PostWritingState extends State<PostWriting> {
                           },
                         ),
                       ),
-
-                    const SizedBox(height: 24),
-
-                    // 작성 가이드
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '작성 가이드',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            '• 등산 경험이나 후기를 자유롭게 공유해주세요\n'
-                            '• 사진은 최대 5장까지 첨부 가능합니다\n'
-                            '• 다른 등산객들에게 도움이 되는 정보를 포함해주세요',
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ],
                 ),
               ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // 작성 가이드
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.green[200]!),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.green[700]),
+                      const SizedBox(width: 8),
+                      Text(
+                        '작성 가이드',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.green[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '• 등산 경험이나 후기를 자유롭게 공유해주세요\n'
+                    '• 사진은 최대 5장까지 첨부 가능합니다\n'
+                    '• 다른 등산객들에게 도움이 되는 정보를 포함해주세요\n'
+                    '• 안전한 등산 문화를 만들어가요',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.green[600],
+                      height: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

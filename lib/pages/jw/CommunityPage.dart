@@ -1,58 +1,90 @@
 import 'package:flutter/material.dart';
-import 'package:trekkit_flutter/pages/jw/PostWriting.dart';
-import 'ViewDetail.dart';
+import 'package:trekkit_flutter/services/jw/AuthService.dart';
+import 'package:trekkit_flutter/services/jw/PostService.dart';
 import 'package:trekkit_flutter/models/jw/Post.dart';
-import 'package:trekkit_flutter/models/jw/PostService.dart';
+import 'package:trekkit_flutter/pages/jh/Login_and_Signup/login.dart';
+import 'package:trekkit_flutter/pages/jw/PostWriting.dart';
+import 'package:trekkit_flutter/pages/jw/ViewDetail.dart';
 
 class CommunityPage extends StatefulWidget {
   const CommunityPage({super.key});
 
   @override
-  State<CommunityPage> createState() => CommunityPageState();
+  State<CommunityPage> createState() => _CommunityPageState();
 }
 
-class CommunityPageState extends State<CommunityPage> {
+class _CommunityPageState extends State<CommunityPage> {
+  @override
+  void initState() {
+    super.initState();
+    // 앱 시작 시 로그인 상태 확인
+    AuthService().checkLoginStatus();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('커뮤니티')),
+      appBar: AppBar(
+        title: const Text('커뮤니티'),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+        actions: [
+          if (AuthService().isLoggedIn)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: Center(
+                child: Text(
+                  '${AuthService().nickname}님',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ),
+        ],
+      ),
       body: Stack(
         children: [
           Padding(
-            padding: EdgeInsets.all(screenWidth * 0.1),
-            child: Column(
+            padding: EdgeInsets.all(screenWidth * 0.04),
+            child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [PostFilter(), Expanded(child: PostList())],
+              children: [
+                PostFilter(),
+                SizedBox(height: 16),
+                Expanded(child: PostList()),
+              ],
             ),
           ),
           Positioned(
             bottom: 20,
             right: 20,
-            child: GestureDetector(
-              onTap: () async {
-                final result = await Navigator.push<bool>(
-                  context,
-                  MaterialPageRoute(builder: (context) => const PostWriting()),
-                );
-
-                // 글 작성 후 새로고침
-                if (result == true) {
-                  setState(() {});
+            child: FloatingActionButton(
+              onPressed: () async {
+                if (AuthService().isLoggedIn) {
+                  // 로그인 상태: 글쓰기 페이지로 이동
+                  final result = await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PostWriting(),
+                    ),
+                  );
+                  if (result == true) {
+                    setState(() {}); // 새로고침
+                  }
+                } else {
+                  // 비로그인 상태: 로그인 페이지로 이동
+                  final result = await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(builder: (context) => const LoginPage()),
+                  );
+                  if (result == true) {
+                    setState(() {}); // 로그인 후 새로고침
+                  }
                 }
               },
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: const BoxDecoration(
-                  color: Colors.lightGreenAccent,
-                  shape: BoxShape.circle,
-                ),
-                child: const Center(
-                  child: Icon(Icons.add, size: 30, color: Colors.black),
-                ),
-              ),
+              backgroundColor: Colors.lightGreenAccent,
+              child: const Icon(Icons.add, size: 30, color: Colors.black),
             ),
           ),
         ],
@@ -71,33 +103,16 @@ class PostFilter extends StatefulWidget {
 class _PostFilterState extends State<PostFilter> {
   String _sortOption = '최신순';
   String? _selectedMountain;
-  List<String> _mountainOptions = [];
+
+  // 데이터베이스의 5가지 산
+  final List<String> _mountainOptions = ['한라산', '지리산', '설악산', '북한산', '내장산'];
 
   final List<String> sortOptions = ['최신순', '인기순'];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadMountains();
-  }
-
-  // 산 목록 로드
-  Future<void> _loadMountains() async {
-    try {
-      final mountains = await PostService.getMountains();
-      setState(() {
-        _mountainOptions = mountains;
-      });
-    } catch (e) {
-      print('산 목록 로드 실패: $e');
-    }
-  }
 
   void _selectMountain(String? mountain) {
     setState(() {
       _selectedMountain = mountain;
     });
-    // 필터 변경 시 PostList에 알림
     _notifyFilterChange();
   }
 
@@ -111,48 +126,67 @@ class _PostFilterState extends State<PostFilter> {
   }
 
   void _notifyFilterChange() {
-    // PostList에 필터 변경 알림
     PostListState.instance?.applyFilter(_sortOption, _selectedMountain);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 10),
-        Wrap(
-          spacing: 10,
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
           children: [
-            DropdownButton<String>(
-              value: _sortOption,
-              items:
-                  sortOptions.map((option) {
-                    return DropdownMenuItem<String>(
-                      value: option,
-                      child: Text(option),
-                    );
-                  }).toList(),
-              onChanged: _changeSortOption,
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  labelText: '정렬',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+                value: _sortOption,
+                items:
+                    sortOptions.map((option) {
+                      return DropdownMenuItem<String>(
+                        value: option,
+                        child: Text(option),
+                      );
+                    }).toList(),
+                onChanged: _changeSortOption,
+              ),
             ),
-            DropdownButton<String>(
-              hint: const Text('산 선택'),
-              value: _selectedMountain,
-              items: [
-                const DropdownMenuItem<String>(value: null, child: Text('전체')),
-                ..._mountainOptions.map((mountain) {
-                  return DropdownMenuItem<String>(
-                    value: mountain,
-                    child: Text(mountain),
-                  );
-                }).toList(),
-              ],
-              onChanged: _selectMountain,
+            const SizedBox(width: 16),
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                decoration: const InputDecoration(
+                  labelText: '산 선택',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                ),
+                value: _selectedMountain,
+                items: [
+                  const DropdownMenuItem<String>(
+                    value: null,
+                    child: Text('전체'),
+                  ),
+                  ..._mountainOptions.map((mountain) {
+                    return DropdownMenuItem<String>(
+                      value: mountain,
+                      child: Text(mountain),
+                    );
+                  }),
+                ],
+                onChanged: _selectMountain,
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 10),
-      ],
+      ),
     );
   }
 }
@@ -194,7 +228,6 @@ class PostListState extends State<PostList> {
     super.dispose();
   }
 
-  // 무한 스크롤 처리
   void _onScroll() {
     if (_scrollController.position.pixels ==
         _scrollController.position.maxScrollExtent) {
@@ -202,7 +235,6 @@ class PostListState extends State<PostList> {
     }
   }
 
-  // 필터 적용
   void applyFilter(String sort, String? mountain) {
     setState(() {
       _currentSort = sort;
@@ -213,7 +245,6 @@ class PostListState extends State<PostList> {
     _loadPosts();
   }
 
-  // 게시글 로드
   Future<void> _loadPosts() async {
     if (_isLoading) return;
 
@@ -248,15 +279,12 @@ class PostListState extends State<PostList> {
     }
   }
 
-  // 더 많은 게시글 로드 (무한 스크롤)
   Future<void> _loadMorePosts() async {
     if (_posts.length >= _totalCount) return;
-
     _currentPage++;
     await _loadPosts();
   }
 
-  // 새로고침
   Future<void> _refresh() async {
     setState(() {
       _currentPage = 0;
@@ -272,8 +300,30 @@ class PostListState extends State<PostList> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text('오류 발생: $_errorMessage'),
+            const SizedBox(height: 16),
             ElevatedButton(onPressed: _refresh, child: const Text('다시 시도')),
+          ],
+        ),
+      );
+    }
+
+    if (_posts.isEmpty && _isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_posts.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.hiking, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('아직 게시글이 없습니다', style: TextStyle(fontSize: 16)),
+            SizedBox(height: 8),
+            Text('첫 번째 등산 후기를 공유해보세요!', style: TextStyle(color: Colors.grey)),
           ],
         ),
       );
@@ -295,10 +345,10 @@ class PostListState extends State<PostList> {
           }
 
           return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.only(bottom: 12),
             child: PostItem(
               post: _posts[index],
-              onUpdate: () => setState(() {}), // 좋아요/북마크 업데이트 시 리빌드
+              onUpdate: () => setState(() {}),
             ),
           );
         },
@@ -321,8 +371,14 @@ class _PostItemState extends State<PostItem> {
   bool _isLikeLoading = false;
   bool _isBookmarkLoading = false;
 
-  // 좋아요 토글
   Future<void> _toggleLike() async {
+    if (!AuthService().isLoggedIn) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('로그인이 필요합니다')));
+      return;
+    }
+
     if (_isLikeLoading) return;
 
     setState(() {
@@ -332,25 +388,33 @@ class _PostItemState extends State<PostItem> {
     try {
       final result = await PostService.toggleLike(
         widget.post.id!,
-        'currentUserId', // 실제 사용자 ID로 변경
+        AuthService().userId!,
       );
 
-      // 좋아요 상태 업데이트
-      widget.post.copyWith(likeCount: result['likeCount']);
       widget.onUpdate?.call();
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('좋아요 처리 실패: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('좋아요 처리 실패: $e')));
+      }
     } finally {
-      setState(() {
-        _isLikeLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLikeLoading = false;
+        });
+      }
     }
   }
 
-  // 북마크 토글
   Future<void> _toggleBookmark() async {
+    if (!AuthService().isLoggedIn) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('로그인이 필요합니다')));
+      return;
+    }
+
     if (_isBookmarkLoading) return;
 
     setState(() {
@@ -358,35 +422,37 @@ class _PostItemState extends State<PostItem> {
     });
 
     try {
-      await PostService.toggleBookmark(
-        widget.post.id!,
-        'currentUserId', // 실제 사용자 ID로 변경
-      );
+      await PostService.toggleBookmark(widget.post.id!, AuthService().userId!);
 
       widget.onUpdate?.call();
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('북마크 처리 실패: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('북마크 처리 실패: $e')));
+      }
     } finally {
-      setState(() {
-        _isBookmarkLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isBookmarkLoading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ViewDetail(post: widget.post),
-          ),
-        );
-      },
-      child: Card(
+    return Card(
+      elevation: 2,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ViewDetail(post: widget.post),
+            ),
+          );
+        },
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -395,103 +461,186 @@ class _PostItemState extends State<PostItem> {
               // 프로필 정보
               Row(
                 children: [
-                  const CircleAvatar(radius: 20, backgroundColor: Colors.grey),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.post.nickname,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.green[100],
+                    child: Text(
+                      widget.post.nickname.isNotEmpty
+                          ? widget.post.nickname[0].toUpperCase()
+                          : 'U',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
                       ),
-                      Text(
-                        '${widget.post.createdAt.year}-${widget.post.createdAt.month.toString().padLeft(2, '0')}-${widget.post.createdAt.day.toString().padLeft(2, '0')}',
-                        style: const TextStyle(
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.post.nickname,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          '${widget.post.createdAt.year}-${widget.post.createdAt.month.toString().padLeft(2, '0')}-${widget.post.createdAt.day.toString().padLeft(2, '0')}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (widget.post.mountain.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.green[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        widget.post.mountain,
+                        style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey,
+                          color: Colors.green[700],
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
-                    ],
-                  ),
-                  const Spacer(),
-                  if (widget.post.mountain.isNotEmpty)
-                    Chip(
-                      label: Text(widget.post.mountain),
-                      backgroundColor: Colors.green[100],
                     ),
                 ],
               ),
-              const SizedBox(height: 10),
 
-              // 이미지 (있는 경우)
-              if (widget.post.imagePaths.isNotEmpty)
-                Container(
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.image, size: 50, color: Colors.grey),
+              const SizedBox(height: 12),
+
+              // 제목 (있는 경우)
+              if (widget.post.title != null && widget.post.title!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    widget.post.title!,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-
-              const SizedBox(height: 10),
 
               // 본문 내용
               Text(
                 widget.post.content,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 14, height: 1.4),
               ),
 
-              const SizedBox(height: 10),
+              // 이미지 (있는 경우)
+              if (widget.post.imagePaths.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Container(
+                    height: 200,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.image, size: 40, color: Colors.grey),
+                          SizedBox(height: 8),
+                          Text(
+                            '이미지 ${1}장',
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
+              const SizedBox(height: 12),
 
               // 아이콘 영역
               Row(
                 children: [
                   // 좋아요
-                  IconButton(
-                    onPressed: _isLikeLoading ? null : _toggleLike,
-                    icon:
-                        _isLikeLoading
-                            ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                            : const Icon(Icons.favorite_border),
+                  InkWell(
+                    onTap: _toggleLike,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _isLikeLoading
+                              ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Icon(Icons.favorite_border, size: 20),
+                          const SizedBox(width: 4),
+                          Text('${widget.post.likeCount}'),
+                        ],
+                      ),
+                    ),
                   ),
-                  Text('${widget.post.likeCount}'),
 
                   const SizedBox(width: 16),
 
                   // 댓글
-                  const Icon(Icons.comment_outlined),
-                  const SizedBox(width: 4),
-                  Text('${widget.post.commentCount}'),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.comment_outlined, size: 20),
+                      const SizedBox(width: 4),
+                      Text('${widget.post.commentCount}'),
+                    ],
+                  ),
 
                   const SizedBox(width: 16),
 
                   // 조회수
-                  const Icon(Icons.visibility_outlined),
-                  const SizedBox(width: 4),
-                  Text('${widget.post.viewCount}'),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.visibility_outlined, size: 20),
+                      const SizedBox(width: 4),
+                      Text('${widget.post.viewCount}'),
+                    ],
+                  ),
 
                   const Spacer(),
 
                   // 북마크
-                  IconButton(
-                    onPressed: _isBookmarkLoading ? null : _toggleBookmark,
-                    icon:
-                        _isBookmarkLoading
-                            ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                            : const Icon(Icons.bookmark_border),
+                  InkWell(
+                    onTap: _toggleBookmark,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child:
+                          _isBookmarkLoading
+                              ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Icon(Icons.bookmark_border, size: 20),
+                    ),
                   ),
                 ],
               ),

@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:trekkit_flutter/models/jw/Post.dart';
 
 class PostService {
-  // 백엔드 서버 URL (실제 서버 주소로 변경하세요)
-  static const String baseUrl = 'http://localhost:8080/api/posts';
+  // 백엔드 서버 URL - Android 에뮬레이터용 주소로 수정
+  static const String baseUrl = 'http://10.0.2.2:30000/api/posts';
 
   // HTTP 헤더 설정
   static const Map<String, String> headers = {
@@ -43,14 +43,15 @@ class PostService {
               (data['posts'] as List)
                   .map((json) => Post.fromJson(json))
                   .toList(),
-          'totalCount': data['totalCount'],
-          'currentPage': data['currentPage'],
-          'pageSize': data['pageSize'],
+          'totalCount': data['totalCount'] ?? 0,
+          'currentPage': data['currentPage'] ?? 0,
+          'pageSize': data['pageSize'] ?? size,
         };
       } else {
         throw Exception('게시글 조회 실패: ${response.statusCode}');
       }
     } catch (e) {
+      print('PostService.getPosts 오류: $e');
       throw Exception('네트워크 오류: $e');
     }
   }
@@ -72,6 +73,7 @@ class PostService {
         throw Exception('게시글 조회 실패: ${response.statusCode}');
       }
     } catch (e) {
+      print('PostService.getPost 오류: $e');
       throw Exception('네트워크 오류: $e');
     }
   }
@@ -79,19 +81,27 @@ class PostService {
   /// 새 게시글 작성
   static Future<Post> createPost(Post post) async {
     try {
+      final postData = post.toJson();
+      // ID는 서버에서 생성하므로 제거
+      postData.remove('id');
+
       final response = await http.post(
         Uri.parse(baseUrl),
         headers: headers,
-        body: json.encode(post.toJson()),
+        body: json.encode(postData),
       );
 
       if (response.statusCode == 200) {
         final data = json.decode(utf8.decode(response.bodyBytes));
         return Post.fromJson(data);
       } else {
-        throw Exception('게시글 작성 실패: ${response.statusCode}');
+        final errorData = json.decode(utf8.decode(response.bodyBytes));
+        throw Exception(
+          '게시글 작성 실패: ${errorData['error'] ?? response.statusCode}',
+        );
       }
     } catch (e) {
+      print('PostService.createPost 오류: $e');
       throw Exception('네트워크 오류: $e');
     }
   }
@@ -104,6 +114,7 @@ class PostService {
         Uri.parse('$baseUrl/upload-images'),
       );
 
+      // 각 이미지를 'images' 필드명으로 추가
       for (int i = 0; i < images.length; i++) {
         request.files.add(
           await http.MultipartFile.fromPath('images', images[i].path),
@@ -115,8 +126,8 @@ class PostService {
 
       if (response.statusCode == 200) {
         final data = json.decode(responseBody);
-        if (data['success']) {
-          return List<String>.from(data['imagePaths']);
+        if (data['success'] == true) {
+          return List<String>.from(data['imagePaths'] ?? []);
         } else {
           throw Exception(data['error'] ?? '이미지 업로드 실패');
         }
@@ -124,6 +135,7 @@ class PostService {
         throw Exception('이미지 업로드 실패: ${response.statusCode}');
       }
     } catch (e) {
+      print('PostService.uploadImages 오류: $e');
       throw Exception('네트워크 오류: $e');
     }
   }
@@ -141,11 +153,18 @@ class PostService {
 
       if (response.statusCode == 200) {
         final data = json.decode(utf8.decode(response.bodyBytes));
-        return {'isLiked': data['isLiked'], 'likeCount': data['likeCount']};
+        return {
+          'isLiked': data['isLiked'] ?? false,
+          'likeCount': data['likeCount'] ?? 0,
+        };
       } else {
-        throw Exception('좋아요 처리 실패: ${response.statusCode}');
+        final errorData = json.decode(utf8.decode(response.bodyBytes));
+        throw Exception(
+          '좋아요 처리 실패: ${errorData['error'] ?? response.statusCode}',
+        );
       }
     } catch (e) {
+      print('PostService.toggleLike 오류: $e');
       throw Exception('네트워크 오류: $e');
     }
   }
@@ -160,11 +179,15 @@ class PostService {
 
       if (response.statusCode == 200) {
         final data = json.decode(utf8.decode(response.bodyBytes));
-        return data['isBookmarked'];
+        return data['isBookmarked'] ?? false;
       } else {
-        throw Exception('북마크 처리 실패: ${response.statusCode}');
+        final errorData = json.decode(utf8.decode(response.bodyBytes));
+        throw Exception(
+          '북마크 처리 실패: ${errorData['error'] ?? response.statusCode}',
+        );
       }
     } catch (e) {
+      print('PostService.toggleBookmark 오류: $e');
       throw Exception('네트워크 오류: $e');
     }
   }
@@ -184,7 +207,9 @@ class PostService {
         throw Exception('산 목록 조회 실패: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('네트워크 오류: $e');
+      print('PostService.getMountains 오류: $e');
+      // 오류 시 기본 산 목록 반환
+      return ['한라산', '지리산', '설악산', '북한산', '내장산'];
     }
   }
 
@@ -196,8 +221,14 @@ class PostService {
         headers: headers,
       );
 
-      return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        final data = json.decode(utf8.decode(response.bodyBytes));
+        return data['success'] ?? false;
+      } else {
+        return false;
+      }
     } catch (e) {
+      print('PostService.deletePost 오류: $e');
       throw Exception('네트워크 오류: $e');
     }
   }
