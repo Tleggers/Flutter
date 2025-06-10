@@ -34,14 +34,12 @@ Future<void> loginHandler({
   final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
   final url = Uri.parse('$baseUrl/login/dologin');
 
-    try {
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"userid": id, "password": pw}),
-      );
-
-    showSnackBar(context, '응답 코드: ${response.statusCode}\n응답: ${response.body}');
+  try {
+    final response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"userid": id, "password": pw}),
+    );
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
@@ -59,21 +57,18 @@ Future<void> loginHandler({
         await prefs.setString('logintype', logintype);
         await prefs.setInt('index', index);
 
-        Provider.of<UserProvider>(context, listen: false).login(
-          token,
-          nickname,
-          profile,
-          logintype,
-          index,
-        );
+        Provider.of<UserProvider>(
+          context,
+          listen: false,
+        ).login(token, nickname, profile, logintype, index);
 
         if (!context.mounted) return;
-        
+
         // 로그인 성공 -> 메인으로 이동 -> AppBar에 뒤로가기 버튼은 사라짐
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const MainPage(title: '트레킷')),
-              (route) => false, // 👈 이전 모든 route 제거
+          (route) => false, // 👈 이전 모든 route 제거
         );
       } else {
         showSnackBar(context, '로그인 실패: 아이디 또는 비밀번호가 틀렸습니다.');
@@ -87,10 +82,7 @@ Future<void> loginHandler({
 }
 
 void showSnackBar(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message),
-      backgroundColor: Colors.red,
-    ),
-  );
+  ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: Text(message), backgroundColor: Colors.red));
 }
