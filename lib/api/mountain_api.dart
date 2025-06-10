@@ -12,8 +12,8 @@ class MountainApi {
   // ▶ API의 실제 요청 주소 (명산 등산로 이미지 API 엔드포인트)
   static const String _baseUrl =
       'http://openapi.forest.go.kr/openapi/service/cultureInfoService/gdTrailInfoOpenAPI';
-
-  /// ▶ 산 정보를 가져오는 비동기 함수
+      
+  /// ▶ 인기 산 정보를 가져오는 비동기 함수
   /// - [page]: 페이지 번호
   /// - [numOfRows]: 한 페이지에 가져올 산 개수
   static Future<List<PopularMountain>> fetchPopularMountains({
@@ -65,6 +65,33 @@ class MountainApi {
     } catch (e) {
       // 네트워크 오류, 파싱 오류 등 예외 발생 시
       throw Exception('데이터를 불러오는 중 문제가 발생했어요: $e');
+    }
+  }
+
+  /// ▶ 전체 산 정보를 가져오는 비동기 함수
+
+  static Future<List<Mountain>> fetchMountains() async {
+    final url = Uri.parse('$_baseUrl?serviceKey=$_apiKey&numOfRows=100&pageNo=1&_type=json',);
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+      final items = decoded['response']?['body']?['items']?['item'];
+      
+      print('🧾 첫 번째 산 JSON: ${jsonEncode(items is List ? items.first : items)}');
+
+      if (items is List) {
+        return items
+            .map((item) => Mountain.fromJson(Map<String, dynamic>.from(item)))
+            .toList();
+      } else if (items is Map) {
+        return [
+          Mountain.fromJson(Map<String, dynamic>.from(items)),
+        ];
+      } else {
+        return [];
+      }
+    } else {
+      throw Exception('산 데이터 로드 실패: ${response.statusCode}');
     }
   }
 }
