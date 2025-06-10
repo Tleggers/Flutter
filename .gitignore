@@ -46,3 +46,7 @@ app.*.map.json
 
 # ✅ Android NDK / CMake 빌드 캐시 제거
 android/app/.cxx/
+android/app/build.gradle.kts
+android/app/src/main/AndroidManifest.xml
+android/build.gradle.kts
+android/settings.gradle.kts
