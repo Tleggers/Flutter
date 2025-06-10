@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import '../../../services/jh/Signup/SendMail.dart';
+import '../../../services/jh/Signup/sendmail.dart';
 
 class SignupEmailInput extends StatefulWidget {
   final TextEditingController emailController;

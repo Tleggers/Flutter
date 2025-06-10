@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/jh/FindIdAndPassword/FindIdForm.dart';
-import '../Login_and_Signup/Login.dart';
-import 'FindPwPage.dart';
+import '../../../widgets/jh/FindIdAndPassword/findidform.dart';
+import '../Login_and_Signup/login.dart';
+import 'findpwpage.dart';
 
 // 아이디 찾기 페이지
 class FindIdPage extends StatefulWidget {

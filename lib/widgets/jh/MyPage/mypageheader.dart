@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../functions/jh/UserProvider.dart';
-import '../../../pages/jh/Login_and_Signup/Login.dart';
-import 'MyPageHeader/Profile.dart';
+import '../../../functions/jh/userprovider.dart';
+import '../../../pages/jh/Login_and_Signup/login.dart';
+import 'MyPageHeader/profile.dart';
 
 // 프사, 닉네임 (로그인, 회원가입) 부분
 class MyPageHeader extends StatefulWidget {
@@ -39,7 +39,11 @@ class _MyPageHeaderState extends State<MyPageHeader> {
             MaterialPageRoute(builder: (context) => LoginPage()),
           );
         } else {
-          // 로그인 시 마이페이지로 이동하는 코드 추가
+          // 로그인 되어있을 시 마이 페이지로 이동
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(builder: (context) => ModifyPage()),
+          // );
         }
       },
 

@@ -3,11 +3,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:trekkit_flutter/pages/MainPage.dart';
+import 'package:trekkit_flutter/pages/mainpage.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_detail_page.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 
-import 'functions/jh/UserProvider.dart';
+import 'functions/jh/userprovider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

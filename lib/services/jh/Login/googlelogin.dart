@@ -5,8 +5,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
-import '../../../functions/jh/UserProvider.dart';
-import '../../../pages/MainPage.dart';
+import '../../../functions/jh/userprovider.dart';
+import '../../../pages/mainpage.dart';
 
 Future<void> loginWithGoogle(BuildContext context) async {
 

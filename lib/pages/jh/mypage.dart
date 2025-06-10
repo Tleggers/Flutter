@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/jh/MyPage/MyPageHeader.dart';
+import '../../widgets/jh/MyPage/mypageheader.dart';
 
 // 마이페이지
 class MyPage extends StatelessWidget {

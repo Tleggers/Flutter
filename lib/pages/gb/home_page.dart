@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:trekkit_flutter/functions/jh/UserProvider.dart';
+import 'package:trekkit_flutter/functions/jh/userprovider.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_home_widget.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 

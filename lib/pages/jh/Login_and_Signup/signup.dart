@@ -1,18 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import '../../../services/jh/Signup/CheckDupEmail.dart';
-import '../../../services/jh/Signup/CheckDupId.dart';
-import '../../../services/jh/Signup/CheckDupNickName.dart';
-import '../../../services/jh/Signup/Signup.dart';
-import '../../../services/jh/Signup/VerifyAuthCode.dart';
-import '../../../widgets/jh/Signup/SignupAuthCodeInput.dart';
-import '../../../widgets/jh/Signup/SignupConfirmPwInput.dart';
-import '../../../widgets/jh/Signup/SignupEmailInput.dart';
-import '../../../widgets/jh/Signup/SignupIdInput.dart';
-import '../../../widgets/jh/Signup/SignupNickNameInput.dart';
-import '../../../widgets/jh/Signup/SignupProfile.dart';
-import '../../../widgets/jh/Signup/SignupPwInput.dart';
+import '../../../services/jh/Signup/checkdupemail.dart';
+import '../../../services/jh/Signup/checkdupid.dart';
+import '../../../services/jh/Signup/checkdupnickname.dart';
+import '../../../services/jh/Signup/signup.dart';
+import '../../../services/jh/Signup/verifyauthcode.dart';
+import '../../../widgets/jh/Signup/signupauthcodeinput.dart';
+import '../../../widgets/jh/Signup/signupconfirmpwinput.dart';
+import '../../../widgets/jh/Signup/signupemailinput.dart';
+import '../../../widgets/jh/Signup/signupidinput.dart';
+import '../../../widgets/jh/Signup/signupnicknameinput.dart';
+import '../../../widgets/jh/Signup/signupprofile.dart';
+import '../../../widgets/jh/Signup/signuppwinput.dart';
 
 // 회원가입 페이지
 class SignupPage extends StatefulWidget {

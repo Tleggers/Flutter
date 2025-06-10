@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../../functions/jh/Timer.dart';
-import '../../../services/jh/FindIdAndPassword/FindPwService.dart';
-import '../../../widgets/jh/FindIdAndPassword/FindPwAuthCodeInput.dart';
-import '../../../widgets/jh/FindIdAndPassword/FindPwEmailInput.dart';
-import '../../../widgets/jh/FindIdAndPassword/FindPwForm.dart';
-import '../../../widgets/jh/FindIdAndPassword/FindPwIdInput.dart';
-import '../Login_and_Signup/Login.dart';
-import 'FindIdPage.dart';
+import '../../../functions/jh/timer.dart';
+import '../../../services/jh/FindIdAndPassword/findpwservice.dart';
+import '../../../widgets/jh/FindIdAndPassword/findpwauthcodeinput.dart';
+import '../../../widgets/jh/FindIdAndPassword/findpwemailinput.dart';
+import '../../../widgets/jh/FindIdAndPassword/findpwform.dart';
+import '../../../widgets/jh/FindIdAndPassword/findpwidinput.dart';
+import '../Login_and_Signup/login.dart';
+import 'findidpage.dart';
 
 class FindPwPage extends StatefulWidget {
   const FindPwPage({super.key});

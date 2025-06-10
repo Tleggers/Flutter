@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../widgets/jh/Login/EtcLink.dart';
-import '../../../widgets/jh/Login/LoginButton.dart';
-import '../../../widgets/jh/Login/LoginForm.dart';
+import '../../../widgets/jh/Login/etclink.dart';
+import '../../../widgets/jh/Login/loginbutton.dart';
+import '../../../widgets/jh/Login/loginform.dart';
 
 // 로그인 페이지
 class LoginPage extends StatefulWidget {

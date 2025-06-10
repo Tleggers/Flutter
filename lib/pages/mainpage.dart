@@ -6,8 +6,8 @@ import 'package:trekkit_flutter/pages/gb/home_page.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 import 'package:trekkit_flutter/pages/jw/CommunityPage.dart';
 import 'package:provider/provider.dart';
-import '../functions/jh/UserProvider.dart';
-import 'jh/MyPage.dart';
+import '../functions/jh/userprovider.dart';
+import 'jh/mypage.dart';
 
 // 메인 화면
 class MainPage extends StatefulWidget {

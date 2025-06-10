@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../functions/jh/Timer.dart';
-import '../../../services/jh/FindIdAndPassword/FindIdService.dart';
-import '../../../services/jh/Signup/VerifyAuthCode.dart';
+import '../../../functions/jh/timer.dart';
+import '../../../services/jh/FindIdAndPassword/findidservice.dart';
+import '../../../services/jh/Signup/verifyauthcode.dart';
 
 class FindIdForm extends StatefulWidget {
 

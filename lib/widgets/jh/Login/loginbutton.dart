@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../services/jh/Login/GoogleLogin.dart';
-import '../../../services/jh/Login/KaKaoLogin.dart';
-import '../../../services/jh/Login/HandleLogin.dart';
+import '../../../services/jh/Login/googlelogin.dart';
+import '../../../services/jh/Login/kakaologin.dart';
+import '../../../services/jh/Login/handlelogin.dart';
 
 // 여러개의 로그인 버튼들을 모아놓은 위젯
 class LoginButtonSection extends StatelessWidget {

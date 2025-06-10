@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../services/jh/Signup/VerifyAuthCode.dart';
+import '../../../services/jh/Signup/verifyauthcode.dart';
 
 class AuthCodeInput extends StatelessWidget {
 

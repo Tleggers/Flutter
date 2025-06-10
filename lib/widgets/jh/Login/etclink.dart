@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../pages/jh/FindIdAndPassword/FindIdPage.dart';
-import '../../../pages/jh/FindIdAndPassword/FindPwPage.dart';
-import '../../../pages/jh/Login_and_Signup/Signup.dart';
+import '../../../pages/jh/FindIdAndPassword/findidpage.dart';
+import '../../../pages/jh/FindIdAndPassword/findpwpage.dart';
+import '../../../pages/jh/Login_and_Signup/signup.dart';
 
 // 회원가입, 아이디 및 비밀번호 링크 
 class LoginLink extends StatelessWidget {
