@@ -1,6 +1,7 @@
 import 'dart:convert'; // JSON 데이터를 디코딩하기 위해 필요
 import 'package:http/http.dart' as http; // HTTP 요청을 보내기 위한 패키지
 import 'package:trekkit_flutter/models/gb/popular_course_section.dart'; // 인기 산 정보를 담을 모델 클래스
+import 'package:trekkit_flutter/models/sh/mountain.dart';
 
 // 산 관련 API를 요청하고 데이터를 가져오는 클래스
 class MountainApi {

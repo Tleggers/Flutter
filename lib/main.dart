@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:trekkit_flutter/pages/mainpage.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_detail_page.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
+import 'package:trekkit_flutter/pages/sh/map_page.dart';
 
 import 'functions/jh/userprovider.dart';
 
