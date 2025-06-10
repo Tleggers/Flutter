@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -103,11 +104,12 @@ class StepProvider with ChangeNotifier {
     // TODO: 여기에서 실제 POST 요청 (Spring API 연동)
     print('📡 서버로 전송: user_id=$_userId, date=$walkDate, distance=$distance');
 
+    final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
+    final url = Uri.parse('$baseUrl/step/save');
+
     try {
       final response = await http.post(
-        Uri.parse(
-          'http://localhost:8080/api/step/save',
-        ), // 🛠️ 실제 배포시 서버 주소로 변경
+        url, // 🛠️ 실제 배포시 서버 주소로 변경
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'userId': _userId,
@@ -128,13 +130,17 @@ class StepProvider with ChangeNotifier {
 
   /// 📥 서버에서 오늘 거리 가져오기
   Future<void> fetchTodayStepFromServer() async {
+
+    final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
+    final url = Uri.parse('$baseUrl/step/daily?userId=$_userId');
+
     if (_userId == null) return;
 
     final today = DateTime.now().toIso8601String().split("T")[0]; // yyyy-MM-dd
 
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8080/api/step/today?userId=$_userId'),
+        url,
       );
 
       if (response.statusCode == 200) {

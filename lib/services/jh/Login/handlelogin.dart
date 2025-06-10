@@ -34,14 +34,14 @@ Future<void> loginHandler({
   final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
   final url = Uri.parse('$baseUrl/login/dologin');
 
-  try {
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"userid": id, "password": pw}),
-    );
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"userid": id, "password": pw}),
+      );
 
-    print("응답 본문: ${response.body}");
+    showSnackBar(context, '응답 코드: ${response.statusCode}\n응답: ${response.body}');
 
     if (response.statusCode == 200) {
       final body = jsonDecode(response.body);
