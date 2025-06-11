@@ -13,8 +13,14 @@ import 'jh/mypage.dart';
 // 메인 화면
 class MainPage extends StatefulWidget {
   final String title;
+  final int initialIndex; // 2025-06-11 추가
 
-  const MainPage({super.key, required this.title});
+  //2025-06-11 추가
+  const MainPage({
+    super.key,
+    required this.title,
+    this.initialIndex = 0, // 기본값 0
+  });
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -22,7 +28,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   // 현재 선택된 화면 인덱스
-  int _selectedIndex = 0; // 0: 홈, 1: 지도, 2: 커뮤니티, 3: 마이페이지
+  late int _selectedIndex = 0; // 0: 홈, 1: 지도, 2: 커뮤니티, 3: 마이페이지
 
   final List<Widget> _pages = [
     // 이 밑에 화면으로 이동하는 함수 추가할 것
@@ -58,21 +64,21 @@ class _MainPageState extends State<MainPage> {
           children: [
             Image.asset(
               'assets/images/logo_final2.png',
-              width: screenWidth * 0.12,
+              width: screenWidth * 0.1,
               height: screenHeight * 0.06,
               fit: BoxFit.contain,
             ),
             SizedBox(width: screenWidth * 0.02),
             Text(
               _titles[_selectedIndex],
-              style: TextStyle(fontSize: screenWidth * 0.06),
+              style: TextStyle(fontSize: screenWidth * 0.048),
             ),
           ],
         ),
 
         // 설정한 인덱스에서는 로그아웃 버튼 생기게 하기
         actions:
-            _selectedIndex == 2
+            _selectedIndex == 3 // 2025-06-11 수정
                 ? [
                   Padding(
                     padding: EdgeInsets.only(right: screenWidth * 0.06),
@@ -199,6 +205,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
+    _selectedIndex = widget.initialIndex; // 2025-06-11 추가
     //initState()는 build()보다 먼저 호출되고,
     //이때 context.read()는 위젯 트리가 완전히 구축되지 않아서 실패할 수 있습니다.
     // context 안전하게 접근하기 위한 post-frame callback 사용

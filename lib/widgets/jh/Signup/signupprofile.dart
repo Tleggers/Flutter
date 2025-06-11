@@ -22,8 +22,6 @@ class _ProfileImagePickerState extends State<ProfileImagePicker> {
 
   Future<void> _pickImage() async {
 
-    print("실행");
-
     final picker = ImagePicker(); // ImagePicker를 생성
     final pickedFile = await picker.pickImage(source: ImageSource.gallery); // 선택된 사진 넣는 변수
 

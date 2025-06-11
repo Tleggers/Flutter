@@ -34,12 +34,15 @@ Future<void> loginWithGoogle(BuildContext context) async {
     // 백엔드로 전송할 데이터
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        "Content-Type": "application/json",
+        "X-Client-Type": "app", // 클라이언트 타입
+      },
       body: jsonEncode({
-        'userid': oauthId,
-        'nickname': nickname,
-        'profile': profile,
-        'type': type,
+        "userid": oauthId,
+        "nickname": nickname,
+        "profile": profile,
+        "type": type,
       }),
     );
 

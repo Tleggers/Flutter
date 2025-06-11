@@ -16,15 +16,6 @@ Future<void> loginWithKakao(BuildContext context) async {
     // 1. 카카오 로그인
     OAuthToken token;
 
-    // 혹여나 토큰이 남아있으면 제거
-    if (await AuthApi.instance.hasToken()) {
-      try {
-        await UserApi.instance.logout();
-      } catch (e) {
-        showSnackBar(context, '로그아웃 중 오류 발생.');
-      }
-    }
-
     if (await isKakaoTalkInstalled()) {
       token = await UserApi.instance.loginWithKakaoTalk();
     } else {
@@ -43,7 +34,10 @@ Future<void> loginWithKakao(BuildContext context) async {
 
     final response = await http.post(
       url,
-      headers: {"Content-Type": "application/json"},
+      headers: {
+        "Content-Type": "application/json",
+        "X-Client-Type": "app", // 클라이언트 타입
+      },
       body: jsonEncode({
         "nickname": nickname,
         "profile": profile,
