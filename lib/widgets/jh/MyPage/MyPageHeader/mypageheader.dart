@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../functions/jh/userprovider.dart';
-import '../../../pages/jh/Login_and_Signup/login.dart';
-import 'MyPageHeader/profile.dart';
+import '../../../../functions/jh/userprovider.dart';
+import '../../../../pages/jh/Login_and_Signup/login.dart';
+import '../../../../pages/jh/MyPage/beforemodify.dart';
+import '../../../../pages/jh/MyPage/modifypage.dart';
+import 'profile.dart';
 
 // 프사, 닉네임 (로그인, 회원가입) 부분
 class MyPageHeader extends StatefulWidget {
@@ -21,13 +23,14 @@ class MyPageHeader extends StatefulWidget {
 }
 
 class _MyPageHeaderState extends State<MyPageHeader> {
+
   @override
   Widget build(BuildContext context) {
 
-    final userProvider = Provider.of<UserProvider>(context); // ✅ Provider에서 로그인 정보 가져옴
+    final userProvider = Provider.of<UserProvider>(context); // Provider에서 로그인 정보 가져옴
     final isLoggedIn = userProvider.isLoggedIn;
     final nickname = userProvider.nickname;
-    final index = userProvider.index;
+    final logintype = userProvider.logintype;
 
     return GestureDetector(
 
@@ -40,10 +43,18 @@ class _MyPageHeaderState extends State<MyPageHeader> {
           );
         } else {
           // 로그인 되어있을 시 마이 페이지로 이동
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(builder: (context) => ModifyPage()),
-          // );
+          // logintype << LOCAL이면 BeforeModify , 아니면 ModifyPage로 이동
+          if (logintype == 'LOCAL') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BeforeModifyPage()),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ModifyPage()),
+            );
+          }
         }
       },
 

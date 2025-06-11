@@ -32,4 +32,10 @@ class UserProvider with ChangeNotifier {
     index = null;
     notifyListeners();
   }
+
+  void setProfileUrl(String? url) {
+    profileUrl = url;
+    notifyListeners();
+  }
+
 }

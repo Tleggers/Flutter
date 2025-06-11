@@ -103,7 +103,15 @@ class _FindPwPageState extends State<FindPwPage> {
         title: Text('비밀번호 찾기', style: TextStyle(fontSize: screenWidth * 0.045)),
         leading: IconButton(
           icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LoginPage(), // ← LoginPage로 이동
+              ),
+                  (Route<dynamic> route) => false, // 모든 이전 스택 제거
+            );
+          },
         ),
       ),
       body: SingleChildScrollView(

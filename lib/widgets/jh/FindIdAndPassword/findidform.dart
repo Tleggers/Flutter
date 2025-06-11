@@ -119,11 +119,11 @@ class _FindIdFormState extends State<FindIdForm> {
                 onPressed: () async {
                   final email = _emailController.text.trim();
                   final code = _codeController.text.trim();
-                  _authTimer.cancel();
 
                   // 인증을 하고 성공하면 if문 실행
                   final isVerified = await verifyAuthCode(email, code);
                   if (isVerified) {
+                    _authTimer.cancel();
                     final result = await fetchUserIdByEmail(email);
                     if (result != null && result['logintype'] == 'LOCAL') {
                       widget.onResult('아이디는 ${result['userid']} 입니다');
