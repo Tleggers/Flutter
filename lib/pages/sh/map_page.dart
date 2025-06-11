@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trekkit_flutter/api/mountain_api.dart';
 import 'package:trekkit_flutter/models/sh/mountain.dart';
+import 'package:trekkit_flutter/services/sh/coordinate_service.dart';
 import 'package:trekkit_flutter/services/sh/location_service.dart';
 import 'package:trekkit_flutter/functions/sh/distance_util.dart';
 import 'package:trekkit_flutter/widgets/sh/mountain_card.dart';
@@ -18,8 +19,13 @@ class _MapPageState extends State<MapPage> {
 
   @override
   void initState() {
-    super.initState();
-    loadNearbyMountains();
+  super.initState();
+  initializeData();
+}
+
+  Future<void> initializeData() async {
+    await CoordinateService.loadCoordinates(); // CSV 먼저 로드
+    await loadNearbyMountains();              // 산 정보 불러오기
   }
 
   Future<void> loadNearbyMountains() async {
@@ -36,20 +42,15 @@ class _MapPageState extends State<MapPage> {
       print('📍 현재 위치 불러오는 중...');
       Position current = await LocationService.determinePosition();
       // Position current = await LocationService.getCurrentPosition();
+      if (current == null) {
+        print('⚠️ 현재 위치를 가져오지 못했습니다.');
+        setState(() {
+          nearbyMountains = []; // 위치 못 불러온 경우 빈 리스트 처리
+          isLoading = false;
+        });
+        return;
+      }
       print("🧭 현재 위치: ${current.latitude}, ${current.longitude}");
-      // Position current = Position(
-      // latitude: 37.5665, // 서울 위도
-      // longitude: 126.9780, // 서울 경도
-      // timestamp: DateTime.now(),
-      // accuracy: 0.0,
-      // altitude: 0.0,
-      // heading: 0.0,
-      // speed: 0.0,
-      // speedAccuracy: 0.0,
-      // altitudeAccuracy: 0.0,
-      // headingAccuracy: 0.0,
-      // );
-      
 
       List<Mountain> filtered = allMountains.where((mountain) {
         if (mountain.latitude == null || mountain.longitude == null) return false;
