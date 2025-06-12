@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../services/jh/Signup/checkdupemail.dart';
 import '../../../services/jh/Signup/checkdupid.dart';
-import '../../../services/jh/Signup/checkdupnickname.dart';
 import '../../../services/jh/Signup/signup.dart';
 import '../../../services/jh/Signup/verifyauthcode.dart';
 import '../../../widgets/jh/Signup/signupauthcodeinput.dart';
@@ -68,18 +67,21 @@ class _SignupPageState extends State<SignupPage> {
     setState(() {
       isValidId = isValidFormat && !isAdminBlocked;
       isCheckDupId = false;
-      idCheckMessage = input.isEmpty
-          ? null
-          : (!isValidFormat
-          ? '아이디 형식이 올바르지 않습니다.'
-          : (isAdminBlocked ? '사용할 수 없는 아이디입니다.' : null));
+      idCheckMessage =
+          input.isEmpty
+              ? null
+              : (!isValidFormat
+                  ? '아이디 형식이 올바르지 않습니다.'
+                  : (isAdminBlocked ? '사용할 수 없는 아이디입니다.' : null));
       idCheckColor = isValidFormat ? null : Colors.red;
     });
   }
 
   // 비밀번호 정규식
   void validatePw(String input) {
-    final regex = RegExp(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#%^&*])[A-Za-z\d!@#%^&*]{1,16}$');
+    final regex = RegExp(
+      r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#%^&*])[A-Za-z\d!@#%^&*]{1,16}$',
+    );
     final isValid = regex.hasMatch(input);
     final isAdminBlocked = input.toLowerCase() == 'admin'; // admin은 사용 불가
 
@@ -88,6 +90,7 @@ class _SignupPageState extends State<SignupPage> {
       isSamePw = _pwCheckController.text == input;
     });
   }
+
   // 비밀번호 확인 -> 비밀번호랑 비밀번호 확인이랑 동일하면 true
   void validatePwCheck(String input) {
     setState(() {
@@ -102,9 +105,8 @@ class _SignupPageState extends State<SignupPage> {
 
     setState(() {
       isValidEmail = isValid;
-      emailCheckMessage = input.isEmpty
-          ? null
-          : (isValid ? null : '이메일 형식이 올바르지 않습니다.');
+      emailCheckMessage =
+          input.isEmpty ? null : (isValid ? null : '이메일 형식이 올바르지 않습니다.');
       emailCheckColor = isValid ? null : Colors.red;
     });
 
@@ -133,7 +135,6 @@ class _SignupPageState extends State<SignupPage> {
         padding: EdgeInsets.all(screenWidth * 0.05),
         child: Column(
           children: [
-
             // 아이디 입력창
             SignupIdInput(
               idController: _idController, // 아이디 입력 컨트롤러
@@ -141,11 +142,9 @@ class _SignupPageState extends State<SignupPage> {
               idCheckMessage: idCheckMessage, // 메세지 출력
               idCheckColor: idCheckColor, // 메세지 색깔
               onChanged: validateId, // onChange 될 때마다 정규식 비교 진행
-
               // 서버쪽으로 입력값 전달 -> DB 비교 -> 사용 가능하면 true리턴, 아니면 false리턴
               // 그 리턴 값을 isAvailable에 넣기 -> isAvailable이 true나 false일 때 각각의 메시지 출력
               onCheckDupId: (id) async {
-
                 // 만약 값이 비어있으면 snakeBar 띄우고 return(서버 과부화 방지)
                 if (id.trim().isEmpty) {
                   if (context.mounted) {
@@ -160,9 +159,8 @@ class _SignupPageState extends State<SignupPage> {
                   final isAvailable = await checkDupId(id);
                   setState(() {
                     isCheckDupId = isAvailable;
-                    idCheckMessage = isAvailable
-                        ? '사용 가능한 아이디입니다.'
-                        : '이미 사용 중인 아이디입니다.';
+                    idCheckMessage =
+                        isAvailable ? '사용 가능한 아이디입니다.' : '이미 사용 중인 아이디입니다.';
                     idCheckColor = isAvailable ? Colors.green : Colors.red;
                   });
                   return isAvailable; // onCheckDupId가 bool 타입이라 리턴 필요
@@ -183,13 +181,13 @@ class _SignupPageState extends State<SignupPage> {
               pwController: _pwController, // 입력 컨트롤러
               isValidPw: isValidPw, // 정규식 체크
               onChanged: validatePw, // onChange 될 때마다 정규식 비교
-
               // 입력값이 있을 때만 메세지가 나오고 아니면 안 나오게
-              pwCheckMessage: _pwController.text.isNotEmpty
-                  ? (isValidPw
-                  ? '*사용 가능한 비밀번호입니다.'
-                  : '*영문+숫자+특수문자 조합, 16자이하여야 합니다.')
-                  : '',
+              pwCheckMessage:
+                  _pwController.text.isNotEmpty
+                      ? (isValidPw
+                          ? '*사용 가능한 비밀번호입니다.'
+                          : '*영문+숫자+특수문자 조합, 16자이하여야 합니다.')
+                      : '',
               pwCheckColor: isValidPw ? Colors.green : Colors.red,
             ),
 
@@ -200,11 +198,10 @@ class _SignupPageState extends State<SignupPage> {
               pwCheckController: _pwCheckController,
               isSamePw: isSamePw,
               onChanged: validatePwCheck,
-              pwCheckMessage: _pwCheckController.text.isNotEmpty
-                  ? (isSamePw
-                  ? '*비밀번호가 일치합니다.'
-                  : '*비밀번호가 일치하지 않습니다.')
-                  : '',
+              pwCheckMessage:
+                  _pwCheckController.text.isNotEmpty
+                      ? (isSamePw ? '*비밀번호가 일치합니다.' : '*비밀번호가 일치하지 않습니다.')
+                      : '',
               pwCheckColor: isSamePw ? Colors.green : Colors.red,
             ),
 
@@ -222,9 +219,10 @@ class _SignupPageState extends State<SignupPage> {
 
                 setState(() {
                   isValidNickname = isValid;
-                  nicknameCheckMessage = trimmed.isEmpty
-                      ? null
-                      : (isValid ? null : '닉네임 형식이 올바르지 않습니다.');
+                  nicknameCheckMessage =
+                      trimmed.isEmpty
+                          ? null
+                          : (isValid ? null : '닉네임 형식이 올바르지 않습니다.');
                   nicknameCheckColor = isValid ? null : Colors.red;
                 });
 
@@ -263,7 +261,7 @@ class _SignupPageState extends State<SignupPage> {
             ),
 
             SizedBox(height: screenHeight * 0.02),
-            
+
             // 프로필 사진 위치
             Column(
               children: [
@@ -283,7 +281,6 @@ class _SignupPageState extends State<SignupPage> {
               height: screenHeight * 0.07,
               child: OutlinedButton(
                 onPressed: () async {
-
                   final id = _idController.text.trim(); // 아이디
                   final pw = _pwController.text; // 비밀번호
                   final nickname = _nicknameController.text.trim(); // 닉네임
@@ -301,7 +298,7 @@ class _SignupPageState extends State<SignupPage> {
                     return;
                   }
 
-                  if(!isValidId) {
+                  if (!isValidId) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('해당 아이디는 사용 불가능합니다.'),
@@ -324,7 +321,7 @@ class _SignupPageState extends State<SignupPage> {
                     return;
                   }
 
-                  if(!isValidPw) {
+                  if (!isValidPw) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('해당 비밀번호는 사용 불가능합니다.'),
@@ -410,7 +407,7 @@ class _SignupPageState extends State<SignupPage> {
                   '회원가입',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: screenWidth*0.06,
+                    fontSize: screenWidth * 0.06,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

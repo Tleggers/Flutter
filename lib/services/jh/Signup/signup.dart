@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 
@@ -12,7 +11,6 @@ Future<bool> signUp({
   required String email,
   required File? profileImage,
 }) async {
-
   final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
   final url = Uri.parse('$baseUrl/signup/dosignup');
 

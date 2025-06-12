@@ -23,7 +23,18 @@ class _PostWritingState extends State<PostWriting> {
   bool _isSubmitting = false;
 
   // 데이터베이스의 5가지 산
-  final List<String> _mountainOptions = ['한라산', '지리산', '설악산', '북한산', '내장산'];
+  final List<String> _mountainOptions = [
+    '한라산',
+    '지리산',
+    '설악산',
+    '북한산',
+    '내장산',
+    '가리산',
+    '가리왕산',
+    '가야산',
+    '가지산',
+    '감악산',
+  ];
 
   @override
   void dispose() {
@@ -230,7 +241,6 @@ class _PostWritingState extends State<PostWriting> {
                 alignLabelWithHint: true,
               ),
               maxLines: 8,
-              keyboardType: TextInputType.multiline,
             ),
 
             const SizedBox(height: 20),

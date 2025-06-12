@@ -4,12 +4,17 @@ import 'package:flutter/services.dart';
 import 'package:trekkit_flutter/models/sh/mountain.dart';
 
 class CoordinateService {
-  static Map<String, List<double>> _coordinateMap = {};
+  static final Map<String, List<double>> _coordinateMap = {};
 
   /// CSV를 로드해서 map에 캐싱
   static Future<void> loadCoordinates() async {
-    final rawData = await rootBundle.loadString('assets/mountain_coordinates.csv');
-    List<List<dynamic>> csvTable = const CsvToListConverter().convert(rawData, eol: '\n');
+    final rawData = await rootBundle.loadString(
+      'assets/csv/mountain_coordinates.csv',
+    );
+    List<List<dynamic>> csvTable = const CsvToListConverter().convert(
+      rawData,
+      eol: '\n',
+    );
 
     for (var row in csvTable) {
       if (row.length >= 3) {
