@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:trekkit_flutter/functions/jh/userprovider.dart';
 import 'package:trekkit_flutter/services/jw/AuthService.dart';
 import 'package:trekkit_flutter/services/jw/PostService.dart';
 import 'package:trekkit_flutter/models/jw/Post.dart';
 import 'package:trekkit_flutter/pages/jh/Login_and_Signup/login.dart';
 import 'package:trekkit_flutter/pages/jw/PostWriting.dart';
 import 'package:trekkit_flutter/pages/jw/ViewDetail.dart';
+import 'package:trekkit_flutter/pages/jw/QnAPage.dart';
 
 class CommunityPage extends StatefulWidget {
   const CommunityPage({super.key});
@@ -13,17 +16,33 @@ class CommunityPage extends StatefulWidget {
   State<CommunityPage> createState() => _CommunityPageState();
 }
 
-class _CommunityPageState extends State<CommunityPage> {
+class _CommunityPageState extends State<CommunityPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     // 앱 시작 시 로그인 상태 확인
     AuthService().checkLoginStatus();
+
+    // 탭 변경 감지를 위한 리스너 추가
+    _tabController.addListener(() {
+      setState(() {}); // 탭이 변경될 때마다 UI 업데이트
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -31,20 +50,25 @@ class _CommunityPageState extends State<CommunityPage> {
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
         actions: [
-          if (AuthService().isLoggedIn)
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: Center(
-                child: Text(
-                  '${AuthService().nickname}님',
-                  style: const TextStyle(fontSize: 14),
-                ),
-              ),
+          if (userProvider.isLoggedIn)
+            const Padding(
+              padding: EdgeInsets.only(right: 16),
+              child: Center(child: Icon(Icons.person)),
             ),
         ],
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [Tab(text: '실시간'), Tab(text: 'Q&A')],
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
+          indicatorWeight: 3,
+        ),
       ),
-      body: Stack(
+      body: TabBarView(
+        controller: _tabController,
         children: [
+          // 실시간 탭 - 기존 커뮤니티 글 표시
           Padding(
             padding: EdgeInsets.all(screenWidth * 0.04),
             child: const Column(
@@ -56,13 +80,35 @@ class _CommunityPageState extends State<CommunityPage> {
               ],
             ),
           ),
-          Positioned(
-            bottom: 20,
-            right: 20,
-            child: FloatingActionButton(
-              onPressed: () async {
-                if (AuthService().isLoggedIn) {
-                  // 로그인 상태: 글쓰기 페이지로 이동
+          // Q&A 탭 - 기존 QnAPage 그대로 사용
+          const QnAPage(),
+        ],
+      ),
+      // 탭에 따라 다른 동작을 하는 FloatingActionButton
+      floatingActionButton:
+          _tabController.index == 0
+              ? FloatingActionButton(
+                onPressed: () async {
+                  final userProvider = Provider.of<UserProvider>(
+                    context,
+                    listen: false,
+                  );
+
+                  if (!userProvider.isLoggedIn) {
+                    // 비로그인 상태: 로그인 페이지로 이동
+                    final result = await Navigator.push<bool>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                    if (result == true) {
+                      setState(() {}); // 로그인 후 새로고침
+                    }
+                    return;
+                  }
+
+                  // 실시간 탭에서만 PostWriting으로 이동
                   final result = await Navigator.push<bool>(
                     context,
                     MaterialPageRoute(
@@ -72,27 +118,16 @@ class _CommunityPageState extends State<CommunityPage> {
                   if (result == true) {
                     setState(() {}); // 새로고침
                   }
-                } else {
-                  // 비로그인 상태: 로그인 페이지로 이동
-                  final result = await Navigator.push<bool>(
-                    context,
-                    MaterialPageRoute(builder: (context) => const LoginPage()),
-                  );
-                  if (result == true) {
-                    setState(() {}); // 로그인 후 새로고침
-                  }
-                }
-              },
-              backgroundColor: Colors.lightGreenAccent,
-              child: const Icon(Icons.add, size: 30, color: Colors.black),
-            ),
-          ),
-        ],
-      ),
+                },
+                backgroundColor: Colors.lightGreenAccent,
+                child: const Icon(Icons.add, size: 30, color: Colors.black),
+              )
+              : null, // Q&A 탭에서는 FloatingActionButton을 숨김
     );
   }
 }
 
+// 나머지 클래스들은 기존과 동일...
 class PostFilter extends StatefulWidget {
   const PostFilter({super.key});
 
@@ -104,8 +139,18 @@ class _PostFilterState extends State<PostFilter> {
   String _sortOption = '최신순';
   String? _selectedMountain;
 
-  // 데이터베이스의 5가지 산
-  final List<String> _mountainOptions = ['한라산', '지리산', '설악산', '북한산', '내장산'];
+  final List<String> _mountainOptions = [
+    '한라산',
+    '지리산',
+    '설악산',
+    '북한산',
+    '내장산',
+    '가리산',
+    '가리왕산',
+    '가야산',
+    '가지산',
+    '감악산',
+  ];
 
   final List<String> sortOptions = ['최신순', '인기순'];
 
@@ -191,6 +236,7 @@ class _PostFilterState extends State<PostFilter> {
   }
 }
 
+// PostList와 PostItem 클래스들도 기존과 동일하게 유지...
 class PostList extends StatefulWidget {
   const PostList({super.key});
 
@@ -200,17 +246,14 @@ class PostList extends StatefulWidget {
 
 class PostListState extends State<PostList> {
   static PostListState? instance;
-
   List<Post> _posts = [];
   bool _isLoading = false;
   bool _hasError = false;
   String _errorMessage = '';
-
   String _currentSort = '최신순';
   String? _currentMountain;
   int _currentPage = 0;
   int _totalCount = 0;
-
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -247,7 +290,6 @@ class PostListState extends State<PostList> {
 
   Future<void> _loadPosts() async {
     if (_isLoading) return;
-
     setState(() {
       _isLoading = true;
       _hasError = false;
@@ -343,7 +385,6 @@ class PostListState extends State<PostList> {
               ),
             );
           }
-
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: PostItem(
@@ -380,17 +421,10 @@ class _PostItemState extends State<PostItem> {
     }
 
     if (_isLikeLoading) return;
-
-    setState(() {
-      _isLikeLoading = true;
-    });
+    setState(() => _isLikeLoading = true);
 
     try {
-      final result = await PostService.toggleLike(
-        widget.post.id!,
-        AuthService().userId!,
-      );
-
+      await PostService.toggleLike(widget.post.id!, AuthService().userId!);
       widget.onUpdate?.call();
     } catch (e) {
       if (mounted) {
@@ -399,11 +433,7 @@ class _PostItemState extends State<PostItem> {
         ).showSnackBar(SnackBar(content: Text('좋아요 처리 실패: $e')));
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLikeLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLikeLoading = false);
     }
   }
 
@@ -416,14 +446,10 @@ class _PostItemState extends State<PostItem> {
     }
 
     if (_isBookmarkLoading) return;
-
-    setState(() {
-      _isBookmarkLoading = true;
-    });
+    setState(() => _isBookmarkLoading = true);
 
     try {
       await PostService.toggleBookmark(widget.post.id!, AuthService().userId!);
-
       widget.onUpdate?.call();
     } catch (e) {
       if (mounted) {
@@ -432,11 +458,7 @@ class _PostItemState extends State<PostItem> {
         ).showSnackBar(SnackBar(content: Text('북마크 처리 실패: $e')));
       }
     } finally {
-      if (mounted) {
-        setState(() {
-          _isBookmarkLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isBookmarkLoading = false);
     }
   }
 
@@ -517,10 +539,8 @@ class _PostItemState extends State<PostItem> {
                     ),
                 ],
               ),
-
               const SizedBox(height: 12),
-
-              // 제목 (있는 경우)
+              // 제목
               if (widget.post.title != null && widget.post.title!.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
@@ -532,16 +552,14 @@ class _PostItemState extends State<PostItem> {
                     ),
                   ),
                 ),
-
-              // 본문 내용
+              // 본문
               Text(
                 widget.post.content,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 14, height: 1.4),
               ),
-
-              // 이미지 (있는 경우)
+              // 이미지
               if (widget.post.imagePaths.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 12),
@@ -558,22 +576,16 @@ class _PostItemState extends State<PostItem> {
                         children: [
                           Icon(Icons.image, size: 40, color: Colors.grey),
                           SizedBox(height: 8),
-                          Text(
-                            '이미지 ${1}장',
-                            style: TextStyle(color: Colors.grey),
-                          ),
+                          Text('이미지 1장', style: TextStyle(color: Colors.grey)),
                         ],
                       ),
                     ),
                   ),
                 ),
-
               const SizedBox(height: 12),
-
               // 아이콘 영역
               Row(
                 children: [
-                  // 좋아요
                   InkWell(
                     onTap: _toggleLike,
                     borderRadius: BorderRadius.circular(20),
@@ -597,10 +609,7 @@ class _PostItemState extends State<PostItem> {
                       ),
                     ),
                   ),
-
                   const SizedBox(width: 16),
-
-                  // 댓글
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -609,10 +618,7 @@ class _PostItemState extends State<PostItem> {
                       Text('${widget.post.commentCount}'),
                     ],
                   ),
-
                   const SizedBox(width: 16),
-
-                  // 조회수
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -621,10 +627,7 @@ class _PostItemState extends State<PostItem> {
                       Text('${widget.post.viewCount}'),
                     ],
                   ),
-
                   const Spacer(),
-
-                  // 북마크
                   InkWell(
                     onTap: _toggleBookmark,
                     borderRadius: BorderRadius.circular(20),
