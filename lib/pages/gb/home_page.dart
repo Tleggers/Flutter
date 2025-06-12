@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:trekkit_flutter/functions/jh/userprovider.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_home_widget.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
+import 'package:trekkit_flutter/pages/gb/suggest/suggest_home_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
 
-    // ✅ 로그인한 경우에만 userId 설정
+    // ✅ 로그인한 경우에만 userId 설정 0609
     final userProvider = context.read<UserProvider>();
     final stepProvider = context.read<StepProvider>();
 
@@ -60,8 +61,11 @@ class _HomePageState extends State<HomePage> {
                 Expanded(
                   child: Container(
                     height: screenHeight * 0.32,
-                    color: Colors.blue[100],
-                    child: const Center(child: Text('추천 코스')),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[100], // 배경 색
+                      borderRadius: BorderRadius.circular(16), // 테두리 둥글게
+                    ),
+                    child: const SuggestHomeWidget(), // 추천 코스 영역 추가
                   ),
                 ),
               ],
