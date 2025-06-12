@@ -27,7 +27,7 @@ class MountainDetailPage extends StatelessWidget {
             ),
             Text('${mountain.height}m', style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 16),
-            Text(mountain.description),
+            Text(mountain.overview),
           ],
         ),
       ),

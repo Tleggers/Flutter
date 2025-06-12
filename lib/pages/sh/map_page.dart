@@ -6,6 +6,7 @@ import 'package:trekkit_flutter/services/sh/location_service.dart';
 import 'package:trekkit_flutter/functions/sh/distance_util.dart';
 import 'package:trekkit_flutter/widgets/sh/mountain_card.dart';
 import 'package:trekkit_flutter/widgets/sh/sliding_panel.dart';
+import 'package:trekkit_flutter/services/sh/mountain_service.dart';
 import 'package:geolocator/geolocator.dart';
 
 class MapPage extends StatefulWidget {
@@ -31,8 +32,14 @@ class _MapPageState extends State<MapPage> {
   Future<void> loadNearbyMountains() async {
     try {
       print('📡 전체 산 데이터를 불러오는 중...');
-      List<Mountain> allMountains = await MountainApi.fetchMountains();
+      // List<Mountain> allMountains = await MountainApi.fetchMountains();
+      final allMountains = await MountainService.fetchTop100WithFullInfo();
       print('📋 전체 산 개수: ${allMountains.length}');
+
+      for (final mountain in allMountains.take(10)) {
+        print('📌 ${mountain.name} → lat: ${mountain.latitude}, lng: ${mountain.longitude}');
+      }
+
 
       if (allMountains.isNotEmpty) {
         final sample = allMountains.first;
@@ -43,6 +50,7 @@ class _MapPageState extends State<MapPage> {
 
       print('📍 현재 위치 불러오는 중...');
       Position? current = await LocationService.determinePosition();
+      print('✅ 위치 결과: $current');
       // Position current = await LocationService.getCurrentPosition();
       if (current == null) {
         print('⚠️ 현재 위치를 가져오지 못했습니다.');

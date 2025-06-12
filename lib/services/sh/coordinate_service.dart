@@ -8,7 +8,7 @@ class CoordinateService {
 
   /// CSV를 로드해서 map에 캐싱
   static Future<void> loadCoordinates() async {
-    final rawData = await rootBundle.loadString('assets/mountain_coordinates.csv');
+    final rawData = await rootBundle.loadString('assets/csv/mountain_coordinates.csv');
     List<List<dynamic>> csvTable = const CsvToListConverter().convert(rawData, eol: '\n');
 
     for (var row in csvTable) {

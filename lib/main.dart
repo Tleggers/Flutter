@@ -15,6 +15,8 @@ import 'functions/jh/userprovider.dart';
 // 네이버 맵 SDK 임포트 추가
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 
+import 'package:trekkit_flutter/services/sh/mountain_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -63,6 +65,15 @@ void main() async {
       print("네이버맵 인증오류 : $ex");
     },
   );
+
+  //20250612 추가
+  //100대 명산 정보 호출
+  final mountains = await MountainService.fetchTop100WithFullInfo();
+    for (var m in mountains) {
+      print('📌 ${m.name} → ${m.latitude}, ${m.longitude}');
+    }
+
+
   runApp(
     MultiProvider(
       providers: [

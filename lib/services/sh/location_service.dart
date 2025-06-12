@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 
 class LocationService {
   static Future<Position?> determinePosition() async {
+    print('🚀 위치 요청 시작됨');
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {

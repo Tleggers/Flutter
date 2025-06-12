@@ -10,7 +10,7 @@ class ImageLoader {
         await rootBundle.load(path); // 존재 확인
         images.add(path);
       } catch (e) {
-        break; // 이미지 없으면 반복 종료
+        break; // 이미지 없으면 종료
       }
     }
     return images;
