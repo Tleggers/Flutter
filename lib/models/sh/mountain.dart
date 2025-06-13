@@ -29,3 +29,30 @@ class Mountain {
     longitude = lng;
   }
 }
+
+
+//트레킹 센터 키 목록
+// {
+//   "header": {
+//     "resultCode": "string",
+//     "resultMsg": "string"
+//   },
+//   "body": {
+//     "items": {
+//       "item": {
+//         "frtrlId": "string",
+//         "frtrlNm": "string",
+//         "mtnCd": "string",
+//         "ctpvNm": "string",
+//         "addrNm": "string",
+//         "lat": 0,
+//         "lot": 0,
+//         "aslAltide": 0,
+//         "crtrDt": "string"
+//       }
+//     },
+//     "pageNo": 0,
+//     "numOfRows": 0,
+//     "totalCount": 0
+//   }
+// }

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:trekkit_flutter/api/mountain_api.dart';
 import 'package:trekkit_flutter/models/sh/mountain.dart';
-import 'package:trekkit_flutter/services/sh/coordinate_service.dart';
 import 'package:trekkit_flutter/services/sh/location_service.dart';
 import 'package:trekkit_flutter/functions/sh/distance_util.dart';
 import 'package:trekkit_flutter/widgets/sh/mountain_card.dart';
 import 'package:trekkit_flutter/widgets/sh/sliding_panel.dart';
 import 'package:trekkit_flutter/services/sh/mountain_service.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:trekkit_flutter/services/sh/image_loader.dart';
+import 'package:trekkit_flutter/views/sh/mountain_collage_view.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -27,7 +28,6 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> initializeData() async {
-    await CoordinateService.loadCoordinates(); // CSV 먼저 로드
     await loadNearbyMountains(); // 산 정보 불러오기
   }
 
@@ -73,10 +73,10 @@ class _MapPageState extends State<MapPage> {
               mountain.latitude,
               mountain.longitude,
             );
-            return distance < 500.0; // 해당 반경 이내
+            return distance < 100.0; // 해당 반경 이내
           }).toList();
 
-      print('🎯 필터링된 산 개수 (500km 이내): ${filtered.length}');
+      print('🎯 필터링된 산 개수 (100km 이내): ${filtered.length}');
 
       setState(() {
         nearbyMountains = filtered;
@@ -93,30 +93,50 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("근처 산")),
-      body:
-          isLoading
-              ? Center(child: CircularProgressIndicator())
-              : nearbyMountains.isEmpty
-              ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text('근처 산이 없습니다 🏔️'),
-                    SizedBox(height: 12),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          isLoading = true;
-                        });
-                        loadNearbyMountains(); // 다시 불러오기
-                      },
-                      child: Text('다시 시도'),
-                    ),
-                  ],
-                ),
-              )
-              : SlidingPanel(mountains: nearbyMountains),
+      body: Stack(
+        children: [
+          Container(color: Colors.blue.shade100), // 임시 지도 대체용
+          if (isLoading)
+            const Center(child: CircularProgressIndicator())
+          else if (nearbyMountains.isEmpty)
+            const Center(child: Text("근처 산이 없습니다."))
+          // else
+            // SlidingPanel(
+            //   child: MountainCollageView(mountains: nearbyMountains),
+            // ),
+        ],
+      ),
     );
   }
 }
+
+//       body: isLoading
+//   ? Center(child: CircularProgressIndicator())
+//   : nearbyMountains.isEmpty
+//     ? Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Text('근처 산이 없습니다 🏔️'),
+//             SizedBox(height: 12),
+//             ElevatedButton(
+//               onPressed: () {
+//                 setState(() {
+//                   isLoading = true;
+//                 });
+//                 loadNearbyMountains(); // 다시 불러오기
+//               },
+//               child: Text('다시 시도'),
+//             ),
+//           ],
+//         ),
+//       )
+//     : ListView.builder(
+//         itemCount: nearbyMountains.length,
+//         itemBuilder: (context, index) {
+//           return MountainCollageTile(mountain: nearbyMountains[index]);
+//         },
+//       ),
+//     );
+//   }
+// }
