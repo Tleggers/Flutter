@@ -198,16 +198,30 @@ class QnaService {
   }
 
   // 질문 좋아요 토글
+  // 질문 좋아요 토글
   static Future<bool> toggleQuestionLike(int questionId, String userId) async {
     try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/questions/$questionId/like?userId=$userId'),
+      // 요청 정보 로깅
+      final url = Uri.parse(
+        '$baseUrl/questions/$questionId/like?userId=$userId',
       );
+      print('=== 좋아요 요청 정보 ===');
+      print('URL: $url');
+      print('Method: POST');
+      print('==================');
+
+      final response = await http.post(url);
+
+      // 응답 정보 로깅
+      print('=== 좋아요 응답 정보 ===');
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+      print('==================');
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        final data = json.decode(utf8.decode(response.bodyBytes));
         if (data['success'] == true) {
-          return data['isLiked'];
+          return data['isLiked'] ?? false;
         } else {
           throw Exception(data['message'] ?? '좋아요 처리에 실패했습니다');
         }
@@ -215,6 +229,7 @@ class QnaService {
         throw Exception('좋아요 처리에 실패했습니다: ${response.statusCode}');
       }
     } catch (e) {
+      print('좋아요 처리 중 오류 발생: $e');
       throw Exception('네트워크 오류: $e');
     }
   }
