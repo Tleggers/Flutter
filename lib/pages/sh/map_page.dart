@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trekkit_flutter/api/mountain_api.dart';
 import 'package:trekkit_flutter/models/sh/mountain.dart';
-import 'package:trekkit_flutter/services/sh/coordinate_service.dart';
 import 'package:trekkit_flutter/services/sh/location_service.dart';
 import 'package:trekkit_flutter/functions/sh/distance_util.dart';
 import 'package:trekkit_flutter/widgets/sh/mountain_card.dart';
@@ -23,11 +22,10 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    initializeData();
   }
 
   Future<void> initializeData() async {
-    await CoordinateService.loadCoordinates(); // CSV 먼저 로드
+    // await CoordinateService.loadCoordinates(); // CSV 먼저 로드
     await loadNearbyMountains(); // 산 정보 불러오기
   }
 
