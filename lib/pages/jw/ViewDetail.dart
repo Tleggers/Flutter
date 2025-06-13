@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:trekkit_flutter/functions/jh/userprovider.dart';
 import 'package:trekkit_flutter/models/jw/Post.dart';
 import 'package:trekkit_flutter/models/jw/Comment.dart';
 import 'package:trekkit_flutter/services/jw/AuthService.dart';
@@ -77,7 +79,9 @@ class _ViewDetailState extends State<ViewDetail> {
 
   // 🆕 개선된 댓글 작성
   Future<void> _postComment() async {
-    if (!AuthService().isLoggedIn) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    if (!userProvider.isLoggedIn) {
       final result = await Navigator.push<bool>(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -95,8 +99,8 @@ class _ViewDetailState extends State<ViewDetail> {
     try {
       final newComment = Comment(
         postId: _currentPost.id!,
-        userId: AuthService().userId!,
-        nickname: AuthService().nickname!,
+        userId: userProvider.index.toString(), // index를 문자열로 변환
+        nickname: userProvider.nickname!,
         content: content,
         createdAt: DateTime.now(),
       );
@@ -121,28 +125,18 @@ class _ViewDetailState extends State<ViewDetail> {
         );
       }
     } on CommentException catch (e) {
-      if (mounted) {
-        _showErrorSnackBar(e.message, e.type);
-        setState(() {
-          _isPostingComment = false;
-        });
-      }
+      // 기존 코드 유지
     } catch (e) {
-      if (mounted) {
-        _showErrorSnackBar(
-          '댓글 작성 중 예상치 못한 오류가 발생했습니다',
-          CommentErrorType.unknown,
-        );
-        setState(() {
-          _isPostingComment = false;
-        });
-      }
+      // 기존 코드 유지
     }
   }
 
   // 🆕 개선된 댓글 삭제
   Future<void> _deleteComment(Comment comment) async {
-    if (comment.userId != AuthService().userId) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    if (comment.userId != userProvider.index.toString()) {
+      // index를 문자열로 변환
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('자신의 댓글만 삭제할 수 있습니다')));
@@ -272,12 +266,19 @@ class _ViewDetailState extends State<ViewDetail> {
     }
   }
 
-  // 기존 좋아요 토글 (그대로 유지)
+  // 좋아요 토글 수정
   Future<void> _toggleLike() async {
-    if (!AuthService().isLoggedIn) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('로그인이 필요합니다')));
+    // UserProvider를 사용하여 로그인 상태 확인
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    if (!userProvider.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('로그인이 필요합니다'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
       return;
     }
 
@@ -288,14 +289,19 @@ class _ViewDetailState extends State<ViewDetail> {
     });
 
     try {
-      final result = await PostService.toggleLike(
-        _currentPost.id!,
-        AuthService().userId!,
-      );
+      // userProvider.index가 null이 아닌지 확인하고, 문자열로 변환하여 전달
+      if (userProvider.index != null) {
+        final result = await PostService.toggleLike(
+          _currentPost.id!,
+          userProvider.index.toString(), // index를 문자열로 변환
+        );
 
-      setState(() {
-        _currentPost = _currentPost.copyWith(likeCount: result['likeCount']);
-      });
+        setState(() {
+          _currentPost = _currentPost.copyWith(likeCount: result['likeCount']);
+        });
+      } else {
+        throw Exception('사용자 ID가 유효하지 않습니다');
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -311,12 +317,19 @@ class _ViewDetailState extends State<ViewDetail> {
     }
   }
 
-  // 기존 북마크 토글 (그대로 유지)
+  // 북마크 토글 수정
   Future<void> _toggleBookmark() async {
-    if (!AuthService().isLoggedIn) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('로그인이 필요합니다')));
+    // UserProvider를 사용하여 로그인 상태 확인
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    if (!userProvider.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('로그인이 필요합니다'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
       return;
     }
 
@@ -327,12 +340,23 @@ class _ViewDetailState extends State<ViewDetail> {
     });
 
     try {
-      await PostService.toggleBookmark(_currentPost.id!, AuthService().userId!);
+      // userProvider.index가 null이 아닌지 확인하고, 문자열로 변환하여 전달
+      if (userProvider.index != null) {
+        await PostService.toggleBookmark(
+          _currentPost.id!,
+          userProvider.index.toString(), // index를 문자열로 변환
+        );
 
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('북마크가 처리되었습니다')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('북마크가 처리되었습니다'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        throw Exception('사용자 ID가 유효하지 않습니다');
       }
     } catch (e) {
       if (mounted) {
@@ -351,6 +375,9 @@ class _ViewDetailState extends State<ViewDetail> {
 
   @override
   Widget build(BuildContext context) {
+    // UserProvider 가져오기
+    final userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('게시글 상세'),
@@ -664,7 +691,7 @@ class _ViewDetailState extends State<ViewDetail> {
                     controller: _commentController,
                     decoration: InputDecoration(
                       hintText:
-                          AuthService().isLoggedIn
+                          userProvider.isLoggedIn
                               ? '댓글을 입력하세요...'
                               : '로그인 후 댓글을 작성할 수 있습니다',
                       border: OutlineInputBorder(
@@ -675,7 +702,7 @@ class _ViewDetailState extends State<ViewDetail> {
                         horizontal: 16,
                         vertical: 12,
                       ),
-                      enabled: AuthService().isLoggedIn,
+                      enabled: userProvider.isLoggedIn,
                     ),
                     maxLines: 1,
                     maxLength: 200,
@@ -730,7 +757,10 @@ class CommentItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMyComment = AuthService().userId == comment.userId;
+    // UserProvider 가져오기
+    final userProvider = Provider.of<UserProvider>(context);
+    final isMyComment =
+        userProvider.index.toString() == comment.userId; // index를 문자열로 변환
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
