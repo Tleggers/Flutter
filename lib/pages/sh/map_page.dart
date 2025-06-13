@@ -25,7 +25,6 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> initializeData() async {
-    // await CoordinateService.loadCoordinates(); // CSV 먼저 로드
     await loadNearbyMountains(); // 산 정보 불러오기
   }
 

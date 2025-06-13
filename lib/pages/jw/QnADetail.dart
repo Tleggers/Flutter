@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:trekkit_flutter/functions/jh/userprovider.dart';
-import 'package:trekkit_flutter/services/jw/AuthService.dart';
 import 'package:trekkit_flutter/services/jw/QnaService.dart';
 import 'package:trekkit_flutter/models/jw/QnaQuestion.dart';
 import 'package:trekkit_flutter/pages/jh/Login_and_Signup/login.dart';
@@ -20,6 +19,8 @@ class _QnADetailState extends State<QnADetail> {
   bool _isLoading = false;
   bool _hasError = false;
   String _errorMessage = '';
+  bool _isLikeLoading = false;
+  late QnaQuestion _currentQuestion; // late 키워드 유지
 
   final TextEditingController _answerController = TextEditingController();
   bool _isSubmitting = false;
@@ -27,6 +28,7 @@ class _QnADetailState extends State<QnADetail> {
   @override
   void initState() {
     super.initState();
+    _currentQuestion = widget.question; // initState에서 반드시 초기화
     _loadAnswers();
   }
 
@@ -44,7 +46,7 @@ class _QnADetailState extends State<QnADetail> {
 
     try {
       final answers = await QnaService.getAnswersByQuestionId(
-        widget.question.id,
+        _currentQuestion.id,
       );
       setState(() {
         _answers = answers;
@@ -59,7 +61,117 @@ class _QnADetailState extends State<QnADetail> {
     }
   }
 
+  // 좋아요 토글 기능 추가
+  Future<void> _toggleLike() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    // 로그인 상태 확인 (Provider 사용)
+    if (!userProvider.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('로그인이 필요합니다'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      // 로그인 페이지로 이동
+      final result = await Navigator.push<bool>(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+
+      if (result != true) return;
+    }
+
+    if (_isLikeLoading) return;
+
+    setState(() {
+      _isLikeLoading = true;
+    });
+
+    try {
+      // userProvider.index가 null이 아닌지 확인
+      if (userProvider.index != null) {
+        // 반환값이 bool인 경우 처리
+        final isLiked = await QnaService.toggleQuestionLike(
+          _currentQuestion.id,
+          userProvider.index.toString(), // userId 대신 index 사용
+        );
+
+        // 좋아요 수 직접 계산
+        final newLikeCount =
+            isLiked
+                ? _currentQuestion.likeCount + 1
+                : _currentQuestion.likeCount - 1;
+
+        setState(() {
+          _currentQuestion = _currentQuestion.copyWith(likeCount: newLikeCount);
+          _isLikeLoading = false;
+        });
+      } else {
+        throw Exception('사용자 ID가 유효하지 않습니다');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('좋아요 처리 실패: $e')));
+      }
+      setState(() {
+        _isLikeLoading = false;
+      });
+    }
+  }
+
+  // 답변 좋아요 토글 기능 추가
+  Future<void> _toggleAnswerLike(QnaAnswer answer, int index) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    // 로그인 상태 확인 (Provider 사용)
+    if (!userProvider.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('로그인이 필요합니다'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    try {
+      // userProvider.index가 null이 아닌지 확인
+      if (userProvider.index != null) {
+        // 반환값이 bool인 경우 처리
+        final isLiked = await QnaService.toggleAnswerLike(
+          answer.id,
+          userProvider.index.toString(), // index를 문자열로 변환
+        );
+
+        // 좋아요 수 직접 계산
+        final newLikeCount =
+            isLiked ? answer.likeCount + 1 : answer.likeCount - 1;
+
+        setState(() {
+          _answers[index] = _answers[index].copyWith(likeCount: newLikeCount);
+        });
+      } else {
+        throw Exception('사용자 ID가 유효하지 않습니다');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('좋아요 처리 실패: $e')));
+      }
+    }
+  }
+
   Future<void> _submitAnswer() async {
+    // UserProvider를 통해 로그인 상태 확인
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     if (_answerController.text.trim().isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -67,8 +179,9 @@ class _QnADetailState extends State<QnADetail> {
       return;
     }
 
-    if (!AuthService().isLoggedIn) {
-      final result = await Navigator.push(
+    // 로그인 상태 확인 (Provider 사용)
+    if (!userProvider.isLoggedIn) {
+      final result = await Navigator.push<bool>(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
       );
@@ -80,11 +193,11 @@ class _QnADetailState extends State<QnADetail> {
     });
 
     try {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      // userProvider에서 정보 가져오기
       final answer = QnaAnswer(
         id: 0,
-        questionId: widget.question.id,
-        userId: AuthService().userId!,
+        questionId: _currentQuestion.id,
+        userId: userProvider.index.toString(), // AuthService 대신 userProvider 사용
         nickname: userProvider.nickname ?? '익명',
         content: _answerController.text.trim(),
         imagePaths: [],
@@ -93,7 +206,7 @@ class _QnADetailState extends State<QnADetail> {
         createdAt: DateTime.now(),
       );
 
-      await QnaService.createAnswer(answer, userProvider.token!);
+      await QnaService.createAnswer(answer, userProvider.token ?? '');
       _answerController.clear();
       await _loadAnswers();
 
@@ -113,6 +226,9 @@ class _QnADetailState extends State<QnADetail> {
 
   @override
   Widget build(BuildContext context) {
+    // UserProvider 가져오기
+    final userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Q&A'),
@@ -144,7 +260,7 @@ class _QnADetailState extends State<QnADetail> {
           ),
 
           // 답변 입력 영역
-          _buildAnswerInput(),
+          _buildAnswerInput(userProvider),
         ],
       ),
     );
@@ -164,8 +280,8 @@ class _QnADetailState extends State<QnADetail> {
                   radius: 20,
                   backgroundColor: Colors.green[100],
                   child: Text(
-                    widget.question.nickname.isNotEmpty
-                        ? widget.question.nickname[0].toUpperCase()
+                    _currentQuestion.nickname.isNotEmpty
+                        ? _currentQuestion.nickname[0].toUpperCase()
                         : 'U',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
@@ -179,14 +295,14 @@ class _QnADetailState extends State<QnADetail> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.question.nickname,
+                        _currentQuestion.nickname,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                         ),
                       ),
                       Text(
-                        '${widget.question.createdAt.year}-${widget.question.createdAt.month.toString().padLeft(2, '0')}-${widget.question.createdAt.day.toString().padLeft(2, '0')}',
+                        '${_currentQuestion.createdAt.year}-${_currentQuestion.createdAt.month.toString().padLeft(2, '0')}-${_currentQuestion.createdAt.day.toString().padLeft(2, '0')}',
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
@@ -195,7 +311,7 @@ class _QnADetailState extends State<QnADetail> {
                     ],
                   ),
                 ),
-                if (widget.question.mountain.isNotEmpty)
+                if (_currentQuestion.mountain.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -206,7 +322,7 @@ class _QnADetailState extends State<QnADetail> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      widget.question.mountain,
+                      _currentQuestion.mountain,
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.green[700],
@@ -226,7 +342,7 @@ class _QnADetailState extends State<QnADetail> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    widget.question.title,
+                    _currentQuestion.title,
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -249,7 +365,7 @@ class _QnADetailState extends State<QnADetail> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              widget.question.content,
+              _currentQuestion.content,
               style: const TextStyle(fontSize: 16, height: 1.5),
             ),
 
@@ -265,7 +381,7 @@ class _QnADetailState extends State<QnADetail> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '${widget.question.viewCount}',
+                  '${_currentQuestion.viewCount}',
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
 
@@ -274,16 +390,14 @@ class _QnADetailState extends State<QnADetail> {
                 Icon(Icons.favorite_border, size: 16, color: Colors.grey[600]),
                 const SizedBox(width: 4),
                 Text(
-                  '${widget.question.likeCount}',
+                  '${_currentQuestion.likeCount}',
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
 
                 const Spacer(),
 
                 InkWell(
-                  onTap: () {
-                    // 좋아요 기능 구현
-                  },
+                  onTap: _toggleLike, // 좋아요 기능 연결
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -296,11 +410,20 @@ class _QnADetailState extends State<QnADetail> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.favorite_border,
-                          size: 16,
-                          color: Colors.grey[600],
-                        ),
+                        _isLikeLoading
+                            ? SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.grey[600],
+                              ),
+                            )
+                            : Icon(
+                              Icons.favorite_border,
+                              size: 16,
+                              color: Colors.grey[600],
+                            ),
                         const SizedBox(width: 4),
                         Text(
                           '좋아요',
@@ -362,14 +485,14 @@ class _QnADetailState extends State<QnADetail> {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: _answers.length,
             itemBuilder: (context, index) {
-              return _buildAnswerItem(_answers[index]);
+              return _buildAnswerItem(_answers[index], index);
             },
           ),
       ],
     );
   }
 
-  Widget _buildAnswerItem(QnaAnswer answer) {
+  Widget _buildAnswerItem(QnaAnswer answer, int index) {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
@@ -424,9 +547,7 @@ class _QnADetailState extends State<QnADetail> {
             Row(
               children: [
                 InkWell(
-                  onTap: () {
-                    // 답변 좋아요 기능 구현
-                  },
+                  onTap: () => _toggleAnswerLike(answer, index), // 답변 좋아요 기능 연결
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -454,7 +575,7 @@ class _QnADetailState extends State<QnADetail> {
     );
   }
 
-  Widget _buildAnswerInput() {
+  Widget _buildAnswerInput(UserProvider userProvider) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -466,21 +587,27 @@ class _QnADetailState extends State<QnADetail> {
           Expanded(
             child: TextField(
               controller: _answerController,
-              decoration: const InputDecoration(
-                hintText: '로그인 후 사용할 수 있어요',
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(
+              decoration: InputDecoration(
+                hintText:
+                    userProvider.isLoggedIn
+                        ? '답변을 입력하세요...'
+                        : '로그인 후 사용할 수 있어요',
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 8,
                 ),
               ),
               maxLines: null,
-              enabled: AuthService().isLoggedIn,
+              enabled: userProvider.isLoggedIn, // Provider를 통한 로그인 상태 확인
             ),
           ),
           const SizedBox(width: 8),
           ElevatedButton(
-            onPressed: _isSubmitting ? null : _submitAnswer,
+            onPressed:
+                userProvider.isLoggedIn && !_isSubmitting
+                    ? _submitAnswer
+                    : null, // 로그인 상태에 따라 버튼 활성화
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               foregroundColor: Colors.white,
@@ -499,6 +626,66 @@ class _QnADetailState extends State<QnADetail> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// QnaAnswer 클래스에 copyWith 메서드 추가 필요
+extension QnaAnswerExtension on QnaAnswer {
+  QnaAnswer copyWith({
+    int? id,
+    int? questionId,
+    String? userId,
+    String? nickname,
+    String? content,
+    List<String>? imagePaths,
+    int? likeCount,
+    bool? isAccepted,
+    DateTime? createdAt,
+  }) {
+    return QnaAnswer(
+      id: id ?? this.id,
+      questionId: questionId ?? this.questionId,
+      userId: userId ?? this.userId,
+      nickname: nickname ?? this.nickname,
+      content: content ?? this.content,
+      imagePaths: imagePaths ?? this.imagePaths,
+      likeCount: likeCount ?? this.likeCount,
+      isAccepted: isAccepted ?? this.isAccepted,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+}
+
+// QnaQuestion 클래스에 copyWith 메서드 수정
+extension QnaQuestionExtension on QnaQuestion {
+  QnaQuestion copyWith({
+    int? id,
+    String? userId,
+    String? nickname,
+    String? title,
+    String? content,
+    String? mountain,
+    List<String>? imagePaths,
+    int? viewCount,
+    int? likeCount,
+    int? answerCount,
+    bool? isSolved, // isResolved에서 isSolved로 변경
+    DateTime? createdAt,
+  }) {
+    return QnaQuestion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      nickname: nickname ?? this.nickname,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      mountain: mountain ?? this.mountain,
+      imagePaths: imagePaths ?? this.imagePaths,
+      viewCount: viewCount ?? this.viewCount,
+      likeCount: likeCount ?? this.likeCount,
+      answerCount: answerCount ?? this.answerCount,
+      isSolved: isSolved ?? this.isSolved, // isResolved에서 isSolved로 변경
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 }

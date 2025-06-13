@@ -90,7 +90,7 @@ class _MyPageHeaderState extends State<MyPageHeader> {
                   Text(
                     isLoggedIn
                         ? '트레킷과 함께 즐거운 산행 되세요!'
-                        : 'TrekKit과 함께 한 걸음 더 가까이!',
+                        : 'TrekKit에 한 걸음 더 가까이!',
                     style: TextStyle(
                       fontSize: widget.screenWidth * 0.035,
                       color: Colors.grey,
