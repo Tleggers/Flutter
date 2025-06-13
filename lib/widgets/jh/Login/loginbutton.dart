@@ -30,7 +30,7 @@ class LoginButtonSection extends StatelessWidget {
         // 일반 로그인 버튼
         SizedBox(
           width: double.infinity,
-          height: screenHeight * 0.07,
+          height: screenHeight * 0.06,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black,
@@ -42,9 +42,9 @@ class LoginButtonSection extends StatelessWidget {
               loginHandler(context: context, id: id, pw: pw);
             },
             child: Text(
-              '로그인',
+              'TrekKit 로그인',
               style: TextStyle(
-                fontSize: screenWidth * 0.07,
+                fontSize: screenWidth * 0.045,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -84,7 +84,7 @@ class LoginButtonSection extends StatelessWidget {
         // 카카오 로그인 버튼
         SizedBox(
           width: double.infinity,
-          height: screenHeight * 0.07,
+          height: screenHeight * 0.06,
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFFEE500), // 카카오 노란색
@@ -94,9 +94,9 @@ class LoginButtonSection extends StatelessWidget {
               await loginWithKakao(context);
             },
             label: Text(
-              'KAKAO로 로그인',
+              'KAKAO 로그인',
               style: TextStyle(
-                fontSize: screenWidth * 0.065,
+                fontSize: screenWidth * 0.045,
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),
@@ -110,7 +110,7 @@ class LoginButtonSection extends StatelessWidget {
         // 구글 로그인 버튼
         SizedBox(
           width: double.infinity,
-          height: screenHeight * 0.07,
+          height: screenHeight * 0.06,
           child: ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white,
@@ -124,10 +124,10 @@ class LoginButtonSection extends StatelessWidget {
               await loginWithGoogle(context);
             },
             label: Text(
-              'GOOGLE로 로그인',
+              'GOOGLE 로그인',
               style: TextStyle(
-                fontSize: screenWidth * 0.065,
-                color: Colors.black87,
+                fontSize: screenWidth * 0.045,
+                color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),
             ),
