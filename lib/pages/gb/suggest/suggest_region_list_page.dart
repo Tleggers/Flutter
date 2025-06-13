@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:trekkit_flutter/api/suggest_mountain_api.dart';
 import 'package:trekkit_flutter/api/suggest_mountain_image_api.dart';
 import 'package:trekkit_flutter/models/gb/suggest_mountain.dart';
-import 'package:trekkit_flutter/pages/gb/mountain_detail_page.dart';
+import 'package:trekkit_flutter/pages/gb/detail/mountain_detail_page.dart';
 
 // ✅ 지역 리스트 페이지
 class RegionListPage extends StatefulWidget {
@@ -108,6 +108,7 @@ class _RegionListPageState extends State<RegionListPage>
                 }),
                 builder: (context, snapshot) {
                   Widget leadingWidget;
+                  final imageUrl = snapshot.data; // ✅ 이렇게 받아놓고
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     leadingWidget = Container(
@@ -160,6 +161,7 @@ class _RegionListPageState extends State<RegionListPage>
                           builder:
                               (context) => MountainDetailPage(
                                 mountainName: mountain.name,
+                                imageUrl: imageUrl,
                               ),
                         ),
                       );

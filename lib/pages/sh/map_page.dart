@@ -24,7 +24,6 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    initializeData();
   }
 
   Future<void> initializeData() async {
