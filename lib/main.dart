@@ -7,8 +7,6 @@ import 'package:trekkit_flutter/pages/gb/suggest/suggest_region_selection_page.d
 import 'package:trekkit_flutter/pages/mainpage.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_detail_page.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
-import 'package:trekkit_flutter/pages/sh/map_page.dart';
-import 'package:trekkit_flutter/pages/gb/suggest/suggest_region_list_page.dart';
 
 import 'functions/jh/userprovider.dart';
 
@@ -69,10 +67,9 @@ void main() async {
   //20250612 추가
   //100대 명산 정보 호출
   final mountains = await MountainService.fetchTop100WithFullInfo();
-    for (var m in mountains) {
-      print('📌 ${m.name} → ${m.latitude}, ${m.longitude}');
-    }
-
+  for (var m in mountains) {
+    print('📌 ${m.name} → ${m.latitude}, ${m.longitude}');
+  }
 
   runApp(
     MultiProvider(

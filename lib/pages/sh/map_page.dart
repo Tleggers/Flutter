@@ -10,6 +10,8 @@ import 'package:trekkit_flutter/services/sh/mountain_service.dart';
 import 'package:geolocator/geolocator.dart';
 
 class MapPage extends StatefulWidget {
+  const MapPage({super.key});
+
   @override
   State<MapPage> createState() => _MapPageState();
 }
@@ -37,9 +39,10 @@ class _MapPageState extends State<MapPage> {
       print('📋 전체 산 개수: ${allMountains.length}');
 
       for (final mountain in allMountains.take(10)) {
-        print('📌 ${mountain.name} → lat: ${mountain.latitude}, lng: ${mountain.longitude}');
+        print(
+          '📌 ${mountain.name} → lat: ${mountain.latitude}, lng: ${mountain.longitude}',
+        );
       }
-
 
       if (allMountains.isNotEmpty) {
         final sample = allMountains.first;
@@ -64,9 +67,6 @@ class _MapPageState extends State<MapPage> {
 
       List<Mountain> filtered =
           allMountains.where((mountain) {
-            if (mountain.latitude == null || mountain.longitude == null)
-              return false;
-
             double distance = DistanceUtil.calculateDistance(
               current.latitude,
               current.longitude,

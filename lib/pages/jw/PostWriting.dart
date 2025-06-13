@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:trekkit_flutter/functions/jh/userprovider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:trekkit_flutter/models/jw/Post.dart';
@@ -81,6 +83,13 @@ class _PostWritingState extends State<PostWriting> {
   }
 
   Future<void> _submitPost() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    // 로그인 상태 확인
+    if (!userProvider.isLoggedIn) {
+      _showErrorSnackBar('로그인이 필요합니다.');
+      return;
+    }
     // 유효성 검사
     if (_selectedMountain == null || _selectedMountain!.isEmpty) {
       _showErrorSnackBar('산을 선택해주세요.');
@@ -89,11 +98,6 @@ class _PostWritingState extends State<PostWriting> {
 
     if (_contentController.text.trim().isEmpty) {
       _showErrorSnackBar('내용을 입력해주세요.');
-      return;
-    }
-
-    if (!AuthService().isLoggedIn) {
-      _showErrorSnackBar('로그인이 필요합니다.');
       return;
     }
 
@@ -107,7 +111,9 @@ class _PostWritingState extends State<PostWriting> {
 
       // 2. 게시글 작성
       final post = Post(
-        nickname: AuthService().nickname ?? 'Unknown',
+        nickname: userProvider.nickname ?? 'Unknown',
+        // userId 필드가 있다면 추가
+        // userId: userProvider.index.toString(),
         title:
             _titleController.text.trim().isEmpty
                 ? null
@@ -152,7 +158,44 @@ class _PostWritingState extends State<PostWriting> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    // UserProvider 가져오기
+    final userProvider = Provider.of<UserProvider>(context);
 
+    // 로그인 상태 확인 및 처리
+    if (!userProvider.isLoggedIn) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('글쓰기'),
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                '로그인이 필요합니다',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // 로그인 페이지로 이동
+                  Navigator.pushNamed(context, '/login');
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                child: const Text(
+                  '로그인하기',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 로그인된 경우 기존 UI 반환
     return Scaffold(
       appBar: AppBar(
         title: const Text('글쓰기'),
