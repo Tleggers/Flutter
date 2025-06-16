@@ -4,6 +4,7 @@ import 'package:trekkit_flutter/functions/jh/userprovider.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_home_widget.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 import 'package:trekkit_flutter/pages/gb/suggest/suggest_home_widget.dart';
+import 'package:trekkit_flutter/pages/gb/region_map_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -71,27 +72,43 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             SizedBox(height: screenHeight * 0.04),
-            Text(
-              '지금 인기있는 산',
-              style: TextStyle(
-                fontSize: screenWidth * 0.05,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: screenHeight * 0.02),
-            Text(
-              '테마별 코스',
-              style: TextStyle(
-                fontSize: screenWidth * 0.05,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: screenHeight * 0.02),
+
+            // ✅ 자연 느낌 배너 추가 버전
             Container(
-              height: screenHeight * 0.25,
-              color: Colors.purple[100],
-              child: const Center(child: Text('테마별 코스 - 카테고리별 목록')),
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 24),
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFA8E6CF), Color(0xFFDCEDC1)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(width: 12),
+                  const Text(
+                    '원하는 지역을 선택해보세요!',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
             ),
+            const RegionMap(),
           ],
         ),
       ),

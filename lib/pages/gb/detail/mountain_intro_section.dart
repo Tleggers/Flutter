@@ -14,23 +14,31 @@ class MountainIntroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ DB에 데이터가 있으면 상세 내용 보여주고, 없으면 "준비중입니다" 보여줌
     if (data != null) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            data!.mountainName,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          // ✅ 산 이름 + 높이 + 소재지 한 줄에 출력
+          Row(
+            children: [
+              Text(
+                data!.mountainName,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${data!.mountainHeight} · ${data!.mountainLocation}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color.fromARGB(255, 124, 120, 120),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text('${data!.mountainHeight} · ${data!.mountainLocation}'),
           const SizedBox(height: 16),
-          const Text(
-            '산 소개',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
           Text(data!.mountainIntro),
         ],
       );

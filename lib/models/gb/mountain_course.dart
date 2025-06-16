@@ -27,12 +27,12 @@ class MountainCourse {
   // ✅ JSON → MountainCourse 변환 (서버 응답 파싱용)
   factory MountainCourse.fromJson(Map<String, dynamic> json) {
     return MountainCourse(
-      mountainName: json['mountain_name'] as String,
-      mountainLocation: json['mountain_location'] as String,
-      mountainHeight: json['mountain_height'] as String,
+      mountainName: json['mountainName'] as String,
+      mountainLocation: json['mountainLocation'] as String,
+      mountainHeight: json['mountainHeight'] as String,
       difficulty: json['difficulty'] as String,
-      mountainIntro: json['mountain_intro'] as String,
-      hikingCourse: json['hiking_course'] as String,
+      mountainIntro: json['mountainIntro'] as String,
+      hikingCourse: json['hikingCourse'] as String,
       transportation: json['transportation'] as String,
       latitude: (json['latitude'] as num).toDouble(),
       longitude: (json['longitude'] as num).toDouble(),

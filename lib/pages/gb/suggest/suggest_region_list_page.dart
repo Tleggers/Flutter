@@ -4,7 +4,7 @@ import 'package:trekkit_flutter/api/suggest_mountain_image_api.dart';
 import 'package:trekkit_flutter/models/gb/suggest_mountain.dart';
 import 'package:trekkit_flutter/pages/gb/detail/mountain_detail_page.dart';
 
-// ✅ 지역 리스트 페이지
+/// ✅ 지역별 산 리스트 페이지 (걷기길 탭 제거 버전)
 class RegionListPage extends StatefulWidget {
   final String regionId; // 선택한 지역 ID (예: seoul, gangwon 등)
 
@@ -14,10 +14,7 @@ class RegionListPage extends StatefulWidget {
   State<RegionListPage> createState() => _RegionListPageState();
 }
 
-class _RegionListPageState extends State<RegionListPage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
+class _RegionListPageState extends State<RegionListPage> {
   // ✅ 영어 regionId → 한글 지역명 매핑 테이블
   final Map<String, String> regionNameMap = {
     'seoul': '서울',
@@ -33,50 +30,32 @@ class _RegionListPageState extends State<RegionListPage>
   };
 
   @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this); // 탭 2개 (산, 걷기길)
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // ✅ 영문 regionId를 한글 지역명으로 변환
     String regionName = regionNameMap[widget.regionId] ?? widget.regionId;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(regionName), // 상단 지역명 출력
+        title: Text(regionName), // 상단에 한글 지역명 출력
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [Tab(text: '산'), Tab(text: '걷기길')],
-        ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [_buildMountainList(regionName), _buildTrailList()],
-      ),
+      body: _buildMountainList(regionName), // ✅ 산 리스트만 출력 (탭 제거)
     );
   }
 
-  // ✅ 산 리스트 위젯
+  /// ✅ 산 리스트 빌드
   Widget _buildMountainList(String regionName) {
     return FutureBuilder<List<SuggestMountain>>(
-      future: SuggestMountainApi.fetchMountains(), // 산림청 API에서 전체 산 데이터 불러오기
+      future: SuggestMountainApi.fetchMountains(), // 전체 산 데이터 API 호출
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator()); // 로딩 중
         } else if (snapshot.hasError) {
-          return const Center(child: Text('데이터 로딩 실패'));
+          return const Center(child: Text('데이터 로딩 실패')); // 에러 처리
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('산 데이터 없음'));
+          return const Center(child: Text('산 데이터 없음')); // 데이터 없음
         } else {
           final allMountains = snapshot.data!;
 
@@ -86,17 +65,13 @@ class _RegionListPageState extends State<RegionListPage>
                 return mountain.location.contains(regionName);
               }).toList();
 
-          // ✅ 랜덤 추천용으로 7개만 뽑기 (filtered가 7개 이하일 경우도 고려)
-          filtered.shuffle(); // 리스트 랜덤 섞기
-          final randomSample = filtered.take(7).toList();
-
           return ListView.builder(
-            itemCount: randomSample.length,
+            itemCount: filtered.length,
             itemBuilder: (context, index) {
               final mountain = filtered[index];
 
+              // ✅ 각 산에 대해 이미지도 비동기로 불러오기
               return FutureBuilder<String?>(
-                // ✅ 산 ID 기준으로 이미지 가져오기 (코드 기준 API)
                 future: SuggestMountainImageApi.fetchImagesByMountainCode(
                   mountain.id,
                 ).then((images) {
@@ -108,8 +83,9 @@ class _RegionListPageState extends State<RegionListPage>
                 }),
                 builder: (context, snapshot) {
                   Widget leadingWidget;
-                  final imageUrl = snapshot.data; // ✅ 이렇게 받아놓고
+                  final imageUrl = snapshot.data;
 
+                  // ✅ 이미지 로딩 상태에 따라 다르게 출력
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     leadingWidget = Container(
                       width: 60,
@@ -142,6 +118,7 @@ class _RegionListPageState extends State<RegionListPage>
                     );
                   }
 
+                  // ✅ 최종 리스트 항목 출력
                   return ListTile(
                     leading: leadingWidget,
                     title: Text(mountain.name),
@@ -149,12 +126,12 @@ class _RegionListPageState extends State<RegionListPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (mountain.height != 0)
-                          Text('${mountain.height}m'), // 높이가 0이 아닐 때만 출력
-                        Text(shortLocation(mountain.location)), // 소재지 간소화 출력
+                          Text('${mountain.height}m'), // 높이 출력
+                        Text(shortLocation(mountain.location)), // 간략 소재지 출력
                       ],
                     ),
                     onTap: () {
-                      // ✅ 상세페이지 이동
+                      // ✅ 상세 페이지 이동 (이미지도 함께 전달)
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -176,7 +153,7 @@ class _RegionListPageState extends State<RegionListPage>
     );
   }
 
-  // ✅ 소재지 짧게 자르기 헬퍼함수
+  /// ✅ 소재지 간략화 함수 (시/군까지만 표시)
   String shortLocation(String? location) {
     if (location == null || location.isEmpty) return '';
 
@@ -187,10 +164,5 @@ class _RegionListPageState extends State<RegionListPage>
     } else {
       return firstPart;
     }
-  }
-
-  // ✅ 걷기길 탭 (아직 미구현)
-  Widget _buildTrailList() {
-    return const Center(child: Text('걷기길 데이터 없음'));
   }
 }

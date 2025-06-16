@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:trekkit_flutter/pages/gb/suggest/suggest_region_selection_page.dart'; // Flutter UI 구성에 필요한 라이브러리
+import 'package:trekkit_flutter/pages/gb/suggest/suggest_random_list_page.dart'; // ✅ 수정된 부분
+// Flutter UI 구성에 필요한 라이브러리
 
 // 추천 코스 영역 위젯
 class SuggestHomeWidget extends StatelessWidget {
@@ -18,7 +19,7 @@ class SuggestHomeWidget extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const SuggestRegionSelectionPage(),
+            builder: (context) => const SuggestRandomListPage(),
           ),
         );
       },

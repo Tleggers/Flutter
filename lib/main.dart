@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:trekkit_flutter/pages/gb/suggest/suggest_region_selection_page.dart';
+import 'package:trekkit_flutter/pages/gb/region_map_page.dart';
 import 'package:trekkit_flutter/pages/mainpage.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_detail_page.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
@@ -17,6 +18,8 @@ import 'package:trekkit_flutter/services/sh/mountain_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await initializeDateFormatting('ko', null); // ✅ 한글 로케일 초기화
 
   // .env 파일에서 환경 변수 로드
   await dotenv.load(fileName: ".env");
@@ -94,7 +97,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/stepDetail': (context) => const StepDetailPage(), // ← 0609 만보기 상세페이지
         '/suggestRegionSelection':
-            (context) => const SuggestRegionSelectionPage(), // 네이버 맵 페이지 추가
+            (context) => const RegionMap(), // 네이버 맵 페이지 추가
       },
     );
   }
