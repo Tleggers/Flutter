@@ -11,7 +11,10 @@ class MountainDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final unescape = HtmlUnescape();
-    String cleanDescription = unescape.convert(mountain.overview.replaceAll('<br>', '\n\n'));
+    String cleanDescription = unescape.convert(
+      mountain.overview
+      .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
+      .replaceAllMapped(RegExp(r'([\.。])(?=\S)'), (match) => '${match.group(1)}\n'),);
 
     final List<String> imagePaths = List.generate(
       5,
@@ -25,12 +28,6 @@ class MountainDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image.network(
-            //   mountain.imageUrl,
-            //   fit: BoxFit.cover,
-            //   errorBuilder: (context, error, stackTrace) => Icon(Icons.image_not_supported, size: 150),
-            // ),
-            // const SizedBox(height: 16),
             SizedBox(
               height: 250,
               child: PageView.builder(

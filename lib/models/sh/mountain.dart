@@ -2,17 +2,43 @@ class Mountain {
   final String name;
   final String overview;
   final double height;
-  final String imageUrl;
+
   double latitude;
   double longitude;
+
+  String? trailImageUrl;
+  String? trailFileUrl;
+  String? trailInfoUrl;
+  
+  final String? region;
+  final String? details;
+  final String? topReason;
+  final String? subName;
+  final String? tourismInfo;
+  final String? transport;
+  final String? etccourse;
+  
+  final String? summary;
+  final String? listNo;
 
   Mountain({
     required this.name,
     required this.overview,
     required this.height,
-    required this.imageUrl,
     this.latitude = 0.0,
     this.longitude = 0.0,
+    this.region,
+    this.details,
+    this.topReason,
+    this.subName,
+    this.tourismInfo,
+    this.transport,
+    this.etccourse,
+    this.trailImageUrl,
+    this.trailFileUrl,
+    this.trailInfoUrl,
+    this.summary,
+    this.listNo,
   });
 
   factory Mountain.fromAApi(Map<String, dynamic> json) {
@@ -20,7 +46,7 @@ class Mountain {
       name: json['mntnm'] ?? '',
       overview: json['overview'] ?? '',
       height: double.tryParse(json['mntheight']?.toString() ?? '0') ?? 0.0,
-      imageUrl: json['imageUrl'] ?? '',
+      region: json['areanm'],
     );
   }
 
@@ -29,30 +55,3 @@ class Mountain {
     longitude = lng;
   }
 }
-
-
-//트레킹 센터 키 목록
-// {
-//   "header": {
-//     "resultCode": "string",
-//     "resultMsg": "string"
-//   },
-//   "body": {
-//     "items": {
-//       "item": {
-//         "frtrlId": "string",
-//         "frtrlNm": "string",
-//         "mtnCd": "string",
-//         "ctpvNm": "string",
-//         "addrNm": "string",
-//         "lat": 0,
-//         "lot": 0,
-//         "aslAltide": 0,
-//         "crtrDt": "string"
-//       }
-//     },
-//     "pageNo": 0,
-//     "numOfRows": 0,
-//     "totalCount": 0
-//   }
-// }
