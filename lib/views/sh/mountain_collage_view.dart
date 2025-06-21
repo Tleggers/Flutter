@@ -1,21 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:trekkit_flutter/models/sh/mountain.dart';
 import 'package:trekkit_flutter/services/sh/image_loader.dart';
+import 'package:trekkit_flutter/pages/sh/mountain_detail_page.dart';
 
 class MountainCollageView extends StatelessWidget {
   final List<Mountain> mountains;
 
   const MountainCollageView({super.key, required this.mountains});
 
+  String extractSummary(String overview) {
+  final unescape = HtmlUnescape();
+  // 먼저 HTML 이스케이프 문자 변환 (&lt; → <, &gt; → >)
+  String decoded = unescape.convert(overview);
+
+  // < > 사이의 내용만 추출
+  final match = RegExp(r'<(.*?)>').firstMatch(decoded);
+  return match != null ? match.group(1)!.trim() : '설명이 없습니다.';
+}
+
   @override
   Widget build(BuildContext context) {
+    if (mountains.isEmpty) {
+      return const Center(child: Text("표시할 산이 없습니다."));
+    }
+
     return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(), // 패널 내에서 충돌 방지
+      shrinkWrap: true, // 스크롤뷰 안에서 사용 시 필수
       itemCount: mountains.length,
       itemBuilder: (context, index) {
         final mountain = mountains[index];
         return FutureBuilder<List<String>>(
           future: ImageLoader.loadMountainImages(mountain.name),
           builder: (context, snapshot) {
+            // 아직 이미지 안 넣은 산이 안보여서 취소
+            // if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            //   return const SizedBox.shrink(); // 이미지 없을 경우 건너뜀
+            // }
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Padding(
                 padding: EdgeInsets.all(16),
@@ -28,49 +50,67 @@ class MountainCollageView extends StatelessWidget {
 
             return Card(
               margin: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      mountain.name,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+              child: InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MountainDetailPage(mountain: mountain),
                       ),
-                    ),
-                  ),
-                  if (selectedImages.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text('이미지가 없습니다.'),
-                    )
-                  else
-                    GridView.count(
-                      shrinkWrap: true,
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 4,
-                      mainAxisSpacing: 4,
-                      physics: const NeverScrollableScrollPhysics(),
-                      children: selectedImages
-                          .map(
-                            (imgPath) => ClipRRect(
+                    );
+                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 산 이름 + 고도 + 설명
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          "${mountain.name} (${mountain.height}m)",
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      if (mountain.overview.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            extractSummary(mountain.overview),
+                            style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                      if (selectedImages.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Text('이미지가 없습니다.'),
+                        )
+                      else
+                        GridView.count(
+                          shrinkWrap: true,
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 4,
+                          mainAxisSpacing: 4,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: selectedImages.map((imgPath) {
+                            return ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.asset(
                                 imgPath,
                                 fit: BoxFit.cover,
                               ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
+                            );
+                          }).toList(),
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+    }
   }
-}
