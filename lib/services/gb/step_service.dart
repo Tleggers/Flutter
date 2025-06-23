@@ -13,6 +13,7 @@ class StepService {
 
     _stepSubscription = Pedometer.stepCountStream.listen(
           (StepCount event) {
+            print('📥 걸음 수 감지: ${event.steps} - ${event.timeStamp}'); // 🟡 이 줄 추가
         if (_initialStep == null) {
           _initialStep = event.steps;
         }

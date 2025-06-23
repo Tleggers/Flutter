@@ -45,6 +45,15 @@ Future<void> loginHandler({
       );
 
     if (response.statusCode == 200) {
+
+      final bodyText = response.body.trim();
+
+      // 서버에서 "0"이라는 문자열만 온 경우 -> 로그인 실패
+      if (bodyText == '0') {
+        showSnackBar(context, '로그인 실패: 아이디 또는 비밀번호가 틀렸습니다.');
+        return;
+      }
+
       final body = jsonDecode(response.body);
       final token = body['token']; // 토큰
       final nickname = body['nickname']; // 닉네임
@@ -77,10 +86,10 @@ Future<void> loginHandler({
               (route) => false, // 👈 이전 모든 route 제거
         );
       } else {
-        showSnackBar(context, '로그인 실패: 아이디 또는 비밀번호가 틀렸습니다.');
+        showSnackBar(context, '로그인 실패: 서버 응답에 문제가 있습니다.');
       }
     } else {
-      showSnackBar(context, '서버 오류가 발생했습니다.');
+      showSnackBar(context, '로그인 실패: 응답 파싱 중 오류 발생');
     }
   } catch (e) {
     showSnackBar(context, '서버 통신 중 오류가 발생했습니다.');

@@ -9,6 +9,7 @@ import 'package:trekkit_flutter/pages/mainpage.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_detail_page.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 
+import 'api/step_api.dart';
 import 'functions/jh/userprovider.dart';
 
 // 네이버 맵 SDK 임포트 추가
@@ -18,6 +19,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await initializeDateFormatting('ko', null); // ✅ 한글 로케일 초기화
+
+  await requestActivityPermission(); // 만보기 권한 요청
 
   // .env 파일에서 환경 변수 로드
   await dotenv.load(fileName: ".env");
