@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:trekkit_flutter/models/sh/mountain.dart';
+import 'package:trekkit_flutter/views/sh/mountain_collage_view.dart';
 import 'package:trekkit_flutter/widgets/sh/mountain_card.dart';
 
 class SlidingPanel extends StatelessWidget {
   final List<Mountain> mountains;
+  final ScrollController scrollController;
 
-  const SlidingPanel({super.key, required this.mountains});
+  const SlidingPanel({super.key, required this.mountains, required MountainCollageView child, required this.scrollController});
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +19,7 @@ class SlidingPanel extends StatelessWidget {
         boxShadow: [BoxShadow(blurRadius: 6, color: Colors.black26)],
       ),
       child: ListView.builder(
+        controller: scrollController,
         shrinkWrap: true,
         itemCount: mountains.length,
         itemBuilder: (context, index) {

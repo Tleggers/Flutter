@@ -24,11 +24,6 @@ class MountainApi {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       final items = decoded['response']?['body']?['items']?['item'];
 
-       //100대 명산 API 키(컬럼) 확인
-      if (items is List && items.isNotEmpty) {
-      final firstItem = Map<String, dynamic>.from(items.first);
-      print('🧾 산림청 키 목록: ${firstItem.keys.toList()}');
-    }
 
       if (items is List) {
         return items
@@ -42,7 +37,7 @@ class MountainApi {
         return [];
       }
     } else {
-      throw Exception('API A 로드 실패: ${response.statusCode}');
+      throw Exception('산림청 100대 명산 로드 실패: ${response.statusCode}');
     }
   }
 }
