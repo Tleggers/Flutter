@@ -26,26 +26,33 @@ class _MapPageState extends State<MapPage> {
 
   String searchQuery = '';
   String selectedRegion = '전체';
-  
+
   late NCameraPosition _initialCameraPosition;
   final PanelController _panelController = PanelController();
   final Set<NMarker> _markers = {};
 
   // 지역 목록 만들기
   List<String> getRegions() {
-    final regions = nearbyMountains.map((m) => m.region).where((region) => region != null && region!.isNotEmpty).map((region) => region!).toSet().toList();
+    final regions =
+        nearbyMountains
+            .map((m) => m.region)
+            .where((region) => region != null && region.isNotEmpty)
+            .map((region) => region!)
+            .toSet()
+            .toList();
     regions.sort();
     return ['전체', ...regions];
   }
 
   void applyFilter() {
     setState(() {
-      filteredMountains = nearbyMountains.where((m) {
-        final matchesName = m.name.contains(searchQuery);
-        final matchesRegion =
-            selectedRegion == '전체' || m.region == selectedRegion;
-        return matchesName && matchesRegion;
-      }).toList();
+      filteredMountains =
+          nearbyMountains.where((m) {
+            final matchesName = m.name.contains(searchQuery);
+            final matchesRegion =
+                selectedRegion == '전체' || m.region == selectedRegion;
+            return matchesName && matchesRegion;
+          }).toList();
     });
   }
 
@@ -147,91 +154,97 @@ class _MapPageState extends State<MapPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 40, 16, 0),
-                  child: Column(
-                    children: [
-                      TextField(
-                        decoration: const InputDecoration(
-                          hintText: '산 이름 검색',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (value) {
-                          searchQuery = value;
-                          applyFilter();
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButton<String>(
-                        isExpanded: true,
-                        value: selectedRegion,
-                        items: getRegions().map((region) {
-                          return DropdownMenuItem<String>(
-                            value: region,
-                            child: Text(region),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            selectedRegion = value;
-                            applyFilter();
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: nearbyMountains.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('근처 산이 없습니다 🏔️'),
-                              const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    isLoading = true;
-                                  });
-                                  loadNearbyMountains();
-                                },
-                                child: const Text('다시 시도'),
-                              ),
-                            ],
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 40, 16, 0),
+                    child: Column(
+                      children: [
+                        TextField(
+                          decoration: const InputDecoration(
+                            hintText: '산 이름 검색',
+                            prefixIcon: Icon(Icons.search),
+                            border: OutlineInputBorder(),
                           ),
-                        )
-                      : SlidingUpPanel(
-                        controller: _panelController,
-                        minHeight: 140,
-                        maxHeight: MediaQuery.of(context).size.height * 0.7,
-                        // panel: MountainCollageView(mountains: filteredMountains),
-                        panelBuilder: (ScrollController sc) => MountainCollageView(
-                              mountains: filteredMountains,
-                              scrollController: sc, // 👈 여기 전달
+                          onChanged: (value) {
+                            searchQuery = value;
+                            applyFilter();
+                          },
                         ),
-                        body: NaverMap(
-                          options: NaverMapViewOptions(
-                          initialCameraPosition: _initialCameraPosition,
-                          locationButtonEnable: true,
-                          indoorEnable: true,
-                          consumeSymbolTapEvents: true, //네이버 심볼 이벤트 방지_false이면 네이버 마커 동작 수행
+                        const SizedBox(height: 8),
+                        DropdownButton<String>(
+                          isExpanded: true,
+                          value: selectedRegion,
+                          items:
+                              getRegions().map((region) {
+                                return DropdownMenuItem<String>(
+                                  value: region,
+                                  child: Text(region),
+                                );
+                              }).toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              selectedRegion = value;
+                              applyFilter();
+                            }
+                          },
                         ),
-                        onMapReady: (controller) async {
-                          for (final marker in _markers) {
-                            await controller.addOverlay(marker);
-                          }
-                        }, 
+                      ],
                     ),
                   ),
-                ),
-              ],
-          ),
-      );
-    }
+                  Expanded(
+                    child:
+                        nearbyMountains.isEmpty
+                            ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text('근처 산이 없습니다 🏔️'),
+                                  const SizedBox(height: 12),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        isLoading = true;
+                                      });
+                                      loadNearbyMountains();
+                                    },
+                                    child: const Text('다시 시도'),
+                                  ),
+                                ],
+                              ),
+                            )
+                            : SlidingUpPanel(
+                              controller: _panelController,
+                              minHeight: 140,
+                              maxHeight:
+                                  MediaQuery.of(context).size.height * 0.7,
+                              // panel: MountainCollageView(mountains: filteredMountains),
+                              panelBuilder:
+                                  (ScrollController sc) => MountainCollageView(
+                                    mountains: filteredMountains,
+                                    scrollController: sc, // 👈 여기 전달
+                                  ),
+                              body: NaverMap(
+                                options: NaverMapViewOptions(
+                                  initialCameraPosition: _initialCameraPosition,
+                                  locationButtonEnable: true,
+                                  indoorEnable: true,
+                                  consumeSymbolTapEvents:
+                                      true, //네이버 심볼 이벤트 방지_false이면 네이버 마커 동작 수행
+                                ),
+                                onMapReady: (controller) async {
+                                  for (final marker in _markers) {
+                                    await controller.addOverlay(marker);
+                                  }
+                                },
+                              ),
+                            ),
+                  ),
+                ],
+              ),
+    );
   }
+}

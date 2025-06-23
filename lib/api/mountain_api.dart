@@ -1,7 +1,6 @@
 import 'dart:convert'; // JSON 데이터를 디코딩하기 위해 필요
 import 'package:http/http.dart' as http; // HTTP 요청을 보내기 위한 패키지
 import 'package:trekkit_flutter/models/sh/mountain.dart';
-import 'package:trekkit_flutter/services/sh/mountain_service.dart';
 
 // 산림청 100대 명산 API를 요청하고 데이터를 가져오는 클래스
 class MountainApi {
