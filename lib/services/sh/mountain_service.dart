@@ -1,10 +1,8 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:trekkit_flutter/models/sh/mountain.dart';
 import 'package:trekkit_flutter/api/mountain_api.dart'; // 기존 산림청 명산 등산로 API
-import 'package:trekkit_flutter/api/mountain_trail_api.dart';     // 새로 추가할 산림청 등산로 API
-import 'package:trekkit_flutter/api/trekking_api.dart';     // 트레킹센터 좌표 API
-import 'package:trekkit_flutter/api/mountain_info_api.dart';    // 새로 추가할 산림청 산 정보 API
+import 'package:trekkit_flutter/api/mountain_trail_api.dart'; // 새로 추가할 산림청 등산로 API
+import 'package:trekkit_flutter/api/trekking_api.dart'; // 트레킹센터 좌표 API
+import 'package:trekkit_flutter/api/mountain_info_api.dart'; // 새로 추가할 산림청 산 정보 API
 
 class MountainService {
   static Future<List<Mountain>> fetchMountainsWithAPIs() async {
@@ -15,24 +13,28 @@ class MountainService {
     final coordMap = await TrekkingApi.fetchMountainCoords(); // 이름 → 위경도
 
     // 3. 산림청 산 정보
-    final forestInfoMap = await MountainInfoApi.fetchMountainInfo(); // 이름 → 상세정보 map
+    final forestInfoMap =
+        await MountainInfoApi.fetchMountainInfo(); // 이름 → 상세정보 map
     print('산림청 산 정보 개수: ${forestInfoMap.length}'); // 디버깅용
 
     // 4. 산림청 등산로 정보
-    final mountainNames = baseList.map((m) => m.name.trim()).toList(); // 공백 제거 후 이름 목록
-    final trailInfoMap = await MountainTrailApi.fetchTrails(mountainNames); // 이름 → 코스 URL, 이미지 등
+    final mountainNames =
+        baseList.map((m) => m.name.trim()).toList(); // 공백 제거 후 이름 목록
+    final trailInfoMap = await MountainTrailApi.fetchTrails(
+      mountainNames,
+    ); // 이름 → 코스 URL, 이미지 등
 
     // 5. 병합
     List<Mountain> enrichedList = [];
 
     String? findClosestTrailKey(String nameKey, Map<String, dynamic> trailMap) {
-          for (final key in trailMap.keys) {
-            if (key.contains(nameKey) || nameKey.contains(key)) {
-              return key;
-            }
-          }
-          return null;
+      for (final key in trailMap.keys) {
+        if (key.contains(nameKey) || nameKey.contains(key)) {
+          return key;
         }
+      }
+      return null;
+    }
 
     for (final mountain in baseList) {
       final nameKey = mountain.name.trim(); // 공백 제거해서 키로 사용
@@ -51,18 +53,17 @@ class MountainService {
       final trailUrl = (trail?['trailInfoUrl'])?.toString() ?? '';
       final trailImg = (trail?['trailImageUrl'])?.toString() ?? '';
       final trailFile = (trail?['trailFileUrl'])?.toString() ?? '';
-  
 
       // 좌표 없으면 스킵해도 됨 (지도에 안 보일 거니까)
       if (coord == null) continue;
-    
+
       // if (trail != null) {
       //   print('✅ trail data for ${nameKey}: $trail');
 
       //   mountain.trailInfoUrl = trail['trailInfoUrl']?.toString() ?? '';
       //   mountain.trailImageUrl = trail['trailImageUrl']?.toString();
       //   mountain.trailFileUrl = trail['trailFileUrl']?.toString();
-      // }      
+      // }
 
       enrichedList.add(
         Mountain(
@@ -72,7 +73,8 @@ class MountainService {
           region: coord['region'] ?? '',
           overview: mountain.overview,
           // height: forest?['mntihigh']?.toDouble(), // 산림청 고도 정보
-          height: double.tryParse(forest?['mntihigh']?.toString() ?? '0') ?? 0.0,
+          height:
+              double.tryParse(forest?['mntihigh']?.toString() ?? '0') ?? 0.0,
           details: forest?['mntidetails'],
           topReason: forest?['mntitop'],
           subName: forest?['mntisname'],
