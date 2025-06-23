@@ -7,11 +7,14 @@ class ImageLoader {
 
   static Future<List<String>> loadMountainImages(String mountainName) async {
     List<String> images = [];
-    final cleanName = mountainName.replaceAll(RegExp(r'\s+'), '').trim();  //normalizeMountainName(mountainName);
+    final cleanName =
+        mountainName
+            .replaceAll(RegExp(r'\s+'), '')
+            .trim(); //normalizeMountainName(mountainName);
 
     for (int i = 1; i <= 5; i++) {
       // String path = 'assets/mtimages/$folderName/$i.jpg';
-      String path = 'assets/mtimages/${cleanName}_${i}.jpg';
+      String path = 'assets/mtimages/${cleanName}_$i.jpg';
       print('📁 checking file exists: $path');
       try {
         final data = await rootBundle.load(path); // 존재 확인

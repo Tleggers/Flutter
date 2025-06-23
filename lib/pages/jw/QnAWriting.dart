@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:trekkit_flutter/functions/jh/userprovider.dart';
-import 'package:trekkit_flutter/services/jw/QnaService.dart';
+// import 'package:image_picker/image_picker.dart'; // 이미지가 사용되지 않으므로 제거 가능 (optional)
+// import 'dart:io'; // 이미지가 사용되지 않으므로 제거 가능 (optional)
 import 'package:trekkit_flutter/models/jw/QnaQuestion.dart';
+import 'package:trekkit_flutter/services/jw/QnaService.dart';
+import 'package:trekkit_flutter/pages/jh/Login_and_Signup/login.dart'; // LoginPage 임포트
 
 class QnAWriting extends StatefulWidget {
   const QnAWriting({super.key});
@@ -61,7 +64,7 @@ class _QnAWritingState extends State<QnAWriting> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('로그인이 필요합니다. 다시 로그인해주세요.')));
-      Navigator.pop(context);
+      Navigator.pop(context); // 로그인 페이지로 이동하기 전에 현재 페이지 닫기
       return;
     }
 
@@ -71,18 +74,18 @@ class _QnAWritingState extends State<QnAWriting> {
 
     try {
       final question = QnaQuestion(
-        id: 0,
-        userId: userProvider.index!.toString(), // int를 String으로 변환
+        id: 0, // ID는 서버에서 생성
+        userId: userProvider.index!, // userId는 int 타입. toString() 제거.
         nickname: userProvider.nickname ?? '익명',
         title: _titleController.text.trim(),
         content: _contentController.text.trim(),
         mountain: _selectedMountain ?? '',
-        imagePaths: [],
-        viewCount: 0,
-        answerCount: 0,
-        likeCount: 0,
-        isSolved: false,
-        createdAt: DateTime.now(),
+        imagePaths: [], // Q&A 질문은 이미지가 없으므로 빈 리스트
+        viewCount: 0, // 서버에서 초기화
+        answerCount: 0, // 서버에서 초기화
+        likeCount: 0, // 서버에서 초기화
+        isSolved: false, // 서버에서 초기화
+        createdAt: DateTime.now(), // 서버에서 생성
       );
 
       // 디버깅: 전송할 데이터 출력
@@ -92,16 +95,16 @@ class _QnAWritingState extends State<QnAWriting> {
       print('title: ${question.title}');
       print('content: ${question.content}');
       print('mountain: ${question.mountain}');
-      print('token: ${userProvider.token}');
+      print('token: ${userProvider.token}'); // userProvider.token은 String? 타입
       print('=====================');
 
-      await QnaService.createQuestion(question, userProvider.token!);
+      await QnaService.createQuestion(question, context); // context 전달
 
       if (mounted) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('질문이 등록되었습니다')));
-        Navigator.pop(context, true);
+        Navigator.pop(context, true); // 성공 시 이전 페이지로 돌아감 (true 반환)
       }
     } catch (e) {
       // 더 자세한 에러 정보 출력
@@ -131,6 +134,41 @@ class _QnAWritingState extends State<QnAWriting> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
 
+    // 로그인 상태에 따른 조건부 UI
+    if (!userProvider.isLoggedIn) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('질문하기'),
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                '로그인이 필요합니다',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // 로그인 페이지로 이동
+                  Navigator.pushNamed(context, '/login');
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                child: const Text(
+                  '로그인하기',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 로그인된 경우 질문 작성 UI 반환
     return Scaffold(
       appBar: AppBar(
         title: const Text('질문하기'),
