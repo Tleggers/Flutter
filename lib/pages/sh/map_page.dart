@@ -15,14 +15,14 @@ import 'package:trekkit_flutter/pages/sh/mountain_detail_page.dart';
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
 
-//   @override
-//   State<MapPage> createState() => _MapPageState();
-// }
+  @override
+  State<MapPage> createState() => _MapPageState();
+}
 
-// class _MapPageState extends State<MapPage> {
-//   List<Mountain> nearbyMountains = [];
+class _MapPageState extends State<MapPage> {
+  List<Mountain> nearbyMountains = [];
   List<Mountain> filteredMountains = [];
-//   bool isLoading = true;
+  bool isLoading = true;
 
   String searchQuery = '';
   String selectedRegion = '전체';
@@ -55,9 +55,9 @@ class MapPage extends StatefulWidget {
     initializeData();
   }
 
-//   Future<void> initializeData() async {
-//     await loadNearbyMountains(); // 산 정보 불러오기
-//   }
+  Future<void> initializeData() async {
+    await loadNearbyMountains(); // 산 정보 불러오기
+  }
 
   Future<void> loadNearbyMountains() async {
     try {
@@ -100,16 +100,16 @@ class MapPage extends StatefulWidget {
         zoom: 10,
       );
 
-//       List<Mountain> filtered =
-//           allMountains.where((mountain) {
-//             double distance = DistanceUtil.calculateDistance(
-//               current.latitude,
-//               current.longitude,
-//               mountain.latitude,
-//               mountain.longitude,
-//             );
-//             return distance < 100.0; // 해당 반경 이내
-//           }).toList();
+      List<Mountain> filtered =
+          allMountains.where((mountain) {
+            double distance = DistanceUtil.calculateDistance(
+              current.latitude,
+              current.longitude,
+              mountain.latitude,
+              mountain.longitude,
+            );
+            return distance < 100.0; // 해당 반경 이내
+          }).toList();
 
       print('🎯 필터링된 산 개수 (100km 이내): ${filtered.length}');
 

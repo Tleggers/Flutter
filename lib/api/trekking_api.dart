@@ -19,6 +19,7 @@ class TrekkingApi {
     if (response.statusCode == 200) {
       final data = jsonDecode(utf8.decode(response.bodyBytes));
       final items = data['response']?['body']?['items']?['item'];
+      
       final Map<String, Map<String, dynamic>> result = {};
 
       for (var item in items) {

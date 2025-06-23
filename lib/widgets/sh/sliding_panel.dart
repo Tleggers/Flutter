@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trekkit_flutter/models/sh/mountain.dart';
+import 'package:trekkit_flutter/views/sh/mountain_collage_view.dart';
 import 'package:trekkit_flutter/widgets/sh/mountain_card.dart';
 
 class SlidingPanel extends StatelessWidget {
