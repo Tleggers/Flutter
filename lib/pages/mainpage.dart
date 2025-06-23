@@ -6,7 +6,9 @@ import 'package:trekkit_flutter/pages/gb/home_page.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 import 'package:trekkit_flutter/pages/jw/CommunityPage.dart';
 import 'package:provider/provider.dart';
+import 'package:trekkit_flutter/pages/sh/map_page.dart';
 import '../functions/jh/userprovider.dart';
+import '../services/gb/step_service.dart';
 import 'jh/mypage.dart';
 
 // 메인 화면
@@ -34,7 +36,7 @@ class _MainPageState extends State<MainPage> {
     // 홈 화면
     HomePage(),
     // 지도 화면
-    // MapPage(),
+    MapPage(),
     // 커뮤니티 화면
     CommunityPage(),
     // 마이페이지 화면
@@ -205,14 +207,14 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    _selectedIndex = widget.initialIndex; // 2025-06-11 추가
-    //initState()는 build()보다 먼저 호출되고,
-    //이때 context.read()는 위젯 트리가 완전히 구축되지 않아서 실패할 수 있습니다.
-    // context 안전하게 접근하기 위한 post-frame callback 사용
+    _selectedIndex = widget.initialIndex;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final stepProvider = context.read<StepProvider>();
       stepProvider.fetchTodayStepFromServer();
-      // stepProvider.fetchMonthlyStepFromServer();
+
+      // 여기 추가
+      StepService().startListening(stepProvider);
     });
   }
 }

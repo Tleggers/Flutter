@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:trekkit_flutter/models/sh/mountain.dart';
 import 'package:trekkit_flutter/services/sh/image_loader.dart';
 import 'package:trekkit_flutter/pages/sh/mountain_detail_page.dart';
