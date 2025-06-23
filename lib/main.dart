@@ -14,8 +14,6 @@ import 'functions/jh/userprovider.dart';
 // 네이버 맵 SDK 임포트 추가
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 
-import 'package:trekkit_flutter/services/sh/mountain_service.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 

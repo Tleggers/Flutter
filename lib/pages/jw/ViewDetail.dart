@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:trekkit_flutter/functions/jh/userprovider.dart';
+import 'package:trekkit_flutter/functions/jh/userprovider.dart'; // UserProvider 사용
 import 'package:trekkit_flutter/models/jw/Post.dart';
 import 'package:trekkit_flutter/models/jw/Comment.dart';
-import 'package:trekkit_flutter/services/jw/AuthService.dart';
 import 'package:trekkit_flutter/services/jw/PostService.dart';
 import 'package:trekkit_flutter/services/jw/CommentService.dart';
 import 'package:trekkit_flutter/pages/jh/Login_and_Signup/login.dart';
+
+// CommentException과 CommentErrorType이 CommentService에 정의되어 있다고 가정합니다.
+// 만약 다른 파일에 있다면 해당 파일을 임포트해야 합니다.
 
 class ViewDetail extends StatefulWidget {
   final Post post;
@@ -32,7 +34,7 @@ class _ViewDetailState extends State<ViewDetail> {
   void initState() {
     super.initState();
     _currentPost = widget.post;
-    _loadComments(); // 댓글 로딩 추가
+    _loadComments();
   }
 
   @override
@@ -86,11 +88,19 @@ class _ViewDetailState extends State<ViewDetail> {
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
       );
-
       if (result != true) return;
     }
 
     final content = _commentController.text.trim();
+    if (content.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('댓글 내용을 입력해주세요.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
     setState(() {
       _isPostingComment = true;
@@ -99,13 +109,16 @@ class _ViewDetailState extends State<ViewDetail> {
     try {
       final newComment = Comment(
         postId: _currentPost.id!,
-        userId: userProvider.index.toString(), // index를 문자열로 변환
+        userId: userProvider.index!,
         nickname: userProvider.nickname!,
         content: content,
         createdAt: DateTime.now(),
       );
 
-      final createdComment = await CommentService.createComment(newComment);
+      final createdComment = await CommentService.createComment(
+        newComment,
+        context,
+      ); // context 전달
 
       setState(() {
         _comments.add(createdComment);
@@ -125,9 +138,22 @@ class _ViewDetailState extends State<ViewDetail> {
         );
       }
     } on CommentException catch (e) {
-      // 기존 코드 유지
+      if (mounted) {
+        _showErrorSnackBar(e.message, e.type);
+        setState(() {
+          _isPostingComment = false;
+        });
+      }
     } catch (e) {
-      // 기존 코드 유지
+      if (mounted) {
+        _showErrorSnackBar(
+          '댓글 작성 중 예상치 못한 오류가 발생했습니다',
+          CommentErrorType.unknown,
+        );
+        setState(() {
+          _isPostingComment = false;
+        });
+      }
     }
   }
 
@@ -135,15 +161,13 @@ class _ViewDetailState extends State<ViewDetail> {
   Future<void> _deleteComment(Comment comment) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-    if (comment.userId != userProvider.index.toString()) {
-      // index를 문자열로 변환
+    if (!userProvider.isLoggedIn || comment.userId != userProvider.index) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('자신의 댓글만 삭제할 수 있습니다')));
       return;
     }
 
-    // 삭제 확인 다이얼로그
     final confirmed = await showDialog<bool>(
       context: context,
       builder:
@@ -169,6 +193,7 @@ class _ViewDetailState extends State<ViewDetail> {
       final success = await CommentService.deleteComment(
         comment.id!,
         _currentPost.id!,
+        context, // context 전달
       );
 
       if (success) {
@@ -266,9 +291,8 @@ class _ViewDetailState extends State<ViewDetail> {
     }
   }
 
-  // 좋아요 토글 수정
+  // 좋아요 토글 수정 (기존 오류 해결)
   Future<void> _toggleLike() async {
-    // UserProvider를 사용하여 로그인 상태 확인
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     if (!userProvider.isLoggedIn) {
@@ -289,19 +313,14 @@ class _ViewDetailState extends State<ViewDetail> {
     });
 
     try {
-      // userProvider.index가 null이 아닌지 확인하고, 문자열로 변환하여 전달
-      if (userProvider.index != null) {
-        final result = await PostService.toggleLike(
-          _currentPost.id!,
-          userProvider.index.toString(), // index를 문자열로 변환
-        );
+      final result = await PostService.toggleLike(
+        _currentPost.id!,
+        context,
+      ); // context 전달
 
-        setState(() {
-          _currentPost = _currentPost.copyWith(likeCount: result['likeCount']);
-        });
-      } else {
-        throw Exception('사용자 ID가 유효하지 않습니다');
-      }
+      setState(() {
+        _currentPost = _currentPost.copyWith(likeCount: result['likeCount']);
+      });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -317,9 +336,8 @@ class _ViewDetailState extends State<ViewDetail> {
     }
   }
 
-  // 북마크 토글 수정
+  // 북마크 토글 수정 (기존 오류 해결)
   Future<void> _toggleBookmark() async {
-    // UserProvider를 사용하여 로그인 상태 확인
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     if (!userProvider.isLoggedIn) {
@@ -340,23 +358,15 @@ class _ViewDetailState extends State<ViewDetail> {
     });
 
     try {
-      // userProvider.index가 null이 아닌지 확인하고, 문자열로 변환하여 전달
-      if (userProvider.index != null) {
-        await PostService.toggleBookmark(
-          _currentPost.id!,
-          userProvider.index.toString(), // index를 문자열로 변환
-        );
+      await PostService.toggleBookmark(_currentPost.id!, context); // context 전달
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('북마크가 처리되었습니다'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } else {
-        throw Exception('사용자 ID가 유효하지 않습니다');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('북마크가 처리되었습니다'),
+            backgroundColor: Colors.green,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -375,7 +385,6 @@ class _ViewDetailState extends State<ViewDetail> {
 
   @override
   Widget build(BuildContext context) {
-    // UserProvider 가져오기
     final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
@@ -386,14 +395,12 @@ class _ViewDetailState extends State<ViewDetail> {
       ),
       body: Column(
         children: [
-          // 게시글 내용 (스크롤 가능)
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 글쓴이 정보
                   Row(
                     children: [
                       CircleAvatar(
@@ -449,10 +456,7 @@ class _ViewDetailState extends State<ViewDetail> {
                         ),
                     ],
                   ),
-
                   const SizedBox(height: 20),
-
-                  // 제목 (있는 경우)
                   if (_currentPost.title != null &&
                       _currentPost.title!.isNotEmpty)
                     Padding(
@@ -465,8 +469,6 @@ class _ViewDetailState extends State<ViewDetail> {
                         ),
                       ),
                     ),
-
-                  // 이미지 슬라이더 (있는 경우)
                   if (_currentPost.imagePaths.isNotEmpty)
                     Container(
                       height: 250,
@@ -474,35 +476,46 @@ class _ViewDetailState extends State<ViewDetail> {
                       child: PageView.builder(
                         itemCount: _currentPost.imagePaths.length,
                         itemBuilder: (context, index) {
+                          final imageUrl =
+                              'http://10.0.2.2:30000${_currentPost.imagePaths[index]}';
                           return Container(
                             margin: const EdgeInsets.symmetric(horizontal: 4),
                             decoration: BoxDecoration(
                               color: Colors.grey[200],
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.image,
-                                    size: 60,
-                                    color: Colors.grey,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    '사진 ${index + 1}/${_currentPost.imagePaths.length}',
-                                    style: const TextStyle(color: Colors.grey),
-                                  ),
-                                ],
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder:
+                                    (context, error, stackTrace) => Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(
+                                            Icons.broken_image,
+                                            size: 60,
+                                            color: Colors.grey,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            '이미지 로드 실패: ${index + 1}',
+                                            style: const TextStyle(
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                               ),
                             ),
                           );
                         },
                       ),
                     ),
-
-                  // 본문
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -515,10 +528,7 @@ class _ViewDetailState extends State<ViewDetail> {
                       style: const TextStyle(fontSize: 16, height: 1.6),
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
-                  // 아이콘 영역
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -702,7 +712,7 @@ class _ViewDetailState extends State<ViewDetail> {
                         horizontal: 16,
                         vertical: 12,
                       ),
-                      enabled: userProvider.isLoggedIn,
+                      enabled: userProvider.isLoggedIn, // 로그인 상태에 따라 활성화/비활성화
                     ),
                     maxLines: 1,
                     maxLength: 200,
@@ -712,7 +722,10 @@ class _ViewDetailState extends State<ViewDetail> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  onPressed: _isPostingComment ? null : _postComment,
+                  onPressed:
+                      _isPostingComment || !userProvider.isLoggedIn
+                          ? null
+                          : _postComment, // 로그인 상태가 아니면 비활성화
                   icon:
                       _isPostingComment
                           ? const SizedBox(
@@ -759,8 +772,7 @@ class CommentItem extends StatelessWidget {
   Widget build(BuildContext context) {
     // UserProvider 가져오기
     final userProvider = Provider.of<UserProvider>(context);
-    final isMyComment =
-        userProvider.index.toString() == comment.userId; // index를 문자열로 변환
+    final isMyComment = userProvider.index == comment.userId; // userId를 int로 비교
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),

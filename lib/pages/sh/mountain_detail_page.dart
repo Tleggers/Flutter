@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trekkit_flutter/models/sh/mountain.dart';
 import 'package:html_unescape/html_unescape.dart';
-import 'package:trekkit_flutter/services/sh/image_loader.dart';
 
 class MountainDetailPage extends StatelessWidget {
   final Mountain mountain;
@@ -15,7 +14,6 @@ class MountainDetailPage extends StatelessWidget {
       mountain.overview
       .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
       .replaceAllMapped(RegExp(r'([\.。])(?=\S)'), (match) => '${match.group(1)}\n'),);
-
     final List<String> imagePaths = List.generate(
       5,
       (index) => 'assets/mtimages/${mountain.name}_${index + 1}.jpg',
@@ -36,8 +34,9 @@ class MountainDetailPage extends StatelessWidget {
                   return Image.asset(
                     imagePaths[index],
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.broken_image, size: 100),
+                    errorBuilder:
+                        (context, error, stackTrace) =>
+                            const Icon(Icons.broken_image, size: 100),
                   );
                 },
               ),
@@ -50,9 +49,15 @@ class MountainDetailPage extends StatelessWidget {
                 children: [
                   Text(
                     mountain.name,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  Text('${mountain.height}m', style: const TextStyle(color: Colors.grey)),
+                  Text(
+                    '${mountain.height}m',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                   const SizedBox(height: 16),
                   Text(cleanDescription),
                 ],

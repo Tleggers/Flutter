@@ -1,7 +1,8 @@
+// lib/models/jw/Comment.dart
 class Comment {
   final int? id;
   final int postId;
-  final String userId;
+  final int userId; // Long userId에 대응되도록 int로 변경
   final String nickname;
   final String content;
   final DateTime createdAt;
@@ -22,7 +23,10 @@ class Comment {
     return Comment(
       id: json['id'],
       postId: json['postId'],
-      userId: json['userId'],
+      userId:
+          (json['userId'] is String)
+              ? int.parse(json['userId'])
+              : json['userId'], // 백엔드 Long -> int
       nickname: json['nickname'],
       content: json['content'],
       createdAt: DateTime.parse(json['createdAt']),
@@ -36,7 +40,7 @@ class Comment {
     return {
       'id': id,
       'postId': postId,
-      'userId': userId,
+      'userId': userId, // int 그대로 전송
       'nickname': nickname,
       'content': content,
       'createdAt': createdAt.toIso8601String(),
@@ -48,7 +52,7 @@ class Comment {
   Comment copyWith({
     int? id,
     int? postId,
-    String? userId,
+    int? userId, // int로 변경
     String? nickname,
     String? content,
     DateTime? createdAt,

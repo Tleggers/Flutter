@@ -7,7 +7,6 @@ import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 import 'package:trekkit_flutter/pages/jw/CommunityPage.dart';
 import 'package:provider/provider.dart';
 import '../functions/jh/userprovider.dart';
-import 'package:trekkit_flutter/pages/sh/map_page.dart';
 import 'jh/mypage.dart';
 
 // 메인 화면
@@ -35,7 +34,7 @@ class _MainPageState extends State<MainPage> {
     // 홈 화면
     HomePage(),
     // 지도 화면
-    MapPage(),
+    // MapPage(),
     // 커뮤니티 화면
     CommunityPage(),
     // 마이페이지 화면
@@ -78,7 +77,8 @@ class _MainPageState extends State<MainPage> {
 
         // 설정한 인덱스에서는 로그아웃 버튼 생기게 하기
         actions:
-            _selectedIndex == 3 // 2025-06-11 수정
+            _selectedIndex ==
+                    3 // 2025-06-11 수정
                 ? [
                   Padding(
                     padding: EdgeInsets.only(right: screenWidth * 0.06),

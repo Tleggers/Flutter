@@ -71,6 +71,7 @@ class _QnAPageState extends State<QnAPage> {
         mountain: _currentMountain,
         page: _currentPage,
         size: 10,
+        context: context, // context 전달
       );
 
       setState(() {
