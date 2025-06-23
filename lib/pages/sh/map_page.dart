@@ -1,233 +1,136 @@
-import 'package:flutter/material.dart';
-import 'package:trekkit_flutter/api/mountain_api.dart';
-import 'package:trekkit_flutter/models/sh/mountain.dart';
-import 'package:trekkit_flutter/services/sh/location_service.dart';
-import 'package:trekkit_flutter/functions/sh/distance_util.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'package:trekkit_flutter/widgets/sh/sliding_panel.dart';
-import 'package:trekkit_flutter/services/sh/mountain_service.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:trekkit_flutter/services/sh/image_loader.dart';
-import 'package:trekkit_flutter/views/sh/mountain_collage_view.dart';
-import 'package:trekkit_flutter/pages/sh/mountain_detail_page.dart';
+// import 'package:flutter/material.dart';
+// import 'package:trekkit_flutter/models/sh/mountain.dart';
+// import 'package:trekkit_flutter/services/sh/location_service.dart';
+// import 'package:trekkit_flutter/functions/sh/distance_util.dart';
+// import 'package:trekkit_flutter/services/sh/mountain_service.dart';
+// import 'package:geolocator/geolocator.dart';
 
-class MapPage extends StatefulWidget {
-  const MapPage({super.key});
+// class MapPage extends StatefulWidget {
+//   const MapPage({super.key});
 
-  @override
-  State<MapPage> createState() => _MapPageState();
-}
+//   @override
+//   State<MapPage> createState() => _MapPageState();
+// }
 
-class _MapPageState extends State<MapPage> {
-  List<Mountain> nearbyMountains = [];
-  List<Mountain> filteredMountains = [];
-  bool isLoading = true;
+// class _MapPageState extends State<MapPage> {
+//   List<Mountain> nearbyMountains = [];
+//   bool isLoading = true;
 
-  String searchQuery = '';
-  String selectedRegion = '전체';
-  
-  late NCameraPosition _initialCameraPosition;
-  final PanelController _panelController = PanelController();
-  final Set<NMarker> _markers = {};
+//   @override
+//   void initState() {
+//     super.initState();
+//   }
 
-  // 지역 목록 만들기
-  List<String> getRegions() {
-    final regions = nearbyMountains.map((m) => m.region).where((region) => region != null && region!.isNotEmpty).map((region) => region!).toSet().toList();
-    regions.sort();
-    return ['전체', ...regions];
-  }
+//   Future<void> initializeData() async {
+//     await loadNearbyMountains(); // 산 정보 불러오기
+//   }
 
-  void applyFilter() {
-    setState(() {
-      filteredMountains = nearbyMountains.where((m) {
-        final matchesName = m.name.contains(searchQuery);
-        final matchesRegion =
-            selectedRegion == '전체' || m.region == selectedRegion;
-        return matchesName && matchesRegion;
-      }).toList();
-    });
-  }
+//   Future<void> loadNearbyMountains() async {
+//     try {
+//       print('📡 전체 산 데이터를 불러오는 중...');
+//       // List<Mountain> allMountains = await MountainApi.fetchMountains();
+//       final allMountains = await MountainService.fetchTop100WithFullInfo();
+//       print('📋 전체 산 개수: ${allMountains.length}');
 
-  @override
-  void initState() {
-    super.initState();
-    initializeData();
-  }
+//       for (final mountain in allMountains.take(10)) {
+//         print(
+//           '📌 ${mountain.name} → lat: ${mountain.latitude}, lng: ${mountain.longitude}',
+//         );
+//       }
 
-  Future<void> initializeData() async {
-    await loadNearbyMountains(); // 산 정보 불러오기
-  }
+//       if (allMountains.isNotEmpty) {
+//         final sample = allMountains.first;
+//         print(
+//           '🗻 샘플 산 위치: ${sample.name}, latitude: ${sample.latitude}, longitude: ${sample.longitude}',
+//         );
+//       }
 
-  Future<void> loadNearbyMountains() async {
-    try {
-      print('📡 전체 산 데이터를 불러오는 중...');
-      // List<Mountain> allMountains = await MountainApi.fetchMountains();
-      final allMountains = await MountainService.fetchMountainsWithAPIs();
-      print('📋 전체 산 개수: ${allMountains.length}');
+//       print('📍 현재 위치 불러오는 중...');
+//       Position? current = await LocationService.determinePosition();
+//       print('✅ 위치 결과: $current');
+//       // Position current = await LocationService.getCurrentPosition();
+//       if (current == null) {
+//         print('⚠️ 현재 위치를 가져오지 못했습니다.');
+//         setState(() {
+//           nearbyMountains = []; // 위치 못 불러온 경우 빈 리스트 처리
+//           isLoading = false;
+//         });
+//         return;
+//       }
+//       print("🧭 현재 위치: ${current.latitude}, ${current.longitude}");
 
-      for (final mountain in allMountains.take(10)) {
-        print(
-          '📌 ${mountain.name} → lat: ${mountain.latitude}, lng: ${mountain.longitude}',
-        );
-      }
+//       List<Mountain> filtered =
+//           allMountains.where((mountain) {
+//             double distance = DistanceUtil.calculateDistance(
+//               current.latitude,
+//               current.longitude,
+//               mountain.latitude,
+//               mountain.longitude,
+//             );
+//             return distance < 100.0; // 해당 반경 이내
+//           }).toList();
 
-      // 산을 제대로 불러오는 지 확인
-      // if (allMountains.isNotEmpty) {
-      //   final sample = allMountains.first;
-      //   print(
-      //     '🗻 샘플 산 위치: ${sample.name}, latitude: ${sample.latitude}, longitude: ${sample.longitude}',
-      //   );
-      // }
+//       print('🎯 필터링된 산 개수 (100km 이내): ${filtered.length}');
 
-      print('📍 현재 위치 불러오는 중...');
-      Position? current = await LocationService.determinePosition();
-      print('✅ 위치 결과: $current');
-      // Position current = await LocationService.getCurrentPosition();
-      if (current == null) {
-        print('⚠️ 현재 위치를 가져오지 못했습니다.');
-        setState(() {
-          nearbyMountains = []; // 위치 못 불러온 경우 빈 리스트 처리
-          filteredMountains = [];
-          isLoading = false;
-        });
-        return;
-      }
-      print("🧭 현재 위치: ${current.latitude}, ${current.longitude}");
+//       setState(() {
+//         nearbyMountains = filtered;
+//         isLoading = false;
+//       });
+//     } catch (e) {
+//       print('🚨 오류 발생: $e');
+//       setState(() {
+//         isLoading = false;
+//       });
+//     }
+//   }
 
-      _initialCameraPosition = NCameraPosition(
-        target: NLatLng(current.latitude, current.longitude),
-        zoom: 10,
-      );
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: Stack(
+//         children: [
+//           Container(color: Colors.blue.shade100), // 임시 지도 대체용
+//           if (isLoading)
+//             const Center(child: CircularProgressIndicator())
+//           else if (nearbyMountains.isEmpty)
+//             const Center(child: Text("근처 산이 없습니다.")),
+//           // else
+//           // SlidingPanel(
+//           //   child: MountainCollageView(mountains: nearbyMountains),
+//           // ),
+//         ],
+//       ),
+//     );
+//   }
+// }
 
-      List<Mountain> filtered =
-          allMountains.where((mountain) {
-            double distance = DistanceUtil.calculateDistance(
-              current.latitude,
-              current.longitude,
-              mountain.latitude,
-              mountain.longitude,
-            );
-            return distance < 100.0; // 해당 반경 이내
-          }).toList();
-
-      print('🎯 필터링된 산 개수 (100km 이내): ${filtered.length}');
-
-      // 마커 세팅
-      _markers.clear();
-      for (final mountain in filtered) {
-        final marker = NMarker(
-          id: mountain.name,
-          position: NLatLng(mountain.latitude, mountain.longitude),
-        );
-        marker.setOnTapListener((_) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MountainDetailPage(mountain: mountain),
-            ),
-          );
-        });
-        _markers.add(marker);
-      }
-
-      setState(() {
-        nearbyMountains = filtered;
-        filteredMountains = filtered;
-        isLoading = false;
-      });
-    } catch (e) {
-      print('🚨 오류 발생: $e');
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 40, 16, 0),
-                  child: Column(
-                    children: [
-                      TextField(
-                        decoration: const InputDecoration(
-                          hintText: '산 이름 검색',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(),
-                        ),
-                        onChanged: (value) {
-                          searchQuery = value;
-                          applyFilter();
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      DropdownButton<String>(
-                        isExpanded: true,
-                        value: selectedRegion,
-                        items: getRegions().map((region) {
-                          return DropdownMenuItem<String>(
-                            value: region,
-                            child: Text(region),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            selectedRegion = value;
-                            applyFilter();
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: nearbyMountains.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text('근처 산이 없습니다 🏔️'),
-                              const SizedBox(height: 12),
-                              ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    isLoading = true;
-                                  });
-                                  loadNearbyMountains();
-                                },
-                                child: const Text('다시 시도'),
-                              ),
-                            ],
-                          ),
-                        )
-                      : SlidingUpPanel(
-                        controller: _panelController,
-                        minHeight: 140,
-                        maxHeight: MediaQuery.of(context).size.height * 0.7,
-                        panel: MountainCollageView(mountains: filteredMountains),
-                        body: NaverMap(
-                          options: NaverMapViewOptions(
-                          initialCameraPosition: _initialCameraPosition,
-                          locationButtonEnable: true,
-                          indoorEnable: true,
-                          consumeSymbolTapEvents: true, //네이버 심볼 이벤트 방지_false이면 네이버 마커 동작 수행
-                        ),
-                        onMapReady: (controller) async {
-                          for (final marker in _markers) {
-                            await controller.addOverlay(marker);
-                          }
-                        }, 
-                    ),
-                  ),
-                ),
-              ],
-          ),
-      );
-    }
-  }
+// //       body: isLoading
+// //   ? Center(child: CircularProgressIndicator())
+// //   : nearbyMountains.isEmpty
+// //     ? Center(
+// //         child: Column(
+// //           mainAxisAlignment: MainAxisAlignment.center,
+// //           children: [
+// //             Text('근처 산이 없습니다 🏔️'),
+// //             SizedBox(height: 12),
+// //             ElevatedButton(
+// //               onPressed: () {
+// //                 setState(() {
+// //                   isLoading = true;
+// //                 });
+// //                 loadNearbyMountains(); // 다시 불러오기
+// //               },
+// //               child: Text('다시 시도'),
+// //             ),
+// //           ],
+// //         ),
+// //       )
+// //     : ListView.builder(
+// //         itemCount: nearbyMountains.length,
+// //         itemBuilder: (context, index) {
+// //           return MountainCollageTile(mountain: nearbyMountains[index]);
+// //         },
+// //       ),
+// //     );
+// //   }
+// // }

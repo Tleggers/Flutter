@@ -1,60 +1,45 @@
-// lib/models/jw/QnaQuestion.dart
-import 'package:flutter/foundation.dart';
-import 'dart:collection';
-
-class QnaQuestion {
+// lib/models/jw/QnaAnswer.dart
+class QnaAnswer {
   final int id;
+  final int questionId;
   final int userId; // int 타입
   final String nickname;
-  final String title;
   final String content;
-  final String mountain;
   final List<String> imagePaths;
-  final int viewCount;
-  final int answerCount;
   final int likeCount;
-  final bool isSolved;
-  final int? acceptedAnswerId;
+  final bool isAccepted;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
-  QnaQuestion({
+  QnaAnswer({
     required this.id,
+    required this.questionId,
     required this.userId, // int 타입
     required this.nickname,
-    required this.title,
     required this.content,
-    required this.mountain,
     this.imagePaths = const [],
-    required this.viewCount,
-    required this.answerCount,
     required this.likeCount,
-    required this.isSolved,
-    this.acceptedAnswerId,
+    required this.isAccepted,
     required this.createdAt,
     this.updatedAt,
   });
 
-  factory QnaQuestion.fromJson(Map<String, dynamic> json) {
-    return QnaQuestion(
+  factory QnaAnswer.fromJson(Map<String, dynamic> json) {
+    return QnaAnswer(
       id: json['id'] ?? 0,
+      questionId: json['questionId'] ?? 0,
       userId:
           (json['userId'] is String)
               ? int.parse(json['userId'])
               : (json['userId'] ?? 0), // String -> int 안전 파싱
       nickname: json['nickname'] ?? '',
-      title: json['title'] ?? '',
       content: json['content'] ?? '',
-      mountain: json['mountain'] ?? '',
       imagePaths:
           json['imagePaths'] != null
               ? List<String>.from(json['imagePaths'])
               : [],
-      viewCount: json['viewCount'] ?? 0,
-      answerCount: json['answerCount'] ?? 0,
       likeCount: json['likeCount'] ?? 0,
-      isSolved: json['isSolved'] ?? false,
-      acceptedAnswerId: json['acceptedAnswerId'],
+      isAccepted: json['isAccepted'] ?? false,
       createdAt:
           json['createdAt'] != null
               ? DateTime.parse(json['createdAt'])
@@ -67,48 +52,38 @@ class QnaQuestion {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'questionId': questionId,
       'userId': userId, // int 그대로 전송
       'nickname': nickname,
-      'title': title,
       'content': content,
-      'mountain': mountain,
       'imagePaths': imagePaths,
-      'viewCount': viewCount,
-      'answerCount': answerCount,
       'likeCount': likeCount,
-      'isSolved': isSolved,
-      'acceptedAnswerId': acceptedAnswerId,
+      'isAccepted': isAccepted,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 
-  QnaQuestion copyWith({
+  QnaAnswer copyWith({
     int? id,
+    int? questionId,
     int? userId, // int 타입
     String? nickname,
-    String? title,
     String? content,
-    String? mountain,
     List<String>? imagePaths,
-    int? viewCount,
     int? likeCount,
-    int? answerCount,
-    bool? isSolved,
+    bool? isAccepted,
     DateTime? createdAt,
   }) {
-    return QnaQuestion(
+    return QnaAnswer(
       id: id ?? this.id,
+      questionId: questionId ?? this.questionId,
       userId: userId ?? this.userId,
       nickname: nickname ?? this.nickname,
-      title: title ?? this.title,
       content: content ?? this.content,
-      mountain: mountain ?? this.mountain,
       imagePaths: imagePaths ?? this.imagePaths,
-      viewCount: viewCount ?? this.viewCount,
       likeCount: likeCount ?? this.likeCount,
-      answerCount: answerCount ?? this.answerCount,
-      isSolved: isSolved ?? this.isSolved,
+      isAccepted: isAccepted ?? this.isAccepted,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

@@ -4,7 +4,6 @@ import 'package:trekkit_flutter/functions/jh/userprovider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:trekkit_flutter/models/jw/Post.dart';
-import 'package:trekkit_flutter/services/jw/AuthService.dart';
 import 'package:trekkit_flutter/services/jw/PostService.dart';
 
 class PostWriting extends StatefulWidget {
@@ -75,6 +74,7 @@ class _PostWritingState extends State<PostWriting> {
     try {
       final imagePaths = await PostService.uploadImages(
         _images.map((xfile) => File(xfile.path)).toList(),
+        context, // context 전달
       );
       _uploadedImagePaths = imagePaths;
     } catch (e) {
@@ -107,13 +107,13 @@ class _PostWritingState extends State<PostWriting> {
 
     try {
       // 1. 이미지 업로드 (있는 경우)
-      await _uploadImages();
+      await _uploadImages(); // _uploadImages 내부에서 context를 사용하도록 수정됨
 
       // 2. 게시글 작성
       final post = Post(
         nickname: userProvider.nickname ?? 'Unknown',
-        // userId 필드가 있다면 추가
-        // userId: userProvider.index.toString(),
+        // userId 필드가 있다면 추가 (Comment.dart 처럼 Post.dart에도 userId를 추가했다면 사용)
+        // userId: userProvider.index, // Post 모델에 userId가 int 타입으로 정의되어 있다면 사용
         title:
             _titleController.text.trim().isEmpty
                 ? null
@@ -124,7 +124,7 @@ class _PostWritingState extends State<PostWriting> {
         createdAt: DateTime.now(),
       );
 
-      await PostService.createPost(post);
+      await PostService.createPost(post, context); // context 전달
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

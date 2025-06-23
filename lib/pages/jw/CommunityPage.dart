@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:trekkit_flutter/functions/jh/userprovider.dart';
-import 'package:trekkit_flutter/services/jw/AuthService.dart';
+import 'package:trekkit_flutter/functions/jh/userprovider.dart'; // UserProvider 임포트
 import 'package:trekkit_flutter/services/jw/PostService.dart';
-import 'package:trekkit_flutter/models/jw/Post.dart';
+import 'package:trekkit_flutter/models/jw/Post.dart'; // Post 모델 임포트
 import 'package:trekkit_flutter/pages/jh/Login_and_Signup/login.dart';
 import 'package:trekkit_flutter/pages/jw/PostWriting.dart';
 import 'package:trekkit_flutter/pages/jw/ViewDetail.dart';
 import 'package:trekkit_flutter/pages/jw/QnAPage.dart';
+import 'package:trekkit_flutter/services/jw/AuthService.dart'; // AuthService 임포트
 
 class CommunityPage extends StatefulWidget {
   const CommunityPage({super.key});
@@ -25,7 +25,7 @@ class _CommunityPageState extends State<CommunityPage>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     // 앱 시작 시 로그인 상태 확인
-    AuthService().checkLoginStatus();
+    AuthService().checkLoginStatus(context);
 
     // 탭 변경 감지를 위한 리스너 추가
     _tabController.addListener(() {
@@ -42,7 +42,9 @@ class _CommunityPageState extends State<CommunityPage>
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final userProvider = Provider.of<UserProvider>(context);
+    final userProvider = Provider.of<UserProvider>(
+      context,
+    ); // UserProvider 인스턴스 가져오기
 
     return Scaffold(
       appBar: AppBar(
@@ -50,7 +52,7 @@ class _CommunityPageState extends State<CommunityPage>
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
         actions: [
-          if (userProvider.isLoggedIn)
+          if (userProvider.isLoggedIn) // UserProvider를 통해 로그인 상태 확인
             const Padding(
               padding: EdgeInsets.only(right: 16),
               child: Center(child: Icon(Icons.person)),
@@ -71,12 +73,15 @@ class _CommunityPageState extends State<CommunityPage>
           // 실시간 탭 - 기존 커뮤니티 글 표시
           Padding(
             padding: EdgeInsets.all(screenWidth * 0.04),
-            child: const Column(
+            child: Column(
+              // const 제거, PostList에 context 전달 위해 Column 위젯 사용
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                PostFilter(),
-                SizedBox(height: 16),
-                Expanded(child: PostList()),
+                const PostFilter(),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: PostList(context: context), // PostList에 context 전달
+                ),
               ],
             ),
           ),
@@ -95,6 +100,7 @@ class _CommunityPageState extends State<CommunityPage>
                   );
 
                   if (!userProvider.isLoggedIn) {
+                    // UserProvider를 통해 로그인 상태 확인
                     // 비로그인 상태: 로그인 페이지로 이동
                     final result = await Navigator.push<bool>(
                       context,
@@ -236,9 +242,10 @@ class _PostFilterState extends State<PostFilter> {
   }
 }
 
-// PostList와 PostItem 클래스들도 기존과 동일하게 유지...
+// PostList에 context를 추가 (기존 PostList 코드에 context 파라미터 추가)
 class PostList extends StatefulWidget {
-  const PostList({super.key});
+  final BuildContext context; // context를 필수로 받도록 추가
+  const PostList({super.key, required this.context}); // 생성자에 context 추가
 
   @override
   State<PostList> createState() => PostListState();
@@ -301,6 +308,7 @@ class PostListState extends State<PostList> {
         mountain: _currentMountain,
         page: _currentPage,
         size: 10,
+        context: widget.context, // PostService.getPosts에 context 전달
       );
 
       setState(() {
@@ -324,7 +332,7 @@ class PostListState extends State<PostList> {
   Future<void> _loadMorePosts() async {
     if (_posts.length >= _totalCount) return;
     _currentPage++;
-    await _loadPosts();
+    await _loadPosts(); // _loadPosts가 context를 사용하므로 이대로 두면 됨
   }
 
   Future<void> _refresh() async {
@@ -332,7 +340,7 @@ class PostListState extends State<PostList> {
       _currentPage = 0;
       _posts.clear();
     });
-    await _loadPosts();
+    await _loadPosts(); // _loadPosts가 context를 사용하므로 이대로 두면 됨
   }
 
   @override
@@ -390,6 +398,9 @@ class PostListState extends State<PostList> {
             child: PostItem(
               post: _posts[index],
               onUpdate: () => setState(() {}),
+              // PostItem 내에서 PostService 호출 시 context가 필요하다면
+              // 여기에 context를 전달하거나, PostItem 내부에서 Provider.of를 통해 직접 접근해야 함.
+              // 현재 PostItem에서는 context를 직접 사용하므로 별도 전달 불필요.
             ),
           );
         },
@@ -413,7 +424,9 @@ class _PostItemState extends State<PostItem> {
   bool _isBookmarkLoading = false;
 
   Future<void> _toggleLike() async {
-    if (!AuthService().isLoggedIn) {
+    // AuthService().isLoggedIn 대신 UserProvider를 직접 사용합니다.
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('로그인이 필요합니다')));
@@ -424,7 +437,8 @@ class _PostItemState extends State<PostItem> {
     setState(() => _isLikeLoading = true);
 
     try {
-      await PostService.toggleLike(widget.post.id!, AuthService().userId!);
+      // PostService.toggleLike에 context 전달
+      await PostService.toggleLike(widget.post.id!, context);
       widget.onUpdate?.call();
     } catch (e) {
       if (mounted) {
@@ -438,7 +452,9 @@ class _PostItemState extends State<PostItem> {
   }
 
   Future<void> _toggleBookmark() async {
-    if (!AuthService().isLoggedIn) {
+    // AuthService().isLoggedIn 대신 UserProvider를 직접 사용합니다.
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (!userProvider.isLoggedIn) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('로그인이 필요합니다')));
@@ -449,7 +465,8 @@ class _PostItemState extends State<PostItem> {
     setState(() => _isBookmarkLoading = true);
 
     try {
-      await PostService.toggleBookmark(widget.post.id!, AuthService().userId!);
+      // PostService.toggleBookmark에 context 전달
+      await PostService.toggleBookmark(widget.post.id!, context);
       widget.onUpdate?.call();
     } catch (e) {
       if (mounted) {
