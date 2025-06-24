@@ -55,11 +55,13 @@ Future<void> loginHandler({
       }
 
       final body = jsonDecode(response.body);
+      print(body);
       final token = body['token']; // 토큰
       final nickname = body['nickname']; // 닉네임
       final profile = body['profile']; // 프로필
       final logintype = body['logintype']; // 로그인 타입(ex.KAKAO,LOCAL)
       final index = body['index']; // 인덱스 (DB에서 ID를 의미)
+      final point = body['point'] ?? 0; // 포인트
 
       if (token != null) {
         final prefs = await SharedPreferences.getInstance();
@@ -68,6 +70,7 @@ Future<void> loginHandler({
         await prefs.setString('profile', profile);
         await prefs.setString('logintype', logintype);
         await prefs.setInt('index', index);
+        await prefs.setInt('point', point);
 
         Provider.of<UserProvider>(context, listen: false).login(
           token,
@@ -75,6 +78,7 @@ Future<void> loginHandler({
           profile,
           logintype,
           index,
+          point,
         );
 
         if (!context.mounted) return;
