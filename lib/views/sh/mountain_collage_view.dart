@@ -4,6 +4,7 @@ import 'package:trekkit_flutter/models/sh/mountain.dart';
 import 'package:trekkit_flutter/services/sh/image_loader.dart';
 import 'package:trekkit_flutter/pages/sh/mountain_detail_page.dart';
 
+//리스트 페이지 외부 이미지 콜라주
 class MountainCollageView extends StatelessWidget {
   final List<Mountain> mountains;
   final ScrollController scrollController;

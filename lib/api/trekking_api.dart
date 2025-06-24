@@ -10,7 +10,7 @@ class TrekkingApi {
 
   static Future<Map<String, Map<String, dynamic>>> fetchMountainCoords() async {
     final url = Uri.parse(
-      '$_baseUrl/getTop100FamtListBasiInfoList?serviceKey=$_apiKey&numOfRows=100&pageNo=1&type=json',
+      '$_baseUrl/getTop100FamtListBasiInfoList?serviceKey=$_apiKey&numOfRows=&pageNo=&type=json',
     );
 
     final response = await http.get(url);

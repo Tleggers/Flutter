@@ -13,8 +13,7 @@ class MountainService {
     final coordMap = await TrekkingApi.fetchMountainCoords(); // 이름 → 위경도
 
     // 3. 산림청 산 정보
-    final forestInfoMap =
-        await MountainInfoApi.fetchMountainInfo(); // 이름 → 상세정보 map
+    final forestInfoMap = await MountainInfoApi.fetchMountainInfo(); // 이름 → 상세정보 map
     print('산림청 산 정보 개수: ${forestInfoMap.length}'); // 디버깅용
 
     // 4. 산림청 등산로 정보

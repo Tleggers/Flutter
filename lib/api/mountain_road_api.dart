@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-//산림청 등산로 API
+//산림청 등산로정보 API
 class MountainTrailApi {
   static const String _apiKey = 
       'b96eSjTza7C7QbPobZvC9k42Yn9TmGV4y%2BxTx%2B0W2d97ycimCfjKE%2F5rd5Bpj9%2FYTvDxlQPEceC6dctxSDDytA%3D%3D';
   static const String _baseUrl =
-      'http://openapi.forest.go.kr/openapi/service/trailInfoService/getforestspatialdataservice';
+      'http://openapi.forest.go.kr/openapi/service/cultureInfoService/gdTrailInfoOpenAPI';
 
   // static Future<Map<String, List<String>>> fetchTrails() async {
    static Future<Map<String, Map<String, String>>> fetchTrails(List<String> mountainNames) async {

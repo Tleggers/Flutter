@@ -3,6 +3,7 @@ import 'package:trekkit_flutter/models/sh/mountain.dart';
 import 'package:trekkit_flutter/pages/sh/mountain_detail_page.dart';
 import 'package:trekkit_flutter/services/sh/image_loader.dart';
 
+//디테일 페이지 내부 슬라이딩 이미지 카드
 class MountainCard extends StatefulWidget {
   final Mountain mountain;
 
