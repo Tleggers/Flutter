@@ -39,6 +39,7 @@ void main() async {
   final profile = prefs.getString('profile');
   final logintype = prefs.getString('logintype');
   final index = prefs.getInt('index');
+  final point = prefs.getInt('point');
 
   final userProvider = UserProvider();
 
@@ -49,6 +50,7 @@ void main() async {
       profile ?? '',
       logintype ?? '',
       index,
+      point!,
     );
   }
 

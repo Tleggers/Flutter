@@ -5,9 +5,6 @@ Future<void> requestActivityPermission() async {
   if (!status.isGranted) {
     final result = await Permission.activityRecognition.request();
     if (result.isGranted) {
-      print("🎉 ACTIVITY_RECOGNITION 권한 허용됨");
-    } else {
-      print("❌ ACTIVITY_RECOGNITION 권한 거부됨");
     }
   }
 }

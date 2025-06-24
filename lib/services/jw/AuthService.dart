@@ -78,6 +78,7 @@ class AuthService extends ChangeNotifier {
     await prefs.remove('profile'); // 'profile' 키 삭제
     await prefs.remove('logintype'); // 'logintype' 키 삭제
     await prefs.remove('index'); // 'index' 키 삭제
+    await prefs.remove('point'); // 'points' 키 삭제
     await prefs.remove(
       'jwtToken',
     ); // AuthService가 자체적으로 저장했을 수 있는 'jwtToken' 키도 삭제
@@ -130,6 +131,7 @@ class AuthService extends ChangeNotifier {
       final String? profile = prefs.getString('profile'); // 프로필 로드
       final String? logintype = prefs.getString('logintype'); // 로그인 타입 로드
       final int? index = prefs.getInt('index'); // 사용자 인덱스 로드
+      final int? point = prefs.getInt('point'); // 포인트
 
       // 사용자 정보가 모두 유효하면 UserProvider를 통해 로그인 상태로 설정합니다.
       if (nickname != null && logintype != null && index != null) {
@@ -139,6 +141,7 @@ class AuthService extends ChangeNotifier {
           profile ?? '', // 프로필이 null일 경우 빈 문자열 전달 (UserProvider의 요구사항에 맞춤)
           logintype, // 로드된 로그인 타입
           index, // 로드된 사용자 인덱스
+          point!, // 로드된 포인트
         );
         debugPrint(
           'AuthService: 로그인 상태 확인 성공 (간접 검증): $index (로그인됨)',

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import '../../functions/jh/userprovider.dart';
 import '../../widgets/jh/MyPage/MyPageBanner/mypagebanner.dart';
 import '../../widgets/jh/MyPage/MyPageHeader/mypageheader.dart';
+import '../../widgets/jh/MyPage/MyPageHeader/point/point_widget.dart';
 import '../../widgets/jh/MyPage/MyPagePolicy/policysection.dart';
 import '../../widgets/jh/MyPage/MyPageUse/mypageusesection.dart';
 
@@ -15,6 +17,8 @@ class MyPage extends StatelessWidget {
     
     final screenWidth = MediaQuery.of(context).size.width; // 화면 가로 크기
     final screenHeight = MediaQuery.of(context).size.height; // 화면 세로 크기
+    final userProvider = Provider.of<UserProvider>(context);
+    final isLoggedIn = userProvider.isLoggedIn;
 
     return Scaffold(
       
@@ -31,6 +35,13 @@ class MyPage extends StatelessWidget {
             // MyPageHeader -> 로그인 및 회원가입 있는 Container
             child: MyPageHeader(screenWidth: screenWidth, screenHeight: screenHeight,),
           ),
+
+          isLoggedIn
+              ? PointWidget(
+            screenWidth: screenWidth,
+            screenHeight: screenHeight,
+          ): SizedBox.shrink(), // 로그인 안한 상태면 출력 X
+
 
           SizedBox(height: screenHeight * 0.01),
 
