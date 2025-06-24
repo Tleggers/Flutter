@@ -72,21 +72,7 @@ class _MapPageState extends State<MapPage> {
       // List<Mountain> allMountains = await MountainApi.fetchMountains();
       final allMountains = await MountainService.fetchMountainsWithAPIs();
       print('📋 전체 산 개수: ${allMountains.length}');
-
-      // for (final mountain in allMountains.take(10)) {
-      //   print(
-      //     '📌 ${mountain.name} → lat: ${mountain.latitude}, lng: ${mountain.longitude}',
-      //   );
-      // }
-
-      // 산을 제대로 불러오는 지 확인
-      // if (allMountains.isNotEmpty) {
-      //   final sample = allMountains.first;
-      //   print(
-      //     '🗻 샘플 산 위치: ${sample.name}, latitude: ${sample.latitude}, longitude: ${sample.longitude}',
-      //   );
-      // }
-
+      
       print('📍 현재 위치 불러오는 중...');
       Position? current = await LocationService.determinePosition();
       print('✅ 위치 결과: $current');

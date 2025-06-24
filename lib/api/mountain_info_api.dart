@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:trekkit_flutter/models/sh/mountain.dart';
 
 //산림청 산정보 API
 class MountainInfoApi {

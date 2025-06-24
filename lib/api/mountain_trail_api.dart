@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:trekkit_flutter/models/sh/mountain.dart';
 
-//산림청 등산로 API
+//산림청 등산로정보 API
 class MountainTrailApi {
   static const String _apiKey = 
       'b96eSjTza7C7QbPobZvC9k42Yn9TmGV4y%2BxTx%2B0W2d97ycimCfjKE%2F5rd5Bpj9%2FYTvDxlQPEceC6dctxSDDytA%3D%3D';
@@ -14,7 +15,7 @@ class MountainTrailApi {
 
     for (final name in mountainNames) {
       final uri = Uri.parse(
-          '$_baseUrl?mntnNm=$name&serviceKey=$_apiKey&numOfRows=&pageNo=&_type=json');
+          '$_baseUrl?mntnNm=$name&serviceKey=$_apiKey&numOfRows=1000&pageNo=1&_type=json');
 
       final response = await http.get(uri);
 
@@ -30,7 +31,7 @@ class MountainTrailApi {
               'trailImageUrl': item['mntnimg']?.toString() ?? '',
               'trailFileUrl': item['mntnfile']?.toString() ?? '',
             };
-            break; // 여러 개 있을 경우 첫 번째만 사용
+            break;
           }
         } else if (items is Map) {
           trailInfoMap[name] = {

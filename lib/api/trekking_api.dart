@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:trekkit_flutter/models/sh/mountain.dart';
 
 // 한국 트레킹센터 100대 명산 API를 요청하고 데이터를 가져오는 클래스
 class TrekkingApi {
@@ -10,7 +11,7 @@ class TrekkingApi {
 
   static Future<Map<String, Map<String, dynamic>>> fetchMountainCoords() async {
     final url = Uri.parse(
-      '$_baseUrl/getTop100FamtListBasiInfoList?serviceKey=$_apiKey&numOfRows=&pageNo=&type=json',
+      '$_baseUrl/getTop100FamtListBasiInfoList?serviceKey=$_apiKey&numOfRows=100&pageNo=1&type=json',
     );
 
     final response = await http.get(url);
