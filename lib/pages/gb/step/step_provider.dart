@@ -11,7 +11,6 @@ import 'package:http/http.dart' as http;
 class StepProvider with ChangeNotifier {
   int _currentStep = 0; // 오늘 걸은 거리
   int _dailyTotal = 0; // 오늘 누적 거리 (DB 저장용)
-  int _monthlyTotal = 0; // 월별 누적 거리 (DB 저장용)
   int _goalInMeters = 3000; // 목표 거리 (기본값: 3km)
 
   int? _userId; // 로그인된 유저 ID (비로그인 시 null)
@@ -20,7 +19,6 @@ class StepProvider with ChangeNotifier {
   // 외부에서 접근 가능한 Getter
   int get currentStep => _currentStep;
   int get dailyTotal => _dailyTotal;
-  int get monthlyTotal => _monthlyTotal;
   int get goalInMeters => _goalInMeters;
   int get yesterdayStep => 1800; // 추후 DB에서 동적으로 불러오기
 
@@ -54,28 +52,27 @@ class StepProvider with ChangeNotifier {
 
     // 🕛 날짜가 바뀐 경우 처리
     if (!_isSameDay(_lastUpdated, now)) {
-      // 일별 초기화
-      _currentStep = 0;
-      _dailyTotal = 0;
-
-      // 월이 바뀐 경우 월별도 초기화
-      if (_lastUpdated.month != now.month) {
-        _monthlyTotal = 0;
-      }
+      final yesterdayDate = _lastUpdated; // ✅ 전날 날짜 저장
+      final yesterdayDistance = _dailyTotal; // ✅ 전날 거리 저장
 
       // 💾 로그인 상태일 경우 → 어제 데이터 서버 전송
       if (_userId != null) {
-        _sendYesterdayDataToServer();
+        _sendYesterdayDataToServer(
+          date: yesterdayDate,
+          distance: yesterdayDistance,
+        );
       }
+
+      // ✅ 오늘 날짜 기준으로 초기화
+      _currentStep = 0;
+      _dailyTotal = 0;
 
       _lastUpdated = now;
     }
 
     // 오늘 걸음 수 및 누적값 갱신
     _currentStep = stepInMeters;
-    _dailyTotal += stepInMeters;
-    _monthlyTotal += stepInMeters;
-
+    _dailyTotal = stepInMeters; // ✅ 센서 값은 원래 누적값이기 때문에 그대로 사용
     notifyListeners();
   }
 
@@ -83,7 +80,6 @@ class StepProvider with ChangeNotifier {
   void resetAll() {
     _currentStep = 0;
     _dailyTotal = 0;
-    _monthlyTotal = 0;
     _goalInMeters = 3000;
     _lastUpdated = DateTime.now();
     notifyListeners();
@@ -95,11 +91,13 @@ class StepProvider with ChangeNotifier {
   }
 
   /// 🛰️ 서버에 어제 걸음 수 전송 (로그인 유저만)
-  Future<void> _sendYesterdayDataToServer() async {
+  Future<void> _sendYesterdayDataToServer({
+    required DateTime date,
+    required int distance,
+  }) async {
     if (_userId == null) return;
 
-    final walkDate = _lastUpdated.toIso8601String().split("T")[0]; // yyyy-MM-dd
-    final distance = _dailyTotal;
+    final walkDate = date.toIso8601String().split("T")[0]; // yyyy-MM-dd
 
     // TODO: 여기에서 실제 POST 요청 (Spring API 연동)
     print('📡 서버로 전송: user_id=$_userId, date=$walkDate, distance=$distance');
@@ -130,7 +128,6 @@ class StepProvider with ChangeNotifier {
 
   /// 📥 서버에서 오늘 거리 가져오기
   Future<void> fetchTodayStepFromServer() async {
-
     final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
     final url = Uri.parse('$baseUrl/step/daily?userId=$_userId');
 
@@ -139,9 +136,7 @@ class StepProvider with ChangeNotifier {
     final today = DateTime.now().toIso8601String().split("T")[0]; // yyyy-MM-dd
 
     try {
-      final response = await http.get(
-        url,
-      );
+      final response = await http.get(url);
 
       if (response.statusCode == 200) {
         final json = jsonDecode(response.body);
@@ -154,30 +149,4 @@ class StepProvider with ChangeNotifier {
       print('🚨 네트워크 오류: $e');
     }
   }
-
-  /// 📥 서버에서 이번 달 누적 거리 가져오기
-  // Future<void> fetchMonthlyStepFromServer() async {
-  //   if (_userId == null) return;
-
-  //   final now = DateTime.now();
-  //   final month = "${now.year}-${now.month.toString().padLeft(2, '0')}";
-
-  //   try {
-  //     final response = await http.get(
-  //       Uri.parse(
-  //         'http://localhost:8080/api/step/month?userId=$_userId&month=$month',
-  //       ),
-  //     );
-
-  //     if (response.statusCode == 200) {
-  //       final json = jsonDecode(response.body);
-  //       _monthlyTotal = json['totalDistance'];
-  //       notifyListeners();
-  //     } else {
-  //       print('❌ 월별 걸음 수 조회 실패: ${response.statusCode}');
-  //     }
-  //   } catch (e) {
-  //     print('🚨 네트워크 오류: $e');
-  //   }
-  // }
 }
