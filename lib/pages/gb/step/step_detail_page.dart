@@ -15,18 +15,15 @@ class StepDetailPage extends StatefulWidget {
 
 class _StepDetailPageState extends State<StepDetailPage>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
   DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this); // [일별, 주별] 탭
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
     super.dispose();
   }
 
@@ -38,18 +35,8 @@ class _StepDetailPageState extends State<StepDetailPage>
     return Scaffold(
       appBar: AppBar(
         title: const Text('만보기'), // 상단 제목
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [Tab(text: '일별'), Tab(text: '주별')],
-        ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildDailyTab(), // 일별 탭 UI
-          const Center(child: Text('주별 통계 (추후 구현)')), // 주별 탭 자리만 잡아둠
-        ],
-      ),
+      body: _buildDailyTab(), // 일별 탭 UI
     );
   }
 
@@ -126,7 +113,7 @@ class _StepDetailPageState extends State<StepDetailPage>
 
           // ⭕ 동그라미 게이지 바 삽입
           StepCircleGauge(
-            current: StepProvider().currentStep,
+            current: stepProvider.currentStep,
             goal: stepProvider.goalInMeters, // ✅ Provider에서 현재 값 가져옴
             onGoalTap: () {
               showModalBottomSheet(
