@@ -19,8 +19,7 @@ class PointWidget extends StatelessWidget {
   Widget build(BuildContext context) {
 
     final userProvider = Provider.of<UserProvider>(context); // 유저 provider
-    final stepProvider = Provider.of<StepProvider>(context, listen: false); // 걸음 수 provider
-    final currentStep = stepProvider.currentStep;
+    final stepProvider = Provider.of<StepProvider>(context); // 걸음 수 provider
 
     double boxHeight = screenHeight * 0.1;
     double fontSizeTitle = screenWidth * 0.04;
@@ -36,7 +35,7 @@ class PointWidget extends StatelessWidget {
         children: [
           _buildItem("내 포인트", userProvider.point.toString(), fontSizeTitle, fontSizeValue),
           _buildDivider(),
-          _buildItem("오늘 걸음 수", currentStep.toString(), fontSizeTitle, fontSizeValue),
+          _buildItem("오늘 걸음 수", stepProvider.dailyTotal.toString(), fontSizeTitle, fontSizeValue),
           _buildDivider(),
           Expanded(
             child: Center(

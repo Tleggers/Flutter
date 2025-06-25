@@ -38,7 +38,7 @@ class _MainPageState extends State<MainPage> {
     // 지도 화면
     MapPage(),
     // 커뮤니티 화면
-    CommunityPage(),
+    // CommunityPage(),
     // 마이페이지 화면
     MyPage(),
   ];
@@ -80,7 +80,7 @@ class _MainPageState extends State<MainPage> {
         // 설정한 인덱스에서는 로그아웃 버튼 생기게 하기
         actions:
             _selectedIndex ==
-                    3 // 2025-06-11 수정
+                    2 // 2025-06-11 수정
                 ? [
                   Padding(
                     padding: EdgeInsets.only(right: screenWidth * 0.06),
@@ -94,32 +94,24 @@ class _MainPageState extends State<MainPage> {
                         if (!userProvider.isLoggedIn) return;
 
                         final prefs = await SharedPreferences.getInstance();
-                        final loginType = prefs.getString(
-                          'logintype',
-                        ); // 'NORMAL', 'KAKAO', 'GOOGLE'
+                        final loginType = prefs.getString('logintype'); // 'NORMAL', 'KAKAO', 'GOOGLE'
 
                         try {
                           if (loginType == 'KAKAO') {
                             await UserApi.instance.logout();
-                            await UserApi.instance
-                                .unlink(); // 이건 배포 전 무조건 지워야함(매번 로그인을 띄우게 하기 위함)
+                            await UserApi.instance.unlink(); // 이건 배포 전 무조건 지워야함(매번 로그인을 띄우게 하기 위함)
                           } else if (loginType == 'GOOGLE') {
-                            // final GoogleSignIn _googleSignIn = GoogleSignIn();
-                            // await _googleSignIn.signOut();
                             await GoogleSignIn().signOut();
-                            print('구글 로그아웃 완료');
-                          } else {
-                            print('일반 로그인 로그아웃');
                           }
                         } catch (e) {
-                          print('소셜 로그아웃 실패: $e');
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('로그아웃 중 오류가 발생했습니다.')),
+                          );
                         }
 
-                        await prefs.remove('token');
-                        await prefs.remove('logintype');
-                        await prefs.remove('nickname');
-                        await prefs.remove('profile');
-                        await prefs.remove('index');
+                        // SharedPreference에 저장되어 있는 키들 제거(clear는 모두 제거)
+                        await prefs.clear();
 
                         // Provider에서 로그인 상태 초기화
                         userProvider.logout();

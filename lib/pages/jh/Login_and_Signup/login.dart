@@ -19,6 +19,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
@@ -54,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
             // 공백
             SizedBox(height: screenHeight * 0.03),
             
-            // 로그인 버튼들 위젯
+            // 로그인 버튼들 위젯(일반 로그인, 소셜 로그인)
             LoginButtonSection(
               idController: _idController,
               pwController: _pwController,
@@ -69,6 +70,7 @@ class _LoginPageState extends State<LoginPage> {
             // 아이디 및 비밀번호 찾기 + 회원가입 위젯
             LoginLink(screenWidth: screenWidth),
             SizedBox(height: screenHeight * 0.03),
+
           ],
         ),
       ),

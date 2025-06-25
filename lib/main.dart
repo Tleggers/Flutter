@@ -73,7 +73,7 @@ void main() async {
   );
 }
 
-/// 로그인 상태 복원 함수
+///  로그인 상태 복원 함수
 Future<UserProvider> restoreUser() async {
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('token');
@@ -107,7 +107,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      navigatorKey: navigatorKey, // ✅ 여기에 추가
+      navigatorKey: navigatorKey,
       home: MainPage(title: 'TrekKit'),
       routes: {
         '/stepDetail': (context) => const StepDetailPage(), // ← 0609 만보기 상세페이지

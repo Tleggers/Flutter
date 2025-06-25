@@ -17,8 +17,8 @@ class MyPage extends StatelessWidget {
     
     final screenWidth = MediaQuery.of(context).size.width; // 화면 가로 크기
     final screenHeight = MediaQuery.of(context).size.height; // 화면 세로 크기
-    final userProvider = Provider.of<UserProvider>(context);
-    final isLoggedIn = userProvider.isLoggedIn;
+    final userProvider = Provider.of<UserProvider>(context); // Provider
+    final isLoggedIn = userProvider.isLoggedIn; // 현재 로그인 여부
 
     return Scaffold(
       
@@ -29,19 +29,17 @@ class MyPage extends StatelessWidget {
         children: [
 
           // 프로필 박스
-          Container(
-            // 비 로그인 시 로그인 및 회원가입
-            // 로그인 시 프사 및 닉네임, 끝쪽에 있는 버튼 클릭 시 회원정보 수정(비 로그인 시는 눌러도 아무 효과 없게)
-            // MyPageHeader -> 로그인 및 회원가입 있는 Container
-            child: MyPageHeader(screenWidth: screenWidth, screenHeight: screenHeight,),
-          ),
+          // 비 로그인 시 로그인 및 회원가입
+          // 로그인 시 프사 및 닉네임, 끝쪽에 있는 버튼 클릭 시 회원정보 수정(비 로그인 시는 눌러도 아무 효과 없게)
+          // MyPageHeader -> 로그인 및 회원가입 있는 Container
+          MyPageHeader(screenWidth: screenWidth, screenHeight: screenHeight,),
 
+          // 로그인 상태라면 Point와 걸음수가 나와있는 위젯 호출
           isLoggedIn
               ? PointWidget(
             screenWidth: screenWidth,
             screenHeight: screenHeight,
           ): SizedBox.shrink(), // 로그인 안한 상태면 출력 X
-
 
           SizedBox(height: screenHeight * 0.01),
 
@@ -54,21 +52,6 @@ class MyPage extends StatelessWidget {
           
           // TrekKit 이용하기
           MyPageUseSection(screenWidth: screenWidth, screenHeight: screenHeight),
-
-          // SizedBox(height: screenHeight * 0.01), // 공백
-          //
-          // Divider(thickness: screenHeight * 0.005),
-          //
-          // SizedBox(height: screenHeight * 0.015),
-          //
-          // 북마크 내역을 출력 시켜줄 Container
-          // Container(
-          //   height: screenHeight * 0.12, // Container 높이
-          //   decoration: BoxDecoration(
-          //     border: Border.all(color: Colors.black),
-          //   ),
-          //   child: const Text('북마크 내역'), // 이건 나중에 지울 계획
-          // ),
 
           SizedBox(height: screenHeight * 0.015), // 공백
 
