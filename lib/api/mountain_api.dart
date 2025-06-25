@@ -15,13 +15,14 @@ class MountainApi {
   // ▶ 전체 산 정보를 가져오는 비동기 함수(산림청 명산등산로API)
   static Future<List<Mountain>> fetchMountains() async {
     final url = Uri.parse(
-      '$_baseUrl?serviceKey=$_apiKey&numOfRows=&pageNo=&_type=json',
+      '$_baseUrl?serviceKey=$_apiKey&numOfRows=100&pageNo=1&_type=json',
     );
 
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+
       final items = decoded['response']?['body']?['items']?['item'];
 
       if (items is List) {
