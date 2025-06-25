@@ -8,11 +8,13 @@ import 'mountain_intro_section.dart';
 class MountainDetailPage extends StatefulWidget {
   final String mountainName;
   final String? imageUrl;
+  final String location;
 
   const MountainDetailPage({
     super.key,
     required this.mountainName,
     required this.imageUrl,
+    required this.location,
   });
 
   @override
@@ -25,8 +27,9 @@ class _MountainDetailPageState extends State<MountainDetailPage> {
   @override
   void initState() {
     super.initState();
-    courseFuture = MountainCourseService.fetchByMountainName(
+    courseFuture = MountainCourseService.fetchByNameAndLocation(
       widget.mountainName,
+      widget.location,
     );
   }
 

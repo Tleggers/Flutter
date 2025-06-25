@@ -62,7 +62,12 @@ class _RegionListPageState extends State<RegionListPage> {
           // ✅ 해당 지역명 포함되는 산만 필터링
           final filtered =
               allMountains.where((mountain) {
-                return mountain.location.contains(regionName);
+                final normalizedLocation = mountain.location.replaceAll(
+                  ' ',
+                  '',
+                );
+                final normalizedRegion = regionName.replaceAll(' ', '');
+                return normalizedLocation.contains(normalizedRegion);
               }).toList();
 
           return ListView.builder(
@@ -139,6 +144,7 @@ class _RegionListPageState extends State<RegionListPage> {
                               (context) => MountainDetailPage(
                                 mountainName: mountain.name,
                                 imageUrl: imageUrl,
+                                location: mountain.location,
                               ),
                         ),
                       );

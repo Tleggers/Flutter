@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     children: [
                       SizedBox(
-                        height: screenHeight * 0.14,
+                        height: screenHeight * 0.11,
                         child: const StepHomeWidget(),
                       ),
                       SizedBox(height: screenHeight * 0.01),

@@ -104,6 +104,7 @@ class _SuggestRandomListPageState extends State<SuggestRandomListPage> {
                                 (context) => MountainDetailPage(
                                   mountainName: mountain.name,
                                   imageUrl: imageUrl,
+                                  location: mountain.location,
                                 ),
                           ),
                         );

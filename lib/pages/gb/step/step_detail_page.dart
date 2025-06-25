@@ -20,9 +20,10 @@ class _StepDetailPageState extends State<StepDetailPage>
   @override
   void initState() {
     super.initState();
-    // 어제 걸음 수 불러오기
     Future.microtask(() {
-      context.read<StepProvider>().fetchYesterdayStepFromServer();
+      final stepProvider = context.read<StepProvider>();
+      stepProvider.fetchYesterdayStepFromServer();
+      stepProvider.loadStepByDate(_selectedDate); // ✅ 날짜별 걸음수 불러오기
     });
   }
 
@@ -31,27 +32,22 @@ class _StepDetailPageState extends State<StepDetailPage>
     super.dispose();
   }
 
-  /// 날짜를 'yyyy.MM.dd' 형식으로 출력
   String get formattedDate => DateFormat('yyyy.MM.dd').format(_selectedDate);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('만보기'), // 상단 제목
-      ),
-      body: _buildDailyTab(), // 일별 탭 UI
+      appBar: AppBar(title: const Text('만보기')),
+      body: _buildDailyTab(),
     );
   }
 
-  /// 일별 탭 UI 구성
   Widget _buildDailyTab() {
     final stepProvider = context.watch<StepProvider>();
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // 🔻 날짜 선택 영역
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -63,6 +59,10 @@ class _StepDetailPageState extends State<StepDetailPage>
                       const Duration(days: 1),
                     );
                   });
+                  context.read<StepProvider>().loadStepByDate(_selectedDate);
+                  context.read<StepProvider>().loadPreviousDateStep(
+                    _selectedDate,
+                  );
                 },
               ),
               GestureDetector(
@@ -77,6 +77,10 @@ class _StepDetailPageState extends State<StepDetailPage>
                     setState(() {
                       _selectedDate = pickedDate;
                     });
+                    context.read<StepProvider>().loadStepByDate(_selectedDate);
+                    context.read<StepProvider>().loadPreviousDateStep(
+                      _selectedDate,
+                    );
                   }
                 },
                 child: Row(
@@ -89,12 +93,11 @@ class _StepDetailPageState extends State<StepDetailPage>
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.arrow_drop_down), // ▼ 아이콘
+                    const Icon(Icons.arrow_drop_down),
                   ],
                 ),
               ),
               IconButton(
-                // 항상 오른쪽 자리를 차지하도록, 투명 아이콘으로 유지
                 icon: Icon(
                   Icons.arrow_right,
                   color: _isToday ? Colors.transparent : Colors.black,
@@ -108,17 +111,24 @@ class _StepDetailPageState extends State<StepDetailPage>
                               const Duration(days: 1),
                             );
                           });
+                          context.read<StepProvider>().loadStepByDate(
+                            _selectedDate,
+                          );
+                          context.read<StepProvider>().loadPreviousDateStep(
+                            _selectedDate,
+                          );
                         },
               ),
             ],
           ),
-
           const SizedBox(height: 32),
-
-          // ⭕ 동그라미 게이지 바 삽입
           StepCircleGauge(
-            current: stepProvider.currentStep,
-            goal: stepProvider.goalInMeters, // ✅ Provider에서 현재 값 가져옴
+            current:
+                _isToday
+                    ? stepProvider.currentStep
+                    : stepProvider.selectedDateStep ?? 0,
+            goal: stepProvider.goalInMeters,
+            isToday: _isToday,
             onGoalTap: () {
               showModalBottomSheet(
                 context: context,
@@ -130,16 +140,18 @@ class _StepDetailPageState extends State<StepDetailPage>
               );
             },
           ),
-
           const SizedBox(height: 32),
-
-          // 👣 비교/응원 메시지 영역 자리만 잡기
-          // 비교 영역
           Builder(
             builder: (context) {
-              final stepProvider = context.watch<StepProvider>();
-              final today = stepProvider.currentStep;
-              final yesterday = stepProvider.yesterdayStep;
+              final today =
+                  _isToday
+                      ? stepProvider.currentStep
+                      : stepProvider.selectedDateStep ?? 0;
+
+              final yesterday =
+                  _isToday
+                      ? stepProvider.yesterdayStep
+                      : stepProvider.previousDateStep;
               final diff = today - yesterday;
 
               Icon icon;
@@ -153,7 +165,7 @@ class _StepDetailPageState extends State<StepDetailPage>
                 text = '${diff.abs()} m 적게 걸었어요';
               } else {
                 icon = const Icon(Icons.horizontal_rule, color: Colors.grey);
-                text = '좀 더 걸어볼까요?';
+                text = '0';
               }
 
               return Container(
@@ -163,8 +175,8 @@ class _StepDetailPageState extends State<StepDetailPage>
                 ),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 228, 223, 223), // 부드러운 배경
-                  borderRadius: BorderRadius.circular(12), // 모서리 둥글게
+                  color: const Color.fromARGB(255, 228, 223, 223),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
                   children: [
@@ -189,8 +201,6 @@ class _StepDetailPageState extends State<StepDetailPage>
               );
             },
           ),
-
-          // ↓ _buildDailyTab() 안 하단에 추가 (비교 아래)
           Text(
             StepMotivation.getTodayMessage(),
             style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
@@ -200,7 +210,6 @@ class _StepDetailPageState extends State<StepDetailPage>
     );
   }
 
-  /// 오늘 날짜와 동일한지 확인하는 헬퍼
   bool get _isToday {
     final now = DateTime.now();
     return _selectedDate.year == now.year &&

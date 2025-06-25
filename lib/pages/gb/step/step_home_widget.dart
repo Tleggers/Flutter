@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:trekkit_flutter/pages/gb/step/step_provider.dart'; // 상태 관리 Provider
+import 'package:intl/intl.dart';
+
+import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 import 'package:trekkit_flutter/functions/jh/userprovider.dart';
 
 class StepHomeWidget extends StatelessWidget {
@@ -9,56 +11,77 @@ class StepHomeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 상태를 가져옴 (걸음 수와 목표 거리 등)
     final stepProvider = Provider.of<StepProvider>(context);
-    final current = stepProvider.currentStep; // 현재 걸음(m)
-    final goal = stepProvider.goalInMeters; // 목표 거리(m)
-    final percent = stepProvider.progressPercent; // 퍼센트 비율 (0.0 ~ 1.0)
+    if (!stepProvider.isLoaded) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    // ✅ 로그인 상태 확인
+    final current = stepProvider.dailyTotal;
+    final goal = stepProvider.goalInMeters;
+    final percent = stepProvider.progressPercent;
     final userProvider = Provider.of<UserProvider>(context);
     final isLoggedIn = userProvider.isLoggedIn;
+
+    final formatter = NumberFormat('#,###');
 
     return GestureDetector(
       onTap: () {
         if (isLoggedIn) {
-          // ✅ 로그인된 상태 → 만보기 상세로 이동
           Navigator.pushNamed(context, '/stepDetail');
         } else {
-          // ❌ 로그인 안된 상태 → 알림 표시 또는 로그인 페이지 이동
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(const SnackBar(content: Text('로그인 후 이용 가능합니다')));
-
-          // 또는 로그인 화면으로 바로 이동하고 싶다면 아래 코드 사용
-          // Navigator.pushNamed(context, '/login');
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(12), // 안쪽 여백
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 209, 198, 198), // 연한 초록색 배경
-          borderRadius: BorderRadius.circular(12), // 둥근 테두리
+          color: const Color.fromARGB(255, 176, 206, 170),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // 왼쪽 정렬
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              '오늘 걸음수',
+              '걸음 수',
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),
-            Text(
-              '$current m / $goal m',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+
+            // ✅ 숫자 표시 라인 (current / goal)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  formatter.format(current),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(width: 4), // 숫자 사이 간격
+                Text(
+                  '/ ${formatter.format(goal)}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.black54, // 연한 텍스트
+                  ),
+                ),
+              ],
             ),
+
             const SizedBox(height: 8),
+
+            // ✅ 게이지바: 숫자 라인과 정확히 정렬되게
             LinearPercentIndicator(
               lineHeight: 8.0,
               percent: percent,
               backgroundColor: Colors.grey[300],
-              progressColor: Colors.green,
+              progressColor: Colors.deepOrange,
               barRadius: const Radius.circular(16),
+              padding: EdgeInsets.zero, // ✅ 좌우 간격 제거 → 숫자라인과 정렬
             ),
           ],
         ),
