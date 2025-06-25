@@ -1,7 +1,7 @@
 /// lib/models/jw/QnaQuestion.dart
 library;
 
-import 'package:flutter/foundation.dart'; // Flutter의 기본 유틸리티 기능을 위해 임포트 (예: @immutable 등)
+// Flutter의 기본 유틸리티 기능을 위해 임포트 (예: @immutable 등)
 
 /// QnA 질문(QnaQuestion) 데이터를 나타내는 모델 클래스입니다.
 /// 이 클래스는 질문의 고유 ID, 작성자 ID, 닉네임, 제목, 내용,

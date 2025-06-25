@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:trekkit_flutter/models/sh/mountain.dart';
 
 //산림청 산정보 API
 class MountainInfoApi {
@@ -17,35 +16,36 @@ class MountainInfoApi {
     final Map<String, Map<String, dynamic>> result = {};
 
     while (!done) {
-    final url = Uri.parse(
-      '$_baseUrl?serviceKey=$_serviceKey&numOfRows=$pageSize&pageNo=$page&MobileOS=ETC&MobileApp=trekkit&_type=json',
-    );
+      final url = Uri.parse(
+        '$_baseUrl?serviceKey=$_serviceKey&numOfRows=$pageSize&pageNo=$page&MobileOS=ETC&MobileApp=trekkit&_type=json',
+      );
 
-    try {
-      final response = await http.get(url);
+      try {
+        final response = await http.get(url);
 
-      if (response.statusCode == 200) {
-        final decoded = utf8.decode(response.bodyBytes);
-        final jsonResult = json.decode(decoded);
-        final items = jsonResult['response']['body']['items']['item'];
+        if (response.statusCode == 200) {
+          final decoded = utf8.decode(response.bodyBytes);
+          final jsonResult = json.decode(decoded);
+          final items = jsonResult['response']['body']['items']['item'];
 
-        if (items is List) {
-          for (var item in items) {
-            final name = item['mntiname']?.toString().trim();
-            if (name != null && name.isNotEmpty) {
-              result[name] = {
-                'height': item['mntihigh'],
-                'address': item['mntiadd'],
-                'summary': item['mntisummary'],
-                'details': item['mntidetails'],
-              };
+          if (items is List) {
+            for (var item in items) {
+              final name = item['mntiname']?.toString().trim();
+              if (name != null && name.isNotEmpty) {
+                result[name] = {
+                  'height': item['mntihigh'],
+                  'address': item['mntiadd'],
+                  'summary': item['mntisummary'],
+                  'details': item['mntidetails'],
+                };
+              }
             }
-          } if (items.length < pageSize) {
-        done = true;
-      } else {
-        page++;
-      }
-    } else if (items is Map) {
+            if (items.length < pageSize) {
+              done = true;
+            } else {
+              page++;
+            }
+          } else if (items is Map) {
             final name = items['mntiname']?.toString().trim();
             if (name != null && name.isNotEmpty) {
               result[name] = {

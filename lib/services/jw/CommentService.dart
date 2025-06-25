@@ -14,9 +14,7 @@ class CommentService {
 
   /// JWT 토큰을 포함하는 HTTP 요청 헤더를 생성하는 메서드입니다.
   /// 이 헤더는 인증이 필요한 API 요청에 사용됩니다.
-  /// [context]는 `AuthService`에서 토큰을 가져올 때 필요할 수 있습니다.
   static Map<String, String> _getAuthHeaders(BuildContext context) {
-    // AuthService 싱글톤 인스턴스에서 현재 JWT 토큰을 가져옵니다.
     final String? token = AuthService().jwtToken;
     return {
       'Content-Type': 'application/json', // 요청 본문이 JSON 형식임을 명시
@@ -49,15 +47,14 @@ class CommentService {
           )
           .timeout(const Duration(seconds: 10)); // 10초 타임아웃 설정
 
-      // HTTP 응답 상태 코드에 따른 처리
       switch (response.statusCode) {
         case 200: // 성공 (OK)
           final List<dynamic> data = json.decode(
             utf8.decode(response.bodyBytes), // 응답 본문을 UTF-8로 디코딩 후 JSON 파싱
           );
-          // 파싱된 JSON 데이터를 Comment 객체 리스트로 변환하여 반환
-          return data.map((json) => Comment.fromJson(json)).toList();
-
+          return data
+              .map((json) => Comment.fromJson(json))
+              .toList(); // Comment 객체 리스트로 변환
         case 404: // 찾을 수 없음 (Not Found)
           throw CommentException('게시글을 찾을 수 없습니다', CommentErrorType.notFound);
         case 500: // 서버 내부 오류 (Internal Server Error)
@@ -71,16 +68,12 @@ class CommentService {
           );
       }
     } on SocketException {
-      // 네트워크 연결 오류 처리
       throw CommentException('네트워크 연결을 확인해주세요', CommentErrorType.network);
     } on HttpException {
-      // HTTP 요청 자체의 오류 처리
       throw CommentException('HTTP 요청 오류가 발생했습니다', CommentErrorType.http);
     } on FormatException {
-      // 응답 데이터 형식 오류 처리 (예: 유효하지 않은 JSON)
       throw CommentException('데이터 형식 오류가 발생했습니다', CommentErrorType.format);
     } catch (e) {
-      // 예상치 못한 기타 오류 처리
       debugPrint('CommentService.getCommentsByPostId 오류: $e'); // 디버그 콘솔에 오류 출력
       if (e is CommentException) rethrow; // 이미 CommentException이면 다시 던짐
       throw CommentException('예상치 못한 오류가 발생했습니다: $e', CommentErrorType.unknown);
@@ -96,7 +89,7 @@ class CommentService {
   /// 예외: `CommentException` (유효성 검사 실패, 인증 오류, 서버 오류 등) 발생 가능.
   static Future<Comment> createComment(
     Comment comment,
-    BuildContext context, // 인증 헤더 생성을 위해 context 필요
+    BuildContext context,
   ) async {
     try {
       // 댓글 내용 유효성 검사
@@ -122,13 +115,11 @@ class CommentService {
           )
           .timeout(const Duration(seconds: 15)); // 15초 타임아웃 설정
 
-      // HTTP 응답 상태 코드에 따른 처리
       switch (response.statusCode) {
         case 200: // 성공 (OK) 또는 201 (Created)
         case 201:
           final data = json.decode(utf8.decode(response.bodyBytes));
           return Comment.fromJson(data); // 생성된 댓글 정보로 Comment 객체 생성 및 반환
-
         case 400: // 잘못된 요청 (Bad Request)
           throw CommentException('잘못된 요청입니다', CommentErrorType.badRequest);
         case 401: // 인증되지 않음 (Unauthorized)
@@ -168,7 +159,7 @@ class CommentService {
   /// 예외: `CommentException` (유효성 검사 실패, 인증 오류, 권한 없음, 댓글 없음 등) 발생 가능.
   static Future<Comment> updateComment(
     Comment comment,
-    BuildContext context, // 인증 헤더 생성을 위해 context 필요
+    BuildContext context,
   ) async {
     try {
       // 댓글 내용 유효성 검사
@@ -190,12 +181,10 @@ class CommentService {
           )
           .timeout(const Duration(seconds: 15)); // 15초 타임아웃 설정
 
-      // HTTP 응답 상태 코드에 따른 처리
       switch (response.statusCode) {
         case 200: // 성공 (OK)
           final data = json.decode(utf8.decode(response.bodyBytes));
           return Comment.fromJson(data); // 수정된 댓글 정보로 Comment 객체 생성 및 반환
-
         case 400:
           throw CommentException('잘못된 요청입니다', CommentErrorType.badRequest);
         case 401:
@@ -242,7 +231,7 @@ class CommentService {
   static Future<bool> deleteComment(
     int commentId,
     int postId,
-    BuildContext context, // 인증 헤더 생성을 위해 context 필요
+    BuildContext context,
   ) async {
     try {
       final response = await http
@@ -252,11 +241,9 @@ class CommentService {
           )
           .timeout(const Duration(seconds: 10)); // 10초 타임아웃 설정
 
-      // HTTP 응답 상태 코드에 따른 처리
       switch (response.statusCode) {
         case 200: // 성공 (OK)
           return true; // 삭제 성공
-
         case 404:
           throw CommentException(
             '삭제할 댓글을 찾을 수 없습니다',

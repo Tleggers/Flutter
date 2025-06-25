@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:pedometer/pedometer.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 

@@ -16,7 +16,7 @@ class PaymentPage extends StatelessWidget {
       data: PaymentData(
         pg: 'html5_inicis',
         payMethod: 'card',
-        name: '포인트 ${point} 충전',
+        name: '포인트 $point 충전',
         merchantUid: 'mid_${DateTime.now().millisecondsSinceEpoch}',
         amount: price.toDouble(),
         buyerName: '홍길동',
