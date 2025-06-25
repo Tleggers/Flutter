@@ -83,7 +83,7 @@ class _MountainWeatherSectionState extends State<MountainWeatherSection> {
     }
 
     return Container(
-      width: 100,
+      width: 110,
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

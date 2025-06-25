@@ -20,6 +20,10 @@ class _StepDetailPageState extends State<StepDetailPage>
   @override
   void initState() {
     super.initState();
+    // 어제 걸음 수 불러오기
+    Future.microtask(() {
+      context.read<StepProvider>().fetchYesterdayStepFromServer();
+    });
   }
 
   @override
@@ -149,7 +153,7 @@ class _StepDetailPageState extends State<StepDetailPage>
                 text = '${diff.abs()} m 적게 걸었어요';
               } else {
                 icon = const Icon(Icons.horizontal_rule, color: Colors.grey);
-                text = '어제와 같아요!';
+                text = '좀 더 걸어볼까요?';
               }
 
               return Container(

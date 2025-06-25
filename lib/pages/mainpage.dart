@@ -214,7 +214,7 @@ class _MainPageState extends State<MainPage> {
       stepProvider.fetchTodayStepFromServer();
 
       // 여기 추가
-      StepService().startListening(stepProvider);
+      StepService().startListening(stepProvider, context);
     });
   }
 }
