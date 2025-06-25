@@ -11,7 +11,7 @@ class StepHomeWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // 상태를 가져옴 (걸음 수와 목표 거리 등)
     final stepProvider = Provider.of<StepProvider>(context);
-    final current = stepProvider.currentStep; // 현재 걸음(m)
+    final current = stepProvider.dailyTotal; // 현재 걸음(m)
     final goal = stepProvider.goalInMeters; // 목표 거리(m)
     final percent = stepProvider.progressPercent; // 퍼센트 비율 (0.0 ~ 1.0)
 

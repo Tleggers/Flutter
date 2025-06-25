@@ -28,9 +28,9 @@ class _MyPageHeaderState extends State<MyPageHeader> {
   Widget build(BuildContext context) {
 
     final userProvider = Provider.of<UserProvider>(context); // Provider에서 로그인 정보 가져옴
-    final isLoggedIn = userProvider.isLoggedIn;
-    final nickname = userProvider.nickname;
-    final logintype = userProvider.logintype;
+    final isLoggedIn = userProvider.isLoggedIn; // 로그인 여부
+    final nickname = userProvider.nickname; // 닉네임
+    final logintype = userProvider.logintype; // 로그인 타입
 
     return GestureDetector(
 
