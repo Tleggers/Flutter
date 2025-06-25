@@ -15,6 +15,8 @@ import 'functions/jh/userprovider.dart';
 // 네이버 맵 SDK 임포트 추가
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -62,14 +64,14 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => userProvider), // 로그인 상태
-        ChangeNotifierProvider(create: (_) => StepProvider()), // 0609 만보기 상태
+        ChangeNotifierProvider(create: (_) => StepProvider(userProvider: userProvider)), // 0609 만보기 상태
       ],
       child: const MyApp(),
     ),
   );
 }
 
-/// 로그인 상태 복원 함수
+///  로그인 상태 복원 함수
 Future<UserProvider> restoreUser() async {
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('token');
@@ -103,6 +105,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey,
       home: MainPage(title: 'TrekKit'),
       routes: {
         '/stepDetail': (context) => const StepDetailPage(), // ← 0609 만보기 상세페이지

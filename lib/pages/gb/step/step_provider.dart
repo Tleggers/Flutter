@@ -1,11 +1,19 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:trekkit_flutter/main.dart';
+import 'package:provider/provider.dart';
+
+import '../../../functions/jh/userprovider.dart';
 
 class StepProvider with ChangeNotifier {
-  StepProvider() {
+
+  final UserProvider userProvider;
+
+  StepProvider({required this.userProvider}) {
     loadRewardedStatus(); // ✅ 보상 상태 로드
     loadTodayDistanceFromPrefs(); // ✅ 걸음 수 로컬에서 불러오기
   }
@@ -84,8 +92,13 @@ class StepProvider with ChangeNotifier {
   }
 
   // ✅ 걸음 수 업데이트 호출 시
-  void updateSteps(int stepInMeters, BuildContext context) {
+  Future<bool> updateSteps(int stepInMeters, BuildContext context) async {
     final now = DateTime.now();
+
+    final baseUrl = dotenv.env['API_URL']!; // 백엔드 url
+
+    final userid = userProvider.index; // 유저 인덱스
+    final token = userProvider.token; // 토큰
 
     // 🕛 날짜가 바뀐 경우 → 초기화 + 전날 서버 저장
     if (!_isSameDay(_lastUpdated, now)) {
@@ -112,14 +125,50 @@ class StepProvider with ChangeNotifier {
     notifyListeners();
 
     // ✅ 1000m 이상 걷고 아직 보상 안 했으면 → 팝업 + 서버 전송
-    if (_dailyTotal >= 1000 && !_alreadyRewarded) {
+    if (_dailyTotal >= 10 && !_alreadyRewarded) {
       _alreadyRewarded = true;
-      saveRewardedStatus(); // ✅ 보상 지급 여부 저장
-      _showRewardPopup(context);
+      saveRewardedStatus(); // 보상 지급 여부
       _sendTodayStepToServer(rewarded: true);
+      try {
+        final response = await http.post(
+          Uri.parse('$baseUrl/pay/add'),
+          headers: {
+            'Content-Type': 'application/json',
+            "Authorization": "Bearer $token",
+            "X-Client-Type": "app",
+          },
+          body: jsonEncode({
+            'point': 100, // 충전할 포인트
+            'id': userid, // 유저 인덱스
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          final body = jsonDecode(response.body);
+          final message = body['result'] ?? '포인트 지급 성공';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message)),
+          );
+        } else {
+          final body = jsonDecode(response.body);
+          final message = body['result'] ?? '포인트 지급 중 오류 발생';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message)),
+          );
+        }
+      } catch(e) {
+        const SnackBar(content: Text('서버 오류가 발생했습니다.'));
+      }
+      // provider에 최신 포인트 반영
+      userProvider.addPoint(100);
+      Future.delayed(const Duration(milliseconds: 300), () {
+        showRewardPopup(); // 이제 context 없이 호출 가능
+      });
+      notifyListeners();
+      return true;
     }
 
-    notifyListeners();
+    return false;
   }
 
   // ✅ 오늘의 모든 상태 초기화
@@ -201,20 +250,25 @@ class StepProvider with ChangeNotifier {
   }
 
   // ✅ 1000m 보상 팝업 표시
-  void _showRewardPopup(BuildContext context) {
+  void showRewardPopup() {
+    final context = navigatorKey.currentContext;
+    if (context == null) return;
+
     showDialog(
       context: context,
       builder:
-          (ctx) => AlertDialog(
-            title: const Text('🎉 포인트 지급 완료'),
-            content: const Text('오늘 1000m 이상 걸어 100포인트가 지급되었습니다!'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: const Text('확인'),
-              ),
-            ],
+          (context) => AlertDialog(
+        title: const Text('🎉 포인트 지급 완료'),
+        content: const Text('오늘 1000m 이상 걸어 100포인트가 지급되었습니다!'),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+            },
+            child: const Text('확인'),
           ),
+        ],
+      ),
     );
   }
 
@@ -224,10 +278,10 @@ class StepProvider with ChangeNotifier {
 
     final baseUrl = dotenv.env['API_URL']!;
     final yesterday =
-        DateTime.now()
-            .subtract(const Duration(days: 1))
-            .toIso8601String()
-            .split("T")[0];
+    DateTime.now()
+        .subtract(const Duration(days: 1))
+        .toIso8601String()
+        .split("T")[0];
 
     final url = Uri.parse(
       '$baseUrl/step/daily?userId=$_userId&walkDate=$yesterday',
@@ -259,30 +313,18 @@ class StepProvider with ChangeNotifier {
       '$baseUrl/step/daily?userId=$_userId&walkDate=$today',
     );
 
-    /// 📥 서버에서 오늘 거리 가져오기
-    Future<void> fetchTodayStepFromServer() async {
-      if (_userId == null) return;
+    try {
+      final response = await http.get(url);
 
-      final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
-      final today =
-          DateTime.now().toIso8601String().split("T")[0]; // yyyy-MM-dd
-      final url = Uri.parse(
-        '$baseUrl/step/daily?userId=$_userId&walkDate=$today',
-      );
-
-      try {
-        final response = await http.get(url);
-
-        if (response.statusCode == 200) {
-          final json = jsonDecode(response.body);
-          _currentStep = json['distance'];
-          notifyListeners();
-        } else {
-          print('❌ 오늘 걸음 수 조회 실패: ${response.statusCode}');
-        }
-      } catch (e) {
-        print('🚨 네트워크 오류: $e');
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        _currentStep = json['distance'];
+        notifyListeners();
+      } else {
+        print('❌ 오늘 걸음 수 조회 실패: ${response.statusCode}');
       }
+    } catch (e) {
+      print('🚨 네트워크 오류: $e');
     }
   }
 }

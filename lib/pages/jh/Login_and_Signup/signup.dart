@@ -363,6 +363,7 @@ class _SignupPageState extends State<SignupPage> {
                     final fileSizeInMB = fileSizeInBytes / (1024 * 1024);
 
                     if (fileSizeInMB > 10) {
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('이미지 크기가 10MB를 초과합니다.'),
@@ -386,11 +387,13 @@ class _SignupPageState extends State<SignupPage> {
                   if (!mounted) return;
 
                   if (success) {
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('회원가입이 완료되었습니다!')),
                     );
                     Navigator.pop(context);
                   } else {
+                    if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('회원가입에 실패했습니다. 다시 시도해주세요.')),
                     );
