@@ -128,12 +128,12 @@ class StepProvider with ChangeNotifier {
 
   /// 📥 서버에서 오늘 거리 가져오기
   Future<void> fetchTodayStepFromServer() async {
-    final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
-    final url = Uri.parse('$baseUrl/step/daily?userId=$_userId');
 
     if (_userId == null) return;
 
+    final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
     final today = DateTime.now().toIso8601String().split("T")[0]; // yyyy-MM-dd
+    final url = Uri.parse('$baseUrl/step/daily?userId=$_userId&walkDate=$today');
 
     try {
       final response = await http.get(url);
