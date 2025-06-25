@@ -4,7 +4,6 @@ import 'package:trekkit_flutter/api/mountain_api.dart'; // 기존 산림청 명�
 import 'package:trekkit_flutter/api/mountain_trail_api.dart'; // 새로 추가할 산림청 등산로 API
 import 'package:trekkit_flutter/api/trekking_api.dart'; // 트레킹센터 좌표 API
 import 'package:trekkit_flutter/api/mountain_info_api.dart'; // 새로 추가할 산림청 산 정보 API
-import 'package:trekkit_flutter/api/mountain_road_api.dart';
 
 class MountainService {
   static Future<List<Mountain>> fetchMountainsWithAPIs() async {
@@ -15,7 +14,8 @@ class MountainService {
     final coordMap = await TrekkingApi.fetchMountainCoords(); // 이름 → 위경도
 
     // 3. 산림청 산정보
-    final forestInfoMap = await MountainInfoApi.fetchMountainInfo(); // 이름 → 상세정보 map
+    final forestInfoMap =
+        await MountainInfoApi.fetchMountainInfo(); // 이름 → 상세정보 map
     print('산림청 산 정보 개수: ${forestInfoMap.length}'); // 디버깅용
 
     // 4. 산림청 등산로정보
@@ -27,7 +27,7 @@ class MountainService {
 
     // 5. 산림청 명산등산로
     final roadsMap = await MountainRoadApi.fetchMountainRoads();
-    
+
     // 6. 병합
     List<Mountain> enrichedList = [];
 
@@ -52,7 +52,9 @@ class MountainService {
       final forest = forestInfoMap[nameKey];
       final roads = roadsMap[nameKey];
 
-      print('🔍 $nameKey: ${roads?['topReason']} (${roads?['topReason'].runtimeType})');
+      print(
+        '🔍 $nameKey: ${roads?['topReason']} (${roads?['topReason'].runtimeType})',
+      );
 
       enrichedList.add(
         Mountain(
@@ -62,7 +64,8 @@ class MountainService {
           region: coord?['region'] ?? '',
           overview: mountain.overview,
           // height: forest?['mntihigh']?.toDouble(), // 산림청 고도 정보
-          height: double.tryParse(forest?['mntihigh']?.toString() ?? '0') ?? 0.0,
+          height:
+              double.tryParse(forest?['mntihigh']?.toString() ?? '0') ?? 0.0,
           details: forest?['mntidetails'],
           summary: forest?['mntisummary'],
           transport: roads?['transport'],

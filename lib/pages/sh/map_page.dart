@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:trekkit_flutter/api/mountain_api.dart';
 import 'package:trekkit_flutter/models/sh/mountain.dart';
 import 'package:trekkit_flutter/services/sh/location_service.dart';
 import 'package:trekkit_flutter/functions/sh/distance_util.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
-import 'package:trekkit_flutter/widgets/sh/sliding_panel.dart';
 import 'package:trekkit_flutter/services/sh/mountain_service.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:trekkit_flutter/services/sh/image_loader.dart';
 import 'package:trekkit_flutter/views/sh/mountain_collage_view.dart';
 import 'package:trekkit_flutter/pages/sh/mountain_detail_page.dart';
 
@@ -72,7 +69,7 @@ class _MapPageState extends State<MapPage> {
       // List<Mountain> allMountains = await MountainApi.fetchMountains();
       final allMountains = await MountainService.fetchMountainsWithAPIs();
       print('📋 전체 산 개수: ${allMountains.length}');
-      
+
       print('📍 현재 위치 불러오는 중...');
       Position? current = await LocationService.determinePosition();
       print('✅ 위치 결과: $current');

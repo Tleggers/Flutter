@@ -157,9 +157,8 @@ class _QnAPageState extends State<QnAPage> {
               MaterialPageRoute(builder: (context) => const LoginPage()),
             );
             if (result == true) {
-              setState(
-                () {},
-              ); // 로그인 후 돌아오면 UI 새로고침 (이 부분이 왜 필요한지 명확하진 않지만 기존 코드 유지)
+              // 로그인 성공 후 돌아오면 UI 새로고침
+              setState(() {});
             }
           }
         },
@@ -260,8 +259,8 @@ class _QnAPageState extends State<QnAPage> {
 /// Q&A 질문 목록을 필터링하는 기능을 제공하는 StatefulWidget입니다.
 /// 정렬 옵션과 산 선택 드롭다운을 포함합니다.
 class QnAFilter extends StatefulWidget {
-  // 필터 변경 시 호출될 콜백 함수
-  final Function(String sort, String? mountain) onFilterChanged;
+  final Function(String sort, String? mountain)
+  onFilterChanged; // 필터 변경 시 호출될 콜백 함수
 
   const QnAFilter({super.key, required this.onFilterChanged});
 
@@ -303,8 +302,10 @@ class _QnAFilterState extends State<QnAFilter> {
     setState(() {
       _selectedMountain = mountain;
     });
-    // 필터 변경 사항을 상위 위젯에 알림
-    widget.onFilterChanged(_sortOption, _selectedMountain);
+    widget.onFilterChanged(
+      _sortOption,
+      _selectedMountain,
+    ); // 필터 변경 사항을 상위 위젯에 알림
   }
 
   /// 정렬 옵션 드롭다운 값이 변경될 때 호출됩니다.
@@ -313,8 +314,10 @@ class _QnAFilterState extends State<QnAFilter> {
       setState(() {
         _sortOption = option;
       });
-      // 필터 변경 사항을 상위 위젯에 알림
-      widget.onFilterChanged(_sortOption, _selectedMountain);
+      widget.onFilterChanged(
+        _sortOption,
+        _selectedMountain,
+      ); // 필터 변경 사항을 상위 위젯에 알림
     }
   }
 
@@ -322,7 +325,7 @@ class _QnAFilterState extends State<QnAFilter> {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0), // 내부 패딩
         child: Row(
           children: [
             // 정렬 옵션 드롭다운 필드
@@ -336,7 +339,7 @@ class _QnAFilterState extends State<QnAFilter> {
                     vertical: 8,
                   ),
                 ),
-                value: _sortOption, // 현재 선택된 값
+                initialValue: _sortOption, // 현재 선택된 값
                 items:
                     sortOptions.map((option) {
                       return DropdownMenuItem<String>(
@@ -361,7 +364,7 @@ class _QnAFilterState extends State<QnAFilter> {
                     vertical: 8,
                   ),
                 ),
-                value: _selectedMountain, // 현재 선택된 값
+                initialValue: _selectedMountain, // 현재 선택된 값
                 items: [
                   const DropdownMenuItem<String>(
                     value: null,
@@ -396,7 +399,6 @@ class QnAItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 1, // 카드 그림자 깊이
-      // 카드 전체를 탭 가능하게 하여 상세 페이지로 이동
       child: InkWell(
         onTap: onTap, // 탭 시 [onTap] 콜백 호출
         child: Padding(

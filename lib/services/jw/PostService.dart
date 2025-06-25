@@ -14,9 +14,7 @@ class PostService {
 
   /// JWT 토큰을 포함하는 HTTP 요청 헤더를 동적으로 생성하는 메서드입니다.
   /// 이 헤더는 인증이 필요한 API 요청에 사용됩니다.
-  /// [context]를 통해 `AuthService`에 접근하여 토큰을 가져옵니다.
   static Map<String, String> _getAuthHeaders(BuildContext context) {
-    // AuthService 싱글톤 인스턴스에서 현재 JWT 토큰을 가져옵니다.
     final String? token = AuthService().jwtToken;
     return {
       'Content-Type': 'application/json', // 요청 본문이 JSON 형식임을 명시
@@ -51,7 +49,7 @@ class PostService {
     String? mountain,
     int page = 0,
     int size = 10,
-    required BuildContext context, // BuildContext를 필수로 받음
+    required BuildContext context,
   }) async {
     try {
       Map<String, String> queryParams = {
@@ -182,7 +180,7 @@ class PostService {
   /// 예외: 로그인 필요, 이미지 업로드 실패 발생 가능.
   static Future<List<String>> uploadImages(
     List<File> images,
-    BuildContext context, // BuildContext를 받음
+    BuildContext context,
   ) async {
     try {
       // MultipartRequest 생성 (파일 업로드에 사용)
@@ -247,7 +245,7 @@ class PostService {
   /// 예외: 로그인 필요, 좋아요 처리 실패 발생 가능.
   static Future<Map<String, dynamic>> toggleLike(
     int postId,
-    BuildContext context, // BuildContext를 받음
+    BuildContext context,
   ) async {
     try {
       // HTTP POST 요청
