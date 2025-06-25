@@ -10,49 +10,81 @@ class MountainService {
   static Future<List<Mountain>> fetchMountainsWithAPIs() async {
     // 1. 기본 명산 정보
     final baseList = await MountainApi.fetchMountains(); // 기존 API (이름, 개요 등)
+    print('기본 명산 정보 개수: ${baseList.length}');
 
     // 2. 트레킹센터 좌표
     final coordMap = await TrekkingApi.fetchMountainCoords(); // 이름 → 위경도
+    print('트레킹센터 좌표 개수: ${coordMap.length}');
 
     // 3. 산림청 산정보
     final forestInfoMap = await MountainInfoApi.fetchMountainInfo(); // 이름 → 상세정보 map
     print('산림청 산 정보 개수: ${forestInfoMap.length}'); // 디버깅용
 
     // 4. 산림청 등산로정보
-    final mountainNames =
-        baseList.map((m) => m.name.trim()).toList(); // 공백 제거 후 이름 목록
-    final trailInfoMap = await MountainTrailApi.fetchTrails(
-      mountainNames,
-    ); // 이름 → 코스 URL, 이미지 등
-
+    Map<String, Map<String, String>> trailInfoMap = {};
+    try{
+    final mountainNames = baseList.map((m) => m.name.trim()).toList(); // 공백 제거 후 이름 목록
+    final trailInfoMap = await MountainTrailApi.fetchTrails(mountainNames); // 이름 → 코스 URL, 이미지 등
+    print('📋 Trail API 결과 산 수: ${trailInfoMap.length}'
+    );
+    } catch (e) {
+      print('MountainTrailAPI 오류: $e');
+    } 
     // 5. 산림청 명산등산로
     final roadsMap = await MountainRoadApi.fetchMountainRoads();
-    
+    print('산림청 등산로 정보 개수: ${roadsMap.length}');
+
     // 6. 병합
     List<Mountain> enrichedList = [];
 
-    String? findClosestTrailKey(String nameKey, Map<String, dynamic> trailMap) {
-      for (final key in trailMap.keys) {
-        if (key.contains(nameKey) || nameKey.contains(key)) {
+    String normalizeName(String name) {
+      return name.replaceAll(RegExp(r'[^\uAC00-\uD7A3a-zA-Z0-9]'), '');
+    }
+
+    String? findBestMatch(String nameKey, Map<String, dynamic> map) {
+      final cleanedKey = normalizeName(nameKey);
+      for (final key in map.keys) {
+        if (normalizeName(key) == cleanedKey) {
           return key;
         }
       }
       return null;
     }
 
+    String? safeStringFrom(dynamic value) {
+      if (value is String) return value;
+      return value?.toString();
+    }
+
     for (final mountain in baseList) {
       final nameKey = mountain.name.trim(); // 공백 제거해서 키로 사용
+      
+      final trailKey = findBestMatch(nameKey, trailInfoMap);
+      final trail = trailKey != null ? trailInfoMap[trailKey] : null;
 
-      String? safeStringFrom(dynamic value) {
-        if (value is String) return value;
-        return value?.toString();
-      }
+      final coordKey = findBestMatch(nameKey, coordMap);
+      final coord = coordKey != null ? coordMap[coordKey] : null;
+      if (coord == null) print('❌ 좌표 없음: $nameKey');
 
-      final coord = coordMap[nameKey];
-      final forest = forestInfoMap[nameKey];
-      final roads = roadsMap[nameKey];
+      final forestKey = findBestMatch(nameKey, forestInfoMap);
+      final forest = forestKey != null ? forestInfoMap[forestKey] : null;
 
-      print('🔍 $nameKey: ${roads?['topReason']} (${roads?['topReason'].runtimeType})');
+      final roadKey = findBestMatch(nameKey, roadsMap);
+      final roads = roadKey != null ? roadsMap[roadKey] : null;
+
+      print('🔍 $nameKey → forestKey: $forestKey → height: ${forest?['mntihigh']}');
+      print('🔍 $nameKey → roadKey: $roadKey → tourisminf: ${roads?['tourisminf']}');
+
+      // final coord = coordMap[nameKey];
+      // final forest = forestInfoMap[nameKey];
+      // final roadKey = findClosestRoadKey(nameKey, roadsMap);
+      // final roads = roadKey != null ? roadsMap[roadKey] : null;
+      
+      // final trailUrl = (trail?['trailInfoUrl'])?.toString() ?? '';
+      // final trailImg = (trail?['trailImageUrl'])?.toString() ?? '';
+      // final trailFile = (trail?['trailFileUrl'])?.toString() ?? '';
+
+      print('🔍 $nameKey: ${roads?['tourisminf']} (${roads?['tourisminf'].runtimeType})');
 
       enrichedList.add(
         Mountain(
@@ -66,10 +98,13 @@ class MountainService {
           details: forest?['mntidetails'],
           summary: forest?['mntisummary'],
           transport: roads?['transport'],
-          tourismInfo: roads?['tourismInfo'],
+          tourismInfo: roads?['tourisminf'],
           etccourse: roads?['etccourse'],
-          subName: roads?['subName'],
-          topReason: roads?['topReason'],
+          subName: roads?['subnm'],
+          topReason: roads?['aeatreason'],
+          trailInfoUrl: safeStringFrom(trail?['trailInfoUrl']),
+          trailImageUrl: safeStringFrom(trail?['trailImageUrl']),
+          trailFileUrl: safeStringFrom(trail?['trailFileUrl']),
         ),
       );
     }

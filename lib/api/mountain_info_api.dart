@@ -32,6 +32,7 @@ class MountainInfoApi {
         if (items is List) {
           for (var item in items) {
             final name = item['mntiname']?.toString().trim();
+            // print("🌲 ${item['mntiname']} → mntihigh: ${item['mntihigh']}");
             if (name != null && name.isNotEmpty) {
               result[name] = {
                 'height': item['mntihigh'],
