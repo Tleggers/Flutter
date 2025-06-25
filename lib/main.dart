@@ -25,6 +25,8 @@ void main() async {
   // .env 파일에서 환경 변수 로드
   await dotenv.load(fileName: ".env");
 
+  final userProvider = await restoreUser();
+
   // 카카오 네이티브 키 로드
   final kakaoKey = dotenv.env['KAKAO_NATIVE_KEY'];
   if (kakaoKey == null || kakaoKey.isEmpty) {
@@ -32,27 +34,6 @@ void main() async {
   }
 
   KakaoSdk.init(nativeAppKey: kakaoKey);
-
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('token');
-  final nickname = prefs.getString('nickname');
-  final profile = prefs.getString('profile');
-  final logintype = prefs.getString('logintype');
-  final index = prefs.getInt('index');
-  final point = prefs.getInt('point');
-
-  final userProvider = UserProvider();
-
-  if (token != null && token.isNotEmpty && index != null) {
-    userProvider.login(
-      token,
-      nickname ?? '',
-      profile ?? '',
-      logintype ?? '',
-      index,
-      point!,
-    );
-  }
 
   // 네이버 맵 API 키 로드
   final naverMapClientId =
@@ -86,6 +67,32 @@ void main() async {
       child: const MyApp(),
     ),
   );
+}
+
+/// 로그인 상태 복원 함수
+Future<UserProvider> restoreUser() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  final nickname = prefs.getString('nickname');
+  final profile = prefs.getString('profile');
+  final logintype = prefs.getString('logintype');
+  final index = prefs.getInt('index');
+  final point = prefs.getInt('point');
+
+  final userProvider = UserProvider();
+
+  if (token != null && index != null) {
+    userProvider.login(
+      token,
+      nickname ?? '',
+      profile ?? '',
+      logintype ?? '',
+      index,
+      point ?? 0,
+    );
+  }
+
+  return userProvider;
 }
 
 class MyApp extends StatelessWidget {

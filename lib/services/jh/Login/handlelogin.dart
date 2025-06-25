@@ -55,7 +55,6 @@ Future<void> loginHandler({
       }
 
       final body = jsonDecode(response.body);
-      print(body);
       final token = body['token']; // 토큰
       final nickname = body['nickname']; // 닉네임
       final profile = body['profile']; // 프로필

@@ -259,18 +259,30 @@ class StepProvider with ChangeNotifier {
       '$baseUrl/step/daily?userId=$_userId&walkDate=$today',
     );
 
-    try {
-      final response = await http.get(url);
+    /// 📥 서버에서 오늘 거리 가져오기
+    Future<void> fetchTodayStepFromServer() async {
+      if (_userId == null) return;
 
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        _currentStep = json['distance'];
-        notifyListeners();
-      } else {
-        print('❌ 오늘 걸음 수 조회 실패: ${response.statusCode}');
+      final baseUrl = dotenv.env['API_URL']!; // 여기서 ! << 절대 null이면 안된다는 의미
+      final today =
+          DateTime.now().toIso8601String().split("T")[0]; // yyyy-MM-dd
+      final url = Uri.parse(
+        '$baseUrl/step/daily?userId=$_userId&walkDate=$today',
+      );
+
+      try {
+        final response = await http.get(url);
+
+        if (response.statusCode == 200) {
+          final json = jsonDecode(response.body);
+          _currentStep = json['distance'];
+          notifyListeners();
+        } else {
+          print('❌ 오늘 걸음 수 조회 실패: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('🚨 네트워크 오류: $e');
       }
-    } catch (e) {
-      print('🚨 네트워크 오류: $e');
     }
   }
 }
