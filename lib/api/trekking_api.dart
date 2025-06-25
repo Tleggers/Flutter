@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:trekkit_flutter/models/sh/mountain.dart';
 
 // 한국 트레킹센터 100대 명산 API를 요청하고 데이터를 가져오는 클래스
 class TrekkingApi {

@@ -1,34 +1,36 @@
-import 'package:flutter/material.dart'; // Flutter UI 구성 요소를 위한 핵심 패키지
-import 'package:provider/provider.dart'; // 상태 관리를 위한 Provider 패키지
-import 'package:trekkit_flutter/functions/jh/userprovider.dart'; // 사용자 로그인 상태 및 정보 관리를 위한 UserProvider 임포트
-import 'package:image_picker/image_picker.dart'; // 이미지 갤러리/카메라 접근을 위한 image_picker 패키지
-import 'dart:io'; // 파일 시스템 상호작용을 위한 dart:io 패키지
-import 'package:trekkit_flutter/models/jw/Post.dart'; // 게시글 데이터 모델인 Post 임포트
-import 'package:trekkit_flutter/services/jw/PostService.dart'; // 게시글 관련 API 호출을 위한 PostService 임포트
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:trekkit_flutter/functions/jh/userprovider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:trekkit_flutter/models/jw/Post.dart';
+import 'package:trekkit_flutter/services/jw/PostService.dart';
 
-/// 게시글 작성 페이지를 담당하는 StatefulWidget입니다.
-/// 사용자가 제목, 내용, 산을 선택하고 이미지를 첨부하여 게시글을 작성할 수 있도록 합니다.
+/// 게시글 작성 또는 수정을 위한 StatefulWidget입니다.
+/// [post] 파라미터가 제공되면 '수정 모드'로, 없으면 '작성 모드'로 동작합니다.
 class PostWriting extends StatefulWidget {
-  const PostWriting({super.key});
+  final Post? post; // 수정을 위한 선택적 Post 객체
+
+  const PostWriting({super.key, this.post});
 
   @override
   State<PostWriting> createState() => _PostWritingState();
 }
 
 /// PostWriting 페이지의 상태를 관리하는 State 클래스입니다.
-/// 게시글 입력 필드 관리, 이미지 선택 및 미리보기, 게시글 제출 로직을 담당합니다.
+/// 게시글 제목, 내용, 산 선택, 이미지 첨부, 제출 로직을 담당합니다.
 class _PostWritingState extends State<PostWriting> {
   String? _selectedMountain; // 사용자가 선택한 산 이름
-  List<XFile> _images = []; // ImagePicker를 통해 선택된 이미지 파일 목록 (최대 5장)
-  List<String> _uploadedImagePaths = []; // 서버에 업로드된 이미지 URL 경로 목록
+  List<XFile> _images = []; // 선택된 이미지 파일 목록
+  List<String> _uploadedImagePaths = []; // 업로드된 이미지 경로 목록
+  final TextEditingController _titleController =
+      TextEditingController(); // 제목 입력 필드 컨트롤러
+  final TextEditingController _contentController =
+      TextEditingController(); // 내용 입력 필드 컨트롤러
+  bool _isSubmitting = false; // 게시글 제출 중 여부
+  bool _isEditMode = false; // 수정 모드 여부
 
-  // 게시글 제목과 내용을 위한 TextEditingController
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
-
-  bool _isSubmitting = false; // 게시글 제출(작성) 중인지 여부를 나타내는 플래그
-
-  // 드롭다운에 표시될 산 목록 (데이터베이스에 있는 산 기준)
+  // TODO: 실제 앱에서는 서버나 파일에서 산 목록을 비동기적으로 불러오는 것이 좋습니다.
   final List<String> _mountainOptions = const [
     '한라산',
     '지리산',
@@ -40,135 +42,165 @@ class _PostWritingState extends State<PostWriting> {
     '가야산',
     '가지산',
     '감악산',
+    '관악산',
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // 위젯에 post 데이터가 전달되면 수정 모드로 초기화합니다.
+    if (widget.post != null) {
+      _isEditMode = true;
+      _titleController.text = widget.post!.title ?? '';
+      _contentController.text = widget.post!.content;
+      // _selectedMountain이 _mountainOptions에 포함된 값인지 확인 후 할당합니다.
+      if (_mountainOptions.contains(widget.post!.mountain)) {
+        _selectedMountain = widget.post!.mountain;
+      } else {
+        // 만약 기존 post의 산이 목록에 없으면 null로 초기화하여 '산 선택 *' 힌트가 보이도록 합니다.
+        _selectedMountain = null;
+      }
+      // TODO: 기존 이미지를 표시하고 관리하는 로직 추가 필요
+      // 현재는 텍스트 데이터만 채워지며, 이미지 수정 시 새로 선택해야 합니다.
+    }
+  }
+
+  @override
   void dispose() {
-    // 위젯이 dispose될 때 컨트롤러들을 dispose하여 리소스 누수 방지
-    _titleController.dispose();
-    _contentController.dispose();
+    _titleController.dispose(); // 제목 입력 컨트롤러 dispose
+    _contentController.dispose(); // 내용 입력 컨트롤러 dispose
     super.dispose();
   }
 
-  /// 산 선택 드롭다운 값이 변경될 때 호출됩니다.
-  void _selectMountain(String? mountain) {
-    setState(() {
-      _selectedMountain = mountain; // 선택된 산 업데이트
-    });
-  }
-
-  /// 갤러리 또는 카메라에서 이미지를 선택하는 기능을 수행합니다.
-  /// 선택된 이미지는 [_images] 리스트에 추가되며, 최대 5장으로 제한됩니다.
+  /// 갤러리에서 이미지를 선택하는 기능을 수행합니다.
+  /// 최대 5장까지 선택 가능하도록 제한합니다.
   Future<void> _pickImages() async {
     final ImagePicker picker = ImagePicker();
-    // 여러 이미지 선택
     final List<XFile> picked = await picker.pickMultiImage();
-
+    if (picked.length > 5) {
+      _showErrorSnackBar('사진은 최대 5장까지 선택할 수 있습니다.');
+    }
     setState(() {
-      // 선택된 이미지 중 최대 5장까지만 저장
-      _images = (picked.length > 5) ? picked.sublist(0, 5) : picked;
+      _images =
+          (picked.length > 5) ? picked.sublist(0, 5) : picked; // 5장 초과 시 자름
     });
   }
 
-  /// 선택된 이미지 목록에서 특정 인덱스의 이미지를 제거합니다.
+  /// 선택된 이미지 목록에서 특정 이미지를 제거합니다.
   void _removeImage(int index) {
     setState(() {
-      _images.removeAt(index); // 이미지 리스트에서 해당 이미지 제거
+      _images.removeAt(index);
     });
   }
 
-  /// 선택된 이미지들을 서버에 업로드하고, 업로드된 이미지 경로를 [_uploadedImagePaths]에 저장합니다.
+  /// 선택된 이미지들을 서버에 업로드합니다.
+  /// 업로드된 이미지들의 경로를 [_uploadedImagePaths]에 저장합니다.
   Future<void> _uploadImages() async {
     if (_images.isEmpty) {
-      _uploadedImagePaths = []; // 이미지가 없으면 빈 리스트로 초기화
+      _uploadedImagePaths = []; // 이미지가 없으면 경로 목록 초기화
       return;
     }
-
     try {
-      // PostService를 사용하여 이미지 업로드 호출
-      final imagePaths = await PostService.uploadImages(
+      _uploadedImagePaths = await PostService.uploadImages(
         _images
             .map((xfile) => File(xfile.path))
-            .toList(), // XFile을 File 타입으로 변환하여 전달
-        context, // context 전달
+            .toList(), // XFile을 File로 변환하여 전달
+        context,
       );
-      _uploadedImagePaths = imagePaths; // 업로드된 이미지 경로 저장
     } catch (e) {
-      // 이미지 업로드 실패 시 예외 발생
       throw Exception('이미지 업로드 실패: $e');
     }
   }
 
-  /// 게시글 제출 버튼이 눌렸을 때 호출되는 함수입니다.
-  /// 로그인 상태 및 입력 유효성 검사 후, 이미지 업로드 및 게시글 생성을 처리합니다.
+  /// 게시글을 서버에 제출(작성 또는 수정)합니다.
+  /// 입력 유효성 검사, 사용자 로그인 상태 확인, 이미지 업로드 후 API를 호출합니다.
   Future<void> _submitPost() async {
-    // UserProvider를 통해 사용자 로그인 상태 가져오기 (listen: false로 불필요한 리빌드 방지)
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
-    // 1. 로그인 상태 확인
+    // 로그인 확인
     if (!userProvider.isLoggedIn) {
       _showErrorSnackBar('로그인이 필요합니다.');
       return;
     }
-
-    // 2. 입력 유효성 검사
+    // 산 선택 확인
     if (_selectedMountain == null || _selectedMountain!.isEmpty) {
       _showErrorSnackBar('산을 선택해주세요.');
       return;
     }
-
+    // 내용 입력 확인
     if (_contentController.text.trim().isEmpty) {
       _showErrorSnackBar('내용을 입력해주세요.');
       return;
     }
 
-    setState(() {
-      _isSubmitting = true; // 제출 중 상태로 변경
-    });
+    setState(() => _isSubmitting = true); // 제출 중 상태 시작
 
     try {
-      // 3. 이미지 업로드 (선택된 이미지가 있을 경우)
+      // 이미지가 새로 선택된 경우에만 업로드합니다.
       await _uploadImages();
 
-      // 4. Post 모델 객체 생성
-      final post = Post(
-        nickname:
-            userProvider.nickname ?? 'Unknown', // 사용자 닉네임 사용, 없으면 'Unknown'
-        // Post 모델에 userId 필드가 있다면 여기 추가 (예: userId: userProvider.index,)
-        title:
-            _titleController.text.trim().isEmpty
-                ? null // 제목이 비어있으면 null로 설정
-                : _titleController.text.trim(),
-        mountain: _selectedMountain!, // 선택된 산 (필수)
-        content: _contentController.text.trim(), // 내용 (필수)
-        imagePaths: _uploadedImagePaths, // 업로드된 이미지 경로 목록
-        createdAt: DateTime.now(), // 현재 시간으로 생성일 설정
-      );
-
-      // 5. PostService를 통해 게시글 생성 API 호출
-      await PostService.createPost(post, context); // context 전달
-
-      // 6. 게시글 작성 성공 시 스낵바 표시 및 이전 화면으로 이동
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('게시글이 성공적으로 작성되었습니다.'),
-            backgroundColor: Colors.green,
-          ),
+      // 수정 모드와 작성 모드를 분기하여 처리합니다.
+      if (_isEditMode) {
+        // [수정 로직] 기존 게시글 업데이트
+        final updatedPost = Post(
+          id: widget.post!.id, // 기존 ID 사용
+          nickname: widget.post!.nickname,
+          userId: widget.post!.userId,
+          title:
+              _titleController.text.trim().isEmpty
+                  ? null
+                  : _titleController.text.trim(),
+          mountain: _selectedMountain!,
+          content: _contentController.text.trim(),
+          imagePaths:
+              _uploadedImagePaths.isNotEmpty
+                  ? _uploadedImagePaths // 새 이미지가 있으면 새 경로 사용
+                  : widget.post!.imagePaths, // 새 이미지가 없으면 기존 이미지 경로 유지
+          createdAt: widget.post!.createdAt,
         );
-        Navigator.pop(context, true); // 이전 화면으로 돌아가면서 true 반환 (성공 알림)
+        await PostService.updatePost(updatedPost, context);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('게시글이 성공적으로 수정되었습니다.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          // 수정 성공 후, 이전 화면(상세보기)으로 true 값을 두 번 보내 목록까지 갱신
+          Navigator.pop(context, true);
+        }
+      } else {
+        // [작성 로직] 새로운 게시글 생성
+        final post = Post(
+          nickname: userProvider.nickname ?? 'Unknown',
+          userId: userProvider.index, // 현재 로그인된 사용자 고유 ID
+          title:
+              _titleController.text.trim().isEmpty
+                  ? null
+                  : _titleController.text.trim(),
+          mountain: _selectedMountain!,
+          content: _contentController.text.trim(),
+          imagePaths: _uploadedImagePaths,
+          createdAt: DateTime.now(),
+        );
+        await PostService.createPost(post, context);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('게시글이 성공적으로 작성되었습니다.'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context, true);
+        }
       }
     } catch (e) {
-      // 7. 오류 발생 시 스낵바 표시
       if (mounted) {
-        _showErrorSnackBar('게시글 작성 실패: $e');
+        _showErrorSnackBar('처리 실패: $e');
       }
     } finally {
-      // 8. 제출 상태 초기화 (로딩 인디케이터 숨김)
       if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
+        setState(() => _isSubmitting = false); // 제출 중 상태 종료
       }
     }
   }
@@ -182,53 +214,13 @@ class _PostWritingState extends State<PostWriting> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final userProvider = Provider.of<UserProvider>(
-      context,
-    ); // UserProvider 가져오기
-
-    // 사용자가 로그인되어 있지 않으면 로그인 요청 UI 반환
-    if (!userProvider.isLoggedIn) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('글쓰기'),
-          backgroundColor: Colors.green,
-          foregroundColor: Colors.white,
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                '로그인이 필요합니다',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  // 로그인 페이지로 이동
-                  Navigator.pushNamed(context, '/login');
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                child: const Text(
-                  '로그인하기',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    // 로그인된 경우 게시글 작성 UI 반환
     return Scaffold(
       appBar: AppBar(
-        title: const Text('글쓰기'), // 앱 바 제목
-        backgroundColor: Colors.green, // 앱 바 배경색
-        foregroundColor: Colors.white, // 앱 바 전경색
+        title: Text(_isEditMode ? '글 수정' : '글쓰기'), // 모드에 따라 앱 바 제목 변경
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
         actions: [
-          // 게시글 제출 중일 때 로딩 인디케이터 표시
+          // 제출 중일 때 로딩 인디케이터 표시, 아니면 '완료' 버튼 표시
           if (_isSubmitting)
             const Center(
               child: Padding(
@@ -244,9 +236,8 @@ class _PostWritingState extends State<PostWriting> {
               ),
             )
           else
-            // 제출 버튼
             TextButton(
-              onPressed: _submitPost, // 제출 버튼 클릭 시 _submitPost 함수 호출
+              onPressed: _submitPost, // 게시글 제출 함수 호출
               child: const Text(
                 '완료',
                 style: TextStyle(
@@ -259,30 +250,26 @@ class _PostWritingState extends State<PostWriting> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(screenWidth * 0.05), // 반응형 패딩
+        padding: const EdgeInsets.all(16.0), // 전체 패딩
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // 내용을 왼쪽 정렬
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 제목 입력 필드 (선택사항)
+            // 제목 입력 필드
             TextField(
               controller: _titleController,
               decoration: const InputDecoration(
                 hintText: '제목 (선택사항)',
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.title),
               ),
-              maxLines: 1, // 한 줄로 제한
             ),
-
-            const SizedBox(height: 16), // 간격
+            const SizedBox(height: 16),
             // 산 선택 드롭다운 필드
             DropdownButtonFormField<String>(
               decoration: const InputDecoration(
-                labelText: '산 선택 *', // 필수 항목 표시
+                labelText: '산 선택 *', // 필수 입력 표시
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.landscape),
               ),
-              value: _selectedMountain, // 현재 선택된 산
+              initialValue: _selectedMountain, // 현재 선택된 산
               items:
                   _mountainOptions.map((mountain) {
                     return DropdownMenuItem<String>(
@@ -290,31 +277,23 @@ class _PostWritingState extends State<PostWriting> {
                       child: Text(mountain),
                     );
                   }).toList(),
-              onChanged: _selectMountain, // 값 변경 시 _selectMountain 호출
-              validator: (value) {
-                // 유효성 검사: 산이 선택되지 않았으면 메시지 반환
-                if (value == null || value.isEmpty) {
-                  return '산을 선택해주세요.';
-                }
-                return null; // 유효성 통과
-              },
+              onChanged:
+                  (value) => setState(
+                    () => _selectedMountain = value,
+                  ), // 값 변경 시 상태 업데이트
             ),
-
-            const SizedBox(height: 16), // 간격
+            const SizedBox(height: 16),
             // 내용 입력 필드
             TextField(
               controller: _contentController,
               decoration: const InputDecoration(
-                hintText: '등산 후기나 경험을 공유해주세요 *', // 필수 항목 표시
+                hintText: '등산 후기나 경험을 공유해주세요 *', // 필수 입력 표시
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.edit),
-                alignLabelWithHint: true, // 힌트 텍스트를 위로 정렬 (멀티라인 입력 시 유용)
               ),
-              maxLines: 8, // 여러 줄 입력 가능
+              maxLines: 8, // 최대 8줄까지 표시
             ),
-
-            const SizedBox(height: 20), // 간격
-            // 이미지 선택 섹션
+            const SizedBox(height: 20),
+            // 이미지 선택 UI 영역
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -332,10 +311,9 @@ class _PostWritingState extends State<PostWriting> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const Spacer(), // 남은 공간 채우기
-                        // 사진 선택 버튼
+                        const Spacer(),
                         OutlinedButton.icon(
-                          onPressed: _pickImages, // _pickImages 함수 호출
+                          onPressed: _pickImages, // 이미지 선택 함수 호출
                           icon: const Icon(Icons.add_photo_alternate),
                           label: Text(
                             '사진 선택 (${_images.length}/5)',
@@ -343,43 +321,34 @@ class _PostWritingState extends State<PostWriting> {
                         ),
                       ],
                     ),
-
-                    // 선택된 이미지가 있을 경우 미리보기 표시
                     if (_images.isNotEmpty) ...[
                       const SizedBox(height: 16),
+                      // 선택된 이미지 미리보기 목록 (가로 스크롤)
                       SizedBox(
-                        height: 100, // 이미지 미리보기 목록의 높이
+                        height: 100,
                         child: ListView.builder(
-                          scrollDirection: Axis.horizontal, // 수평 스크롤
-                          itemCount: _images.length, // 이미지 개수만큼 아이템 생성
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _images.length,
                           itemBuilder: (context, index) {
                             return Container(
                               margin: const EdgeInsets.only(right: 8),
                               child: Stack(
                                 children: [
-                                  // 이미지 미리보기
                                   ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                      8,
-                                    ), // 모서리 둥글게
+                                    borderRadius: BorderRadius.circular(8),
                                     child: Image.file(
-                                      File(
-                                        _images[index].path,
-                                      ), // 선택된 이미지 파일 표시
+                                      File(_images[index].path), // 이미지 파일 표시
                                       width: 100,
                                       height: 100,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
-                                  // 이미지 제거 버튼
                                   Positioned(
                                     top: 4,
                                     right: 4,
                                     child: GestureDetector(
                                       onTap:
-                                          () => _removeImage(
-                                            index,
-                                          ), // 이미지 제거 함수 호출
+                                          () => _removeImage(index), // 이미지 제거
                                       child: Container(
                                         decoration: const BoxDecoration(
                                           color: Colors.black54,
@@ -403,49 +372,6 @@ class _PostWritingState extends State<PostWriting> {
                     ],
                   ],
                 ),
-              ),
-            ),
-
-            const SizedBox(height: 24), // 간격
-            // 작성 가이드 섹션
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.green[50], // 연한 녹색 배경
-                borderRadius: BorderRadius.circular(12), // 모서리 둥글게
-                border: Border.all(color: Colors.green[200]!), // 테두리
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.green[700]),
-                      const SizedBox(width: 8),
-                      Text(
-                        '작성 가이드',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.green[700],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8), // 간격
-                  Text(
-                    // 작성 가이드 내용
-                    '• 등산 경험이나 후기를 자유롭게 공유해주세요\n'
-                    '• 사진은 최대 5장까지 첨부 가능합니다\n'
-                    '• 다른 등산객들에게 도움이 되는 정보를 포함해주세요\n'
-                    '• 안전한 등산 문화를 만들어가요',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.green[600],
-                      height: 1.4,
-                    ),
-                  ),
-                ],
               ),
             ),
           ],

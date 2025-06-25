@@ -26,11 +26,6 @@ class _StepDetailPageState extends State<StepDetailPage>
     });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   /// 날짜를 'yyyy.MM.dd' 형식으로 출력
   String get formattedDate => DateFormat('yyyy.MM.dd').format(_selectedDate);
 

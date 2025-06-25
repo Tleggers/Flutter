@@ -5,7 +5,7 @@ import 'package:trekkit_flutter/models/sh/mountain.dart';
 
 //산림청 등산로정보 API
 class MountainTrailApi {
-  static const String _apiKey = 
+  static const String _apiKey =
       'b96eSjTza7C7QbPobZvC9k42Yn9TmGV4y%2BxTx%2B0W2d97ycimCfjKE%2F5rd5Bpj9%2FYTvDxlQPEceC6dctxSDDytA%3D%3D';
   static const String _baseUrl =
       'http://openapi.forest.go.kr/openapi/service/trailInfoService/getforestspatialdataservice';
@@ -16,7 +16,8 @@ class MountainTrailApi {
 
     for (final name in mountainNames) {
       final uri = Uri.parse(
-          '$_baseUrl?mntnNm=$name&serviceKey=$_apiKey&numOfRows=1000&pageNo=1&_type=json');
+        '$_baseUrl?mntnNm=$name&serviceKey=$_apiKey&numOfRows=1000&pageNo=1&_type=json',
+      );
 
           print('🌐 요청 보냄: $name');
 
