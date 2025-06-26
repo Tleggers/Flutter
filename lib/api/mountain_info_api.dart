@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 //산림청 산정보 API
 class MountainInfoApi {
   static const String _serviceKey =
-      'b96eSjTza7C7QbPobZvC9k42Yn9TmGV4y%2BxTx%2B0W2d97ycimCfjKE%2F5rd5Bpj9%2FYTvDxlQPEceC6dctxSDDytA%3D%3D';
+      'YTmDaHkK9QsxNgBXNgrwBKrWEK7bZ23jIpDqGvGL8E%2BD1EaPNA21sEPu3Nd1kOQpkJSHD923d%2Bl%2F62Wl%2FxGj5w%3D%3D';
   static const String _baseUrl =
       'https://apis.data.go.kr/1400000/service/cultureInfoService2/mntInfoOpenAPI2';
 
@@ -61,16 +61,16 @@ class MountainInfoApi {
             done = true;
           }
         } else {
-          print('❌ API 응답 오류: ${response.statusCode}');
+          print('❌ 산림청 산정보 API 응답 오류: ${response.statusCode}');
           done = true;
         }
       } catch (e) {
-        print('❌ 예외 발생: $e');
+        print('❌ 산림청 산정보 예외 발생: $e');
         done = true;
       }
     }
 
-    print('✅ 총 ${result.length}개의 산 정보를 불러왔습니다.');
+    print('✅ 산림청 산정보에서 총 ${result.length}개의 산 정보를 불러왔습니다.');
     return result;
   }
 }

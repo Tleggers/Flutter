@@ -36,7 +36,7 @@ class _MainPageState extends State<MainPage> {
     // 홈 화면
     HomePage(),
     // 지도 화면
-    // MapPage(),
+    MapPage(),
     // 커뮤니티 화면
     CommunityPage(),
     // 마이페이지 화면

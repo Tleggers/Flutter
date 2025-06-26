@@ -93,7 +93,6 @@ class MountainService {
           longitude: coord?['lng'] ?? 0.0,
           region: coord?['region'] ?? '',
           overview: mountain.overview,
-          // height: forest?['mntihigh']?.toDouble(), // 산림청 고도 정보
           height:
               double.tryParse(forest?['mntihigh']?.toString() ?? '0') ?? 0.0,
           details: forest?['mntidetails'],
@@ -103,9 +102,9 @@ class MountainService {
           etccourse: roads?['etccourse'],
           subName: roads?['subnm'],
           topReason: roads?['aeatreason'],
-          trailInfoUrl: safeStringFrom(trail?['trailInfoUrl']),
-          trailImageUrl: safeStringFrom(trail?['trailImageUrl']),
-          trailFileUrl: safeStringFrom(trail?['trailFileUrl']),
+          trailInfoUrl: safeStringFrom(trail?['mntninfourl']),
+          trailImageUrl: safeStringFrom(trail?['mntnimg']),
+          trailFileUrl: safeStringFrom(trail?['mntnfile']),
         ),
       );
     }

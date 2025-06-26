@@ -15,13 +15,10 @@ class ImageLoader {
     for (int i = 1; i <= 5; i++) {
       // String path = 'assets/mtimages/$folderName/$i.jpg';
       String path = 'assets/mtimages/${cleanName}_$i.jpg';
-      // print('📁 checking file exists: $path');
       try {
         final data = await rootBundle.load(path); // 존재 확인
-        // print('✅ Found: $path (${data.lengthInBytes} bytes)');
         images.add(path);
       } catch (e) {
-        // print('❌ Not found: $path');
         continue;
       }
     }

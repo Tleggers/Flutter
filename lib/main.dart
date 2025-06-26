@@ -53,13 +53,6 @@ void main() async {
     },
   );
 
-  //20250612 추가
-  //100대 명산 정보 호출
-  // final mountains = await MountainService.fetchTop100WithFullInfo();
-  // for (var m in mountains) {
-  //   print('📌 ${m.name} → ${m.latitude}, ${m.longitude}');
-  // }
-
   runApp(
     MultiProvider(
       providers: [

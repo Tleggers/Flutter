@@ -98,9 +98,9 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   const SizedBox(width: 12),
                   const Text(
-                    '원하는 지역을 선택해보세요!',
+                    '오늘은 어디로 떠나볼까요?',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),

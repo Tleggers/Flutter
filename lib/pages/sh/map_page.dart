@@ -66,14 +66,12 @@ class _MapPageState extends State<MapPage> {
   Future<void> loadNearbyMountains() async {
     try {
       print('📡 전체 산 데이터를 불러오는 중...');
-      // List<Mountain> allMountains = await MountainApi.fetchMountains();
       final allMountains = await MountainService.fetchMountainsWithAPIs();
       print('📋 전체 산 개수: ${allMountains.length}');
 
       print('📍 현재 위치 불러오는 중...');
       Position? current = await LocationService.determinePosition();
       print('✅ 위치 결과: $current');
-      // Position current = await LocationService.getCurrentPosition();
       if (current == null) {
         print('⚠️ 현재 위치를 가져오지 못했습니다.');
         setState(() {
@@ -204,7 +202,6 @@ class _MapPageState extends State<MapPage> {
                               minHeight: 140,
                               maxHeight:
                                   MediaQuery.of(context).size.height * 0.7,
-                              // panel: MountainCollageView(mountains: filteredMountains),
                               panelBuilder:
                                   (ScrollController sc) => MountainCollageView(
                                     mountains: filteredMountains,

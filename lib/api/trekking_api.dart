@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 // 한국 트레킹센터 100대 명산 API를 요청하고 데이터를 가져오는 클래스
 class TrekkingApi {
   static const String _apiKey =
-      'b96eSjTza7C7QbPobZvC9k42Yn9TmGV4y%2BxTx%2B0W2d97ycimCfjKE%2F5rd5Bpj9%2FYTvDxlQPEceC6dctxSDDytA%3D%3D';
+      'YTmDaHkK9QsxNgBXNgrwBKrWEK7bZ23jIpDqGvGL8E%2BD1EaPNA21sEPu3Nd1kOQpkJSHD923d%2Bl%2F62Wl%2FxGj5w%3D%3D';
   static const String _baseUrl =
       'https://apis.data.go.kr/B553662/top100FamtListBasiInfoService';
 
@@ -34,7 +34,7 @@ class TrekkingApi {
       return result;
     } else {
       print('🚨 트레킹센터 API 호출 실패: ${response.statusCode}');
-      print('📥 응답 본문: ${response.body}');
+      print('📥 트레킹센터 응답 본문: ${response.body}');
       return {};
     }
   }

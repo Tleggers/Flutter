@@ -60,7 +60,7 @@ class _CommunityPreviewListState extends State<CommunityPreviewList> {
                     TextSpan(
                       children: [
                         const TextSpan(
-                          text: '커뮤니티 소식 \u{1F4E1}\n',
+                          text: '실시간 Trekkit 👀',
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
@@ -68,7 +68,7 @@ class _CommunityPreviewListState extends State<CommunityPreviewList> {
                           ),
                         ),
                         const TextSpan(
-                          text: 'trekkit과 함께하는 하이킹 토크',
+                          text: 'Tleggers Chit-Chat! 👄',
                           style: TextStyle(
                             fontSize: 9,
                             color: Color.fromARGB(255, 136, 133, 133),

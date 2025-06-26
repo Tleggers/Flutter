@@ -121,9 +121,9 @@ class SuggestHomeWidget extends StatelessWidget {
             top: screenHeight * 0.02,
           ), // 왼쪽 상단 패딩 추가
           child: Text(
-            '어디로\n여행 가야 할지\n모르겠다면?', // 줄바꿈 추가
+            "Trekkit's\nChoice", // 줄바꿈 포함
             style: TextStyle(
-              fontSize: screenWidth * 0.045, // 텍스트 크기 줄이기
+              fontSize: screenWidth * 0.06, // 텍스트 크기
               fontWeight: FontWeight.bold, // 텍스트 두께
               color: Colors.white, // 텍스트 색상: 흰색
             ),

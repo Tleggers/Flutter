@@ -1,18 +1,16 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:xml2json/xml2json.dart';
 import 'package:trekkit_flutter/models/sh/mountain.dart';
 
 //산림청 등산로정보 API
 class MountainTrailApi {
   static const String _apiKey =
-      'b96eSjTza7C7QbPobZvC9k42Yn9TmGV4y%2BxTx%2B0W2d97ycimCfjKE%2F5rd5Bpj9%2FYTvDxlQPEceC6dctxSDDytA%3D%3D';
+      'YTmDaHkK9QsxNgBXNgrwBKrWEK7bZ23jIpDqGvGL8E%2BD1EaPNA21sEPu3Nd1kOQpkJSHD923d%2Bl%2F62Wl%2FxGj5w%3D%3D';
   static const String _baseUrl =
       'http://openapi.forest.go.kr/openapi/service/trailInfoService/getforestspatialdataservice';
 
    static Future<Map<String, Map<String, String>>> fetchTrails(List<String> mountainNames) async {
     final Map<String, Map<String, String>> trailInfoMap = {};
-    final Xml2Json xml2json = Xml2Json();
 
     for (final name in mountainNames) {
       final uri = Uri.parse(
@@ -28,18 +26,8 @@ class MountainTrailApi {
           continue;
         }
 
-        // XML → JSON 변환
-        xml2json.parse(utf8.decode(response.bodyBytes));
-        final jsonString = xml2json.toParker();
-        final jsonData = jsonDecode(jsonString);
-
-        final responseBody = jsonData['OpenAPI_ServiceResponse']?['cmmMsgHeader'];
-        if (responseBody != null && responseBody['returnReasonCode'] != '00') {
-          print('❌ $name: 실패 - ${responseBody['returnAuthMsg']}');
-          continue;
-        }
-
-        final body = jsonData['OpenAPI_ServiceResponse']?['body'];
+        final jsonData = jsonDecode(utf8.decode(response.bodyBytes));
+        final body = jsonData['response']?['body'];
         final items = body?['items']?['item'];
 
         if (items == null) {
@@ -47,24 +35,21 @@ class MountainTrailApi {
           continue;
         }
 
-        // 여러 개일 경우 List, 하나면 Map
-        final itemList = items is List ? items : [items];
-
-        for (var item in itemList) {
-          final trailName = item['mntnNm'] ?? name;
+        for (var item in items) {
+          final trailName = item['mntnnm'] ?? name;
           trailInfoMap[trailName] = {
-            'trailInfoUrl': item['course'] ?? '',
-            'trailImageUrl': item['imgurl'] ?? '',
-            'trailFileUrl': item['fileurl'] ?? '',
+            'trailInfoUrl': item['mntninfourl'] ?? '',
+            'trailImageUrl': item['mntnimg'] ?? '',
+            'trailFileUrl': item['mntnfile'] ?? '',
           };
         }
       } catch (e, stack) {
-        print('❌ $name: 예외 발생 $e');
+        print('❌ $name: 예외 발생 ${e.runtimeType}: $e');
         print(stack);
       }
+      await Future.delayed(Duration(milliseconds: 300));
     }
-
-    print('✅ 최종 trail map 개수: ${trailInfoMap.length}');
+    print('✅ 산림청 등산로정보 개수: ${trailInfoMap.length}');
     return trailInfoMap;
   }
 }
