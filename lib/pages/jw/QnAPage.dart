@@ -339,7 +339,7 @@ class _QnAFilterState extends State<QnAFilter> {
                     vertical: 8,
                   ),
                 ),
-                initialValue: _sortOption, // 현재 선택된 값
+                value: _sortOption, // 현재 선택된 값
                 items:
                     sortOptions.map((option) {
                       return DropdownMenuItem<String>(
@@ -364,7 +364,7 @@ class _QnAFilterState extends State<QnAFilter> {
                     vertical: 8,
                   ),
                 ),
-                initialValue: _selectedMountain, // 현재 선택된 값
+                value: _selectedMountain, // 현재 선택된 값
                 items: [
                   const DropdownMenuItem<String>(
                     value: null,

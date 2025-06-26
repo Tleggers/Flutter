@@ -262,7 +262,7 @@ class _QnAWritingState extends State<QnAWriting> {
                 border: OutlineInputBorder(),
               ),
               // value를 사용하고, _selectedMountain이 null일 때 빈 문자열로 표시
-              initialValue: _selectedMountain ?? '',
+              value: _selectedMountain ?? '',
               items: [
                 const DropdownMenuItem<String>(
                   value: '', // '선택 안함'의 실제 값은 빈 문자열로 처리

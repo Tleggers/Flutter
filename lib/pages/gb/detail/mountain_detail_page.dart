@@ -53,7 +53,7 @@ class _MountainDetailPageState extends State<MountainDetailPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text('데이터 없음'));
+            return const Center(child: Text('준비중입니다.'));
           }
 
           final data = snapshot.data!;

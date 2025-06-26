@@ -3,6 +3,7 @@ import 'package:trekkit_flutter/api/suggest_mountain_api.dart';
 import 'package:trekkit_flutter/api/suggest_mountain_image_api.dart';
 import 'package:trekkit_flutter/models/gb/suggest_mountain.dart';
 import 'package:trekkit_flutter/pages/gb/detail/mountain_detail_page.dart';
+import 'package:trekkit_flutter/services/gb/mountain_image_service.dart';
 
 /// ✅ 지역별 산 리스트 페이지 (걷기길 탭 제거 버전)
 class RegionListPage extends StatefulWidget {
@@ -77,15 +78,23 @@ class _RegionListPageState extends State<RegionListPage> {
 
               // ✅ 각 산에 대해 이미지도 비동기로 불러오기
               return FutureBuilder<String?>(
-                future: SuggestMountainImageApi.fetchImagesByMountainCode(
-                  mountain.id,
-                ).then((images) {
+                future: () async {
+                  final images =
+                      await SuggestMountainImageApi.fetchImagesByMountainCode(
+                        mountain.id,
+                      );
                   if (images.isNotEmpty) {
                     return images[0].fullImageUrl;
-                  } else {
-                    return null;
                   }
-                }),
+                  final dbImage = await MountainImageService.fetchImageFromDB(
+                    mountain.name,
+                    mountain.location,
+                  );
+                  if (dbImage != null) {
+                  } else {}
+
+                  return dbImage;
+                }(),
                 builder: (context, snapshot) {
                   Widget leadingWidget;
                   final imageUrl = snapshot.data;
@@ -120,6 +129,13 @@ class _RegionListPageState extends State<RegionListPage> {
                       width: 60,
                       height: 60,
                       fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.broken_image,
+                          size: 30,
+                          color: Colors.grey,
+                        );
+                      },
                     );
                   }
 

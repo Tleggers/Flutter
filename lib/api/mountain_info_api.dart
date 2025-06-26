@@ -28,17 +28,18 @@ class MountainInfoApi {
           final jsonResult = json.decode(decoded);
           final items = jsonResult['response']['body']['items']['item'];
 
-        if (items is List) {
-          for (var item in items) {
-            final name = item['mntiname']?.toString().trim();
-            // print("🌲 ${item['mntiname']} → mntihigh: ${item['mntihigh']}");
-            if (name != null && name.isNotEmpty) {
-              result[name] = {
-                'height': item['mntihigh'],
-                'address': item['mntiadd'],
-                'summary': item['mntisummary'],
-                'details': item['mntidetails'],
-              };
+          if (items is List) {
+            for (var item in items) {
+              final name = item['mntiname']?.toString().trim();
+              // print("🌲 ${item['mntiname']} → mntihigh: ${item['mntihigh']}");
+              if (name != null && name.isNotEmpty) {
+                result[name] = {
+                  'height': item['mntihigh'],
+                  'address': item['mntiadd'],
+                  'summary': item['mntisummary'],
+                  'details': item['mntidetails'],
+                };
+              }
             }
             if (items.length < pageSize) {
               done = true;

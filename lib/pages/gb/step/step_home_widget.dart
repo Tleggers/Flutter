@@ -37,7 +37,7 @@ class StepHomeWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 176, 206, 170),
+          color: const Color.fromARGB(255, 180, 218, 166),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

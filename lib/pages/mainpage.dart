@@ -36,9 +36,9 @@ class _MainPageState extends State<MainPage> {
     // 홈 화면
     HomePage(),
     // 지도 화면
-    MapPage(),
+    // MapPage(),
     // 커뮤니티 화면
-    // CommunityPage(),
+    CommunityPage(),
     // 마이페이지 화면
     MyPage(),
   ];
@@ -94,12 +94,15 @@ class _MainPageState extends State<MainPage> {
                         if (!userProvider.isLoggedIn) return;
 
                         final prefs = await SharedPreferences.getInstance();
-                        final loginType = prefs.getString('logintype'); // 'NORMAL', 'KAKAO', 'GOOGLE'
+                        final loginType = prefs.getString(
+                          'logintype',
+                        ); // 'NORMAL', 'KAKAO', 'GOOGLE'
 
                         try {
                           if (loginType == 'KAKAO') {
                             await UserApi.instance.logout();
-                            await UserApi.instance.unlink(); // 이건 배포 전 무조건 지워야함(매번 로그인을 띄우게 하기 위함)
+                            await UserApi.instance
+                                .unlink(); // 이건 배포 전 무조건 지워야함(매번 로그인을 띄우게 하기 위함)
                           } else if (loginType == 'GOOGLE') {
                             await GoogleSignIn().signOut();
                           }

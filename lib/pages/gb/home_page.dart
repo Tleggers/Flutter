@@ -5,6 +5,7 @@ import 'package:trekkit_flutter/pages/gb/step/step_home_widget.dart';
 import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 import 'package:trekkit_flutter/pages/gb/suggest/suggest_home_widget.dart';
 import 'package:trekkit_flutter/pages/gb/region_map_page.dart';
+import 'package:trekkit_flutter/pages/gb/community/community_preview_list.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -46,14 +47,13 @@ class _HomePageState extends State<HomePage> {
                   child: Column(
                     children: [
                       SizedBox(
-                        height: screenHeight * 0.11,
+                        height: screenHeight * 0.107,
                         child: const StepHomeWidget(),
                       ),
                       SizedBox(height: screenHeight * 0.01),
                       Container(
                         height: screenHeight * 0.22,
-                        color: Colors.orange[100],
-                        child: const Center(child: Text('커뮤니티 최근글')),
+                        child: const CommunityPreviewList(),
                       ),
                     ],
                   ),
@@ -61,7 +61,7 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(width: screenWidth * 0.04),
                 Expanded(
                   child: Container(
-                    height: screenHeight * 0.32,
+                    height: screenHeight * 0.335,
                     decoration: BoxDecoration(
                       color: Colors.blue[100], // 배경 색
                       borderRadius: BorderRadius.circular(16), // 테두리 둥글게

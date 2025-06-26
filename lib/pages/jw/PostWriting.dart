@@ -269,7 +269,7 @@ class _PostWritingState extends State<PostWriting> {
                 labelText: '산 선택 *', // 필수 입력 표시
                 border: OutlineInputBorder(),
               ),
-              initialValue: _selectedMountain, // 현재 선택된 산
+              value: _selectedMountain, // 현재 선택된 산
               items:
                   _mountainOptions.map((mountain) {
                     return DropdownMenuItem<String>(

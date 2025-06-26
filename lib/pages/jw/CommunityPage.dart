@@ -328,7 +328,7 @@ class PostListState extends State<PostList> {
       _isLoading = true;
       _hasError = false;
     });
-
+    //게시글 리스트 가지고 오는 함수
     try {
       final result = await PostService.getPosts(
         sort: _currentSort,
