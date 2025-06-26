@@ -6,7 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:trekkit_flutter/pages/gb/suggest/suggest_random_list_page.dart';
 import 'package:provider/provider.dart';
 import '../../../functions/jh/userprovider.dart';
-import '../../../widgets/jh/MyPage/MyPageHeader/point/point_charge_page.dart'; // ✅ 수정된 부분
+import '../../../widgets/jh/MyPage/MyPageHeader/point/point_charge_page.dart';
+import '../../jh/Login_and_Signup/login.dart'; // ✅ 수정된 부분
 // Flutter UI 구성에 필요한 라이브러리
 
 // 추천 코스 영역 위젯
@@ -21,6 +22,7 @@ class SuggestHomeWidget extends StatelessWidget {
 
     final userProvider = Provider.of<UserProvider>(context);
     final point = userProvider.point ?? 0;
+    final isLoggedIn = userProvider.isLoggedIn;
     final userid = userProvider.index;
     final token = userProvider.token;
 
@@ -50,6 +52,20 @@ class SuggestHomeWidget extends StatelessWidget {
         );
 
         if (shouldProceed != true) return;
+        if(!isLoggedIn) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('로그인이 필요합니다.')),
+          );
+          Future.delayed(const Duration(milliseconds: 500), () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+                  (route) => false, // 이전 스택 모두 제거
+            );
+          });
+
+          return;
+        }
 
         if (point < 10) {
           if (context.mounted) {
