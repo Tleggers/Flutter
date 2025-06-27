@@ -8,8 +8,9 @@ import 'package:trekkit_flutter/pages/sh/mountain_detail_page.dart';
 class MountainCollageView extends StatelessWidget {
   final List<Mountain> mountains;
   final ScrollController scrollController;
+  final void Function(Mountain)? onMountainTap;
 
-  const MountainCollageView({super.key, required this.mountains, required this.scrollController});
+  const MountainCollageView({super.key, required this.mountains, required this.scrollController, this.onMountainTap,});
 
   String extractSummary(String overview) {
   final unescape = HtmlUnescape();
@@ -49,6 +50,7 @@ class MountainCollageView extends StatelessWidget {
               margin: const EdgeInsets.all(12),
               child: InkWell(
                   onTap: () {
+                    onMountainTap?.call(mountain);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
