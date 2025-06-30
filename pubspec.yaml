@@ -107,8 +107,60 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  fonts:
+    - family: GowunBatang
+      fonts:
+        - asset: assets/fonts/GowunBatang-Regular.ttf
+        - asset: assets/fonts/GowunBatang-Bold.ttf
+          weight: 700
+    - family: GowunDodum
+      fonts:
+        - asset: assets/fonts/GowunDodum-Regular.ttf
+    # 온글잎 콘콘체
+    - family: ConCon
+      fonts:
+        - asset: assets/fonts/concon.ttf
+    # 학교안심 글씨체(최종안 1)
+    - family: Hakgyo
+      fonts:
+        - asset: assets/fonts/HakgyoB.ttf
+        - asset: assets/fonts/HakgyoR.ttf
+    # 사천유주?(최종안 2)
+    - family: Sacheon
+      fonts:
+        - asset: assets/fonts/Sacheon.ttf
+    # 사천항공?
+    - family: SacheonHangGong
+      fonts:
+        - asset: assets/fonts/SacheonH.ttf
+    # 나눔고딕
+    - family: NanumGothic
+      fonts:
+        - asset: assets/fonts/NanumGothic.ttf
+        - asset: assets/fonts/NanumGothicLight.ttf
+          weight: 300
+        - asset: assets/fonts/NanumGothicBold.ttf
+          weight: 700
+        - asset: assets/fonts/NanumGothicExtraBold.ttf
+          weight: 800
+    - family: MaruBuri
+      fonts:
+        - asset: assets/fonts/MaruBuri-ExtraLight.ttf
+          weight: 200
+        - asset: assets/fonts/MaruBuri-Light.ttf
+          weight: 300
+        - asset: assets/fonts/MaruBuri-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/MaruBuri-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/MaruBuri-Bold.ttf
+          weight: 700
+    - family: ChosunGu
+      fonts:
+        - asset: assets/fonts/ChosunGu.TTF
   assets:
     - assets/images/
+    - assets/icon/
     - assets/splash/splash.png
     - assets/mtimages/
     - .env

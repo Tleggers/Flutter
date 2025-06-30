@@ -64,18 +64,11 @@ class _SuggestRandomListPageState extends State<SuggestRandomListPage> {
                     } else if (snapshot.hasError ||
                         !snapshot.hasData ||
                         snapshot.data == null) {
-                      leadingWidget = Container(
+                      leadingWidget = Image.asset(
+                        'assets/icon/icon1.png',
                         width: 60,
                         height: 60,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.image,
-                          size: 30,
-                          color: Colors.green,
-                        ),
+                        fit: BoxFit.cover,
                       );
                     } else {
                       leadingWidget = Image.network(
@@ -83,11 +76,23 @@ class _SuggestRandomListPageState extends State<SuggestRandomListPage> {
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            'assets/icon/icon1.png',
+                            width: 60,
+                            height: 60,
+                            fit: BoxFit.cover,
+                          );
+                        },
                       );
                     }
 
                     return ListTile(
-                      leading: leadingWidget,
+                      leading: SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: leadingWidget,
+                      ),
                       title: Text(mountain.name),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,12 +105,11 @@ class _SuggestRandomListPageState extends State<SuggestRandomListPage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder:
-                                (context) => MountainDetailPage(
-                                  mountainName: mountain.name,
-                                  imageUrl: imageUrl,
-                                  location: mountain.location,
-                                ),
+                            builder: (context) => MountainDetailPage(
+                              mountainName: mountain.name,
+                              imageUrl: imageUrl,
+                              location: mountain.location,
+                            ),
                           ),
                         );
                       },

@@ -80,7 +80,7 @@ class _MainPageState extends State<MainPage> {
         // 설정한 인덱스에서는 로그아웃 버튼 생기게 하기
         actions:
             _selectedIndex ==
-                    2 // 2025-06-11 수정
+                    3 // 2025-06-11 수정
                 ? [
                   Padding(
                     padding: EdgeInsets.only(right: screenWidth * 0.06),

@@ -90,7 +90,7 @@ class _CommunityPreviewListState extends State<CommunityPreviewList> {
                             builder:
                                 (_) => MainPage(
                                   title: '트레킷',
-                                  initialIndex: 1, // 나중에 2로 수정(mapPage.dart생기면)
+                                  initialIndex: 2, // 나중에 2로 수정(mapPage.dart생기면)
                                 ),
                           ),
                           (route) => false, // ✅ 이전 스택 모두 제거
@@ -107,7 +107,7 @@ class _CommunityPreviewListState extends State<CommunityPreviewList> {
           SizedBox(height: screenHeight * 0.0008),
           // 게시글 리스트 가로 스크롤
           SizedBox(
-            height: screenHeight * 0.132,
+            height: screenHeight * 0.13,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 4.0),

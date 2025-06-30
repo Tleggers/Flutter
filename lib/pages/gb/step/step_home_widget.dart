@@ -56,7 +56,7 @@ class StepHomeWidget extends StatelessWidget {
                 Text(
                   formatter.format(current),
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),

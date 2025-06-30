@@ -98,10 +98,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'TrekKit',
       debugShowCheckedModeBanner: false,
       navigatorKey: navigatorKey,
-      home: MainPage(title: 'TrekKit'),
+      theme: ThemeData(
+        fontFamily: 'Hakgyo', // 앱 전체 폰트
+      ),
+      home: MainPage(title: 'TrkKit'),
       routes: {
         '/stepDetail': (context) => const StepDetailPage(), // ← 0609 만보기 상세페이지
         '/suggestRegionSelection':
