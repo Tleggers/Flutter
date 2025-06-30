@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
                         child: const StepHomeWidget(),
                       ),
                       SizedBox(height: screenHeight * 0.01),
-                      Container(
+                      SizedBox(
                         height: screenHeight * 0.22,
                         child: const CommunityPreviewList(),
                       ),

@@ -52,7 +52,7 @@ class StepCircleGauge extends StatelessWidget {
 
           // 현재 거리 / 목표 거리
           Text(
-            '$formattedCurrent',
+            formattedCurrent,
             style: const TextStyle(
               fontSize: 40,
               fontWeight: FontWeight.w900, // 아주 두꺼운 글씨

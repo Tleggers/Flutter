@@ -9,14 +9,14 @@ import 'package:trekkit_flutter/models/jw/QnaAnswer.dart';
 import 'package:trekkit_flutter/services/jw/AuthService.dart';
 import 'package:flutter/material.dart';
 
-/// Q&A(질문과 답변) 관련 API 호출을 담당하는 서비스 클래스입니다.
-/// 백엔드와의 통신을 처리하며, 인증 헤더를 자동으로 포함하고 다양한 오류를 처리합니다.
+/// Q&A 관련 API 호출 서비스 클래스입니다.
 class QnaService {
-  // 백엔드 Q&A API의 기본 URL (안드로이드 에뮬레이터에서 로컬 호스트 접근)
-  static const String baseUrl = 'http://10.0.2.2:30000/api/qna';
+  /// AuthService에서 API 기본 URL을 가져옵니다.
+  static String get _apiBaseUrl {
+    return AuthService().API_URL;
+  }
 
-  /// JWT 토큰을 포함하는 HTTP 요청 헤더를 동적으로 생성합니다.
-  /// 이 헤더는 인증이 필요한 API 요청에 사용됩니다.
+  /// 인증이 필요한 API 요청 헤더를 동적으로 생성합니다.
   static Map<String, String> _getAuthHeaders() {
     final String? token = AuthService().jwtToken;
     return {
@@ -28,7 +28,6 @@ class QnaService {
   }
 
   /// HTTP 응답을 처리하고 `QnaException`을 던지는 헬퍼 함수입니다.
-  /// 다양한 HTTP 상태 코드에 따라 적절한 오류 유형과 메시지를 생성합니다.
   static void _handleResponseError(http.Response response) {
     String errorMessage = '알 수 없는 오류가 발생했습니다.';
     QnaErrorType errorType = QnaErrorType.unknown;
@@ -78,7 +77,6 @@ class QnaService {
   }
 
   /// Q&A 질문 목록을 조회합니다.
-  /// 백엔드 API와의 호환성을 위해 POST 메서드를 사용하며, 필터링 및 페이지네이션을 지원합니다.
   static Future<Map<String, dynamic>> getQuestions({
     String sort = 'latest',
     String? mountain,
@@ -86,10 +84,13 @@ class QnaService {
     int size = 10,
     required BuildContext context,
   }) async {
+    /// context가 더 이상 마운트되지 않았다면 즉시 반환합니다.
+    if (!context.mounted) return {};
+
     try {
       final response = await http
           .post(
-            Uri.parse('$baseUrl/questions-list'),
+            Uri.parse('$_apiBaseUrl/api/qna/questions-list'),
             headers: _getAuthHeaders(),
             body: json.encode({}),
           )
@@ -117,15 +118,17 @@ class QnaService {
   }
 
   /// 특정 질문의 상세 정보를 조회합니다.
-  /// 백엔드 API와의 호환성을 위해 POST 메서드를 사용합니다.
   static Future<QnaQuestion?> getQuestionById(
     int id,
     BuildContext context,
   ) async {
+    /// context가 더 이상 마운트되지 않았다면 즉시 반환합니다.
+    if (!context.mounted) return null;
+
     try {
       final response = await http
           .post(
-            Uri.parse('$baseUrl/questions-detail/$id'),
+            Uri.parse('$_apiBaseUrl/api/qna/questions-detail/$id'),
             headers: _getAuthHeaders(),
             body: json.encode({}),
           )
@@ -156,16 +159,18 @@ class QnaService {
     QnaQuestion question,
     BuildContext context,
   ) async {
+    /// context가 더 이상 마운트되지 않았다면 즉시 반환합니다.
+    if (!context.mounted) return;
+
     try {
       final questionData = question.toJson();
-      // ID, userId, nickname 필드는 서버에서 처리하거나 JWT에서 추출하므로 제거
       questionData.remove('id');
       questionData.remove('userId');
       questionData.remove('nickname');
 
       final response = await http
           .post(
-            Uri.parse('$baseUrl/questions'),
+            Uri.parse('$_apiBaseUrl/api/qna/questions'),
             headers: _getAuthHeaders(),
             body: json.encode(questionData),
           )
@@ -188,11 +193,13 @@ class QnaService {
   }
 
   /// 기존 Q&A 질문을 수정합니다.
-  /// 백엔드 API는 `PUT /api/qna/questions/{id}` 형태로 구현되어 있습니다.
   static Future<void> updateQuestion(
     QnaQuestion question,
     BuildContext context,
   ) async {
+    /// context가 더 이상 마운트되지 않았다면 즉시 반환합니다.
+    if (!context.mounted) return;
+
     final String? token = AuthService().jwtToken;
     if (token == null) {
       throw QnaException('로그인이 필요합니다.', QnaErrorType.unauthorized);
@@ -201,7 +208,7 @@ class QnaService {
     try {
       final response = await http
           .put(
-            Uri.parse('$baseUrl/questions/${question.id}'),
+            Uri.parse('$_apiBaseUrl/api/qna/questions/${question.id}'),
             headers: _getAuthHeaders(),
             body: json.encode(question.toJson()),
           )
@@ -222,8 +229,10 @@ class QnaService {
   }
 
   /// 특정 Q&A 질문을 삭제합니다.
-  /// 백엔드 API는 `DELETE /api/qna/questions/{id}` 형태로 구현되어 있습니다.
   static Future<void> deleteQuestion(int id, BuildContext context) async {
+    /// context가 더 이상 마운트되지 않았다면 즉시 반환합니다.
+    if (!context.mounted) return;
+
     final String? token = AuthService().jwtToken;
     if (token == null) {
       throw QnaException('로그인이 필요합니다.', QnaErrorType.unauthorized);
@@ -232,7 +241,7 @@ class QnaService {
     try {
       final response = await http
           .delete(
-            Uri.parse('$baseUrl/questions/$id'),
+            Uri.parse('$_apiBaseUrl/api/qna/questions/$id'),
             headers: _getAuthHeaders(),
           )
           .timeout(const Duration(seconds: 15));
@@ -251,15 +260,18 @@ class QnaService {
     }
   }
 
-  /// 특정 질문([questionId])에 대한 답변 목록을 조회합니다.
+  /// 특정 질문에 대한 답변 목록을 조회합니다.
   static Future<List<QnaAnswer>> getAnswersByQuestionId(
     int questionId,
     BuildContext context,
   ) async {
+    /// context가 더 이상 마운트되지 않았다면 즉시 반환합니다.
+    if (!context.mounted) return [];
+
     try {
       final response = await http
           .post(
-            Uri.parse('$baseUrl/questions-answers/$questionId'),
+            Uri.parse('$_apiBaseUrl/api/qna/questions-answers/$questionId'),
             headers: _getAuthHeaders(),
             body: json.encode({}),
           )
@@ -288,16 +300,18 @@ class QnaService {
     QnaAnswer answer,
     BuildContext context,
   ) async {
+    /// context가 더 이상 마운트되지 않았다면 즉시 반환합니다.
+    if (!context.mounted) return;
+
     try {
       final answerData = answer.toJson();
-      // ID, userId, nickname 필드는 서버에서 처리하거나 JWT에서 추출하므로 제거
       answerData.remove('id');
       answerData.remove('userId');
       answerData.remove('nickname');
 
       final response = await http
           .post(
-            Uri.parse('$baseUrl/answers'),
+            Uri.parse('$_apiBaseUrl/api/qna/answers'),
             headers: _getAuthHeaders(),
             body: json.encode(answerData),
           )
@@ -320,11 +334,13 @@ class QnaService {
   }
 
   /// 기존 답변을 수정합니다.
-  /// 백엔드 API는 `PUT /api/qna/answers/{id}` 형태로 구현되어 있습니다.
   static Future<void> updateAnswer(
     QnaAnswer answer,
     BuildContext context,
   ) async {
+    /// context가 더 이상 마운트되지 않았다면 즉시 반환합니다.
+    if (!context.mounted) return;
+
     final String? token = AuthService().jwtToken;
     if (token == null) {
       throw QnaException('로그인이 필요합니다.', QnaErrorType.unauthorized);
@@ -333,7 +349,7 @@ class QnaService {
     try {
       final response = await http
           .put(
-            Uri.parse('$baseUrl/answers/${answer.id}'),
+            Uri.parse('$_apiBaseUrl/api/qna/answers/${answer.id}'),
             headers: _getAuthHeaders(),
             body: json.encode(answer.toJson()),
           )
@@ -354,12 +370,14 @@ class QnaService {
   }
 
   /// 특정 Q&A 답변을 삭제합니다.
-  /// 백엔드 API는 `DELETE /api/qna/answers/{id}/question/{questionId}` 형태로 구현되어 있습니다.
   static Future<void> deleteAnswer(
     int answerId,
     int questionId,
     BuildContext context,
   ) async {
+    /// context가 더 이상 마운트되지 않았다면 즉시 반환합니다.
+    if (!context.mounted) return;
+
     final String? token = AuthService().jwtToken;
     if (token == null) {
       throw QnaException('로그인이 필요합니다.', QnaErrorType.unauthorized);
@@ -368,7 +386,9 @@ class QnaService {
     try {
       final response = await http
           .delete(
-            Uri.parse('$baseUrl/answers/$answerId/question/$questionId'),
+            Uri.parse(
+              '$_apiBaseUrl/api/qna/answers/$answerId/question/$questionId',
+            ),
             headers: _getAuthHeaders(),
           )
           .timeout(const Duration(seconds: 15));
@@ -387,15 +407,18 @@ class QnaService {
     }
   }
 
-  /// 특정 질문에 대한 좋아요를 토글(추가/취소)합니다.
+  /// 특정 질문에 대한 좋아요를 토글합니다.
   static Future<bool> toggleQuestionLike(
     int questionId,
     BuildContext context,
   ) async {
+    /// context가 더 이상 마운트되지 않았다면 즉시 반환합니다.
+    if (!context.mounted) return false;
+
     try {
       final response = await http
           .post(
-            Uri.parse('$baseUrl/questions/$questionId/like'),
+            Uri.parse('$_apiBaseUrl/api/qna/questions/$questionId/like'),
             headers: _getAuthHeaders(),
             body: json.encode({}),
           )
@@ -419,15 +442,18 @@ class QnaService {
     }
   }
 
-  /// 특정 답변에 대한 좋아요를 토글(추가/취소)합니다.
+  /// 특정 답변에 대한 좋아요를 토글합니다.
   static Future<bool> toggleAnswerLike(
     int answerId,
     BuildContext context,
   ) async {
+    /// context가 더 이상 마운트되지 않았다면 즉시 반환합니다.
+    if (!context.mounted) return false;
+
     try {
       final response = await http
           .post(
-            Uri.parse('$baseUrl/answers/$answerId/like'),
+            Uri.parse('$_apiBaseUrl/api/qna/answers/$answerId/like'),
             headers: _getAuthHeaders(),
             body: json.encode({}),
           )
@@ -452,7 +478,7 @@ class QnaService {
   }
 }
 
-/// Q&A 서비스 관련 오류를 나타내는 커스텀 예외 클래스입니다.
+/// Q&A 서비스 관련 커스텀 예외 클래스입니다.
 class QnaException implements Exception {
   final String message;
   final QnaErrorType type;
@@ -463,7 +489,7 @@ class QnaException implements Exception {
   String toString() => 'QnaException: $message';
 }
 
-/// Q&A 서비스에서 발생할 수 있는 오류의 종류를 정의하는 열거형(enum)입니다.
+/// Q&A 서비스 오류 종류를 정의하는 열거형입니다.
 enum QnaErrorType {
   network,
   serverError,

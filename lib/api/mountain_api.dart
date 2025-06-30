@@ -1,7 +1,6 @@
 import 'dart:convert'; // JSON 데이터를 디코딩하기 위해 필요
 import 'package:http/http.dart' as http; // HTTP 요청을 보내기 위한 패키지
 import 'package:trekkit_flutter/models/sh/mountain.dart';
-import 'package:trekkit_flutter/services/sh/mountain_service.dart';
 
 // 산림청 명산등산로 API를 요청하고 데이터를 가져오는 클래스
 class MountainApi {
@@ -11,9 +10,10 @@ class MountainApi {
   static const String _baseUrl =
       'http://openapi.forest.go.kr/openapi/service/cultureInfoService/gdTrailInfoOpenAPI';
 
-    static Future<List<Mountain>> fetchMountains() async {
+  static Future<List<Mountain>> fetchMountains() async {
     final url = Uri.parse(
-        '$_baseUrl?serviceKey=$_apiKey&numOfRows=100&pageNo=1&_type=json');
+      '$_baseUrl?serviceKey=$_apiKey&numOfRows=100&pageNo=1&_type=json',
+    );
 
     final response = await http.get(url);
 
@@ -26,9 +26,7 @@ class MountainApi {
             .map((item) => Mountain.fromAApi(Map<String, dynamic>.from(item)))
             .toList();
       } else if (items is Map) {
-        return [
-          Mountain.fromAApi(Map<String, dynamic>.from(items)),
-        ];
+        return [Mountain.fromAApi(Map<String, dynamic>.from(items))];
       } else {
         return [];
       }

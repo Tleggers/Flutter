@@ -1,8 +1,6 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:trekkit_flutter/models/sh/mountain.dart';
 import 'package:trekkit_flutter/api/mountain_api.dart'; // 기존 산림청 명산 등산로 API
-import 'package:trekkit_flutter/api/trekking_api.dart';     // 트레킹센터 좌표 API
+import 'package:trekkit_flutter/api/trekking_api.dart'; // 트레킹센터 좌표 API
 
 class MountainService {
   static Future<List<Mountain>> fetchMountainsWithAPIs() async {
@@ -28,11 +26,11 @@ class MountainService {
           name: mountain.name,
           overview: mountain.overview,
           height: mountain.height,
-          
+
           latitude: coord['lat'] ?? 0.0,
           longitude: coord['lng'] ?? 0.0,
           region: coord['region'] ?? '',
-      )
+        ),
       );
     }
 

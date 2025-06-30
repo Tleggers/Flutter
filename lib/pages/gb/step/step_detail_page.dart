@@ -27,11 +27,6 @@ class _StepDetailPageState extends State<StepDetailPage>
     });
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   String get formattedDate => DateFormat('yyyy.MM.dd').format(_selectedDate);
 
   @override
