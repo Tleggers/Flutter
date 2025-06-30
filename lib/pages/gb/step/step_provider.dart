@@ -226,8 +226,10 @@ class StepProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
         print('✅ 전날 기록 저장 성공');
       } else {
+        final json = jsonDecode(response.body);
         print('❌ 전날 기록 저장 실패: ${response.statusCode}');
       }
     } catch (e) {
@@ -256,8 +258,10 @@ class StepProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
         print('✅ 오늘 기록 저장 완료');
       } else {
+        final json = jsonDecode(response.body);
         print('❌ 오늘 기록 저장 실패: ${response.statusCode}');
       }
     } catch (e) {

@@ -1,27 +1,32 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // ✅ dotenv 추가
 import '../../models/gb/mountain_course.dart';
 
 class MountainCourseService {
-  static const String baseUrl = 'http://10.0.2.2:30000/mountaincourse';
+  // ✅ .env에서 API_URL 읽기
+  static final String? baseApiUrl = dotenv.env['API_URL'];
 
-  // ✅ 산 이름으로 검색해서 MountainCourse 데이터 가져오기
+  // ✅ 산 이름과 위치로 MountainCourse 가져오기
   static Future<MountainCourse?> fetchByNameAndLocation(
     String mountainName,
     String location,
   ) async {
     try {
+      if (baseApiUrl == null) {
+        throw Exception("API_URL이 .env에 설정되어 있지 않습니다.");
+      }
+
       final encodedName = Uri.encodeComponent(mountainName);
       final encodedLocation = Uri.encodeComponent(location);
 
       final url = Uri.parse(
-        '$baseUrl/findByNameAndLocation?name=$encodedName&location=$encodedLocation',
+        '$baseApiUrl/mountaincourse/findByNameAndLocation?name=$encodedName&location=$encodedLocation',
       );
 
       final response = await http.get(url);
 
       if (response.statusCode == 200 && response.body.isNotEmpty) {
-        // 🔹 이 부분 반드시 있어야 데이터 파싱 가능
         final json = jsonDecode(response.body);
         return MountainCourse.fromJson(json);
       }
@@ -30,11 +35,9 @@ class MountainCourseService {
         return null;
       }
 
-      throw Exception(
-        'Failed to load mountain course (status ${response.statusCode})',
-      );
+      throw Exception('산 코스 불러오기 실패 (상태코드 ${response.statusCode})');
     } catch (e) {
-      print('API 호출 실패: $e');
+      print('❌ API 호출 실패: $e');
       return null;
     }
   }

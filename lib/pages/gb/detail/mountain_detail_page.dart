@@ -102,16 +102,6 @@ class _MountainDetailPageState extends State<MountainDetailPage> {
                   child: MountainMapCourseSection(data: data),
                 ),
               ),
-
-              // ✅ 5. 실시간 등산정보
-              SliverToBoxAdapter(
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  color: Colors.orange[50],
-                  child: const Text('실시간 등산정보 영역'),
-                ),
-              ),
             ],
           );
         },

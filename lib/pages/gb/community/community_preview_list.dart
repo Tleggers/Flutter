@@ -147,12 +147,12 @@ class _CommunityPreviewListState extends State<CommunityPreviewList> {
                       children: [
                         Row(
                           children: [
-                            const CircleAvatar(
-                              radius: 10,
-                              backgroundImage: AssetImage(
-                                'assets/images/default_profile.png',
-                              ),
-                            ),
+                            // const CircleAvatar(
+                            //   radius: 10,
+                            //   backgroundImage: AssetImage(
+                            //     'assets/images/default_profile.png',
+                            //   ),
+                            // ),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
