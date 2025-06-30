@@ -10,10 +10,9 @@ class ImageLoader {
     final cleanName =
         mountainName
             .replaceAll(RegExp(r'\s+'), '')
-            .trim(); //normalizeMountainName(mountainName);
+            .trim();
 
     for (int i = 1; i <= 5; i++) {
-      // String path = 'assets/mtimages/$folderName/$i.jpg';
       String path = 'assets/mtimages/${cleanName}_$i.jpg';
       try {
         final data = await rootBundle.load(path); // 존재 확인

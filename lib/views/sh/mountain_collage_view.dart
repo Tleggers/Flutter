@@ -61,7 +61,6 @@ class MountainCollageView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 산 이름 + 고도 + 설명
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text(

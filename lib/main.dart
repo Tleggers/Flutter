@@ -12,7 +12,7 @@ import 'package:trekkit_flutter/pages/gb/step/step_provider.dart';
 import 'api/step_api.dart';
 import 'functions/jh/userprovider.dart';
 
-// 네이버 맵 SDK 임포트 추가
+// 네이버 맵 SDK import
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

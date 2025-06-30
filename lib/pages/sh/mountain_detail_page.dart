@@ -28,12 +28,6 @@ class MountainDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image.network(
-            //   mountain.imageUrl,
-            //   fit: BoxFit.cover,
-            //   errorBuilder: (context, error, stackTrace) => Icon(Icons.image_not_supported, size: 150),
-            // ),
-            // const SizedBox(height: 16),
             SizedBox(
               height: 250,
               child: PageView.builder(
